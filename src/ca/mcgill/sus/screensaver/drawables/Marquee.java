@@ -1,7 +1,6 @@
 package ca.mcgill.sus.screensaver.drawables;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.io.InputStreamReader;
@@ -22,12 +21,12 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 
 public class Marquee implements Drawable {
 	
@@ -58,7 +57,7 @@ public class Marquee implements Drawable {
 		synchronized(currentTitle) {
 			g.drawString(currentTitle, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentTitle) / 2, y);
 		}
-		g.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(24f));
 		g.setColor(new Color((alphaEntry << 24) | color, true));
 		synchronized(currentEntry) {
 			g.drawString(currentEntry, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentEntry) / 2, y + 40);

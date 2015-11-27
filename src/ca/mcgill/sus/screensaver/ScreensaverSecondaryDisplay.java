@@ -22,24 +22,17 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import ca.mcgill.sus.screensaver.drawables.Clock;
-import ca.mcgill.sus.screensaver.drawables.Header;
-import ca.mcgill.sus.screensaver.drawables.JobList;
-import ca.mcgill.sus.screensaver.drawables.Marquee;
-import ca.mcgill.sus.screensaver.drawables.NowPlaying;
-import ca.mcgill.sus.screensaver.drawables.PrinterStatus;
-import ca.mcgill.sus.screensaver.drawables.ProfilePic;
-import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
+import ca.mcgill.sus.screensaver.drawables.Logo;
 import ca.mcgill.sus.screensaver.filters.Filter;
 import ca.mcgill.sus.screensaver.filters.HardLight;
 
-public class ScreensaverMainDisplay extends Screensaver {
+public class ScreensaverSecondaryDisplay extends Screensaver {
 	private static final long serialVersionUID = 4848839375816808489L;
 	private final Canvas canvas;
 	
-	public ScreensaverMainDisplay(int display, boolean kiosk) {
-		super(display, kiosk);
-		canvas = new Canvas(kiosk);
+	public ScreensaverSecondaryDisplay(int display) {
+		super(display, false);
+		canvas = new Canvas(false);
 		this.add(canvas);
 	}
 	
@@ -104,7 +97,7 @@ public class ScreensaverMainDisplay extends Screensaver {
 		} else {
 			BufferedImage background;
 			try {
-				background =  Util.convert(ImageIO.read(ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg")), BufferedImage.TYPE_INT_RGB);
+				background =  Util.convert(ImageIO.read(ScreensaverSecondaryDisplay.class.getResourceAsStream("background/bg.jpg")), BufferedImage.TYPE_INT_RGB);
 			} catch (IOException e) {
 				background = null;
 				System.err.println("Could not load background image...");
@@ -171,24 +164,9 @@ public class ScreensaverMainDisplay extends Screensaver {
 				}
 			};
 			int textColor = 0xbb000000;
-//			drawables.add(new Header("McGill Science Computer Taskforce", 70, 100, textColor));
-			drawables.add(new PrinterStatus(60, 50).setOnChange(onChange));
-			drawables.add(new JobList(550).setOnChange(onChange));
-			drawables.add(new Clock("h:mm a", textColor).setOnChange(onChange));
-//			drawables.add(new Header("PRINTER STATUS", 32, 525, textColor));
-			if (kiosk) {
-				drawables.add(new NowPlaying(470).setOnChange(onChange));
-				drawables.add(new Marquee(380, textColor).setOnChange(onChange));
-			} else {
-				drawables.add(new Header(System.getenv("computerName"), 16, 22, textColor, false).setAlignment(Header.ALIGN_RIGHT));
-				//determining info about the current user could take time, so it has its own thread
-				UserInfoBar userInfo = new UserInfoBar(48, 450);
-				drawables.add(userInfo);
-				drawables.add(new Marquee(350, textColor).setOnChange(onChange));
-				if (userInfo.officeComputer && userInfo.loggedIn) {
-					drawables.add(new ProfilePic().setOnChange(onChange));
-				}
-			}
+			drawables.add(new Logo(15).setOnChange(onChange));
+			//say until when for OH
+//			drawables.add(new OfficeHoursMarquee(380).setOnChange(onChange));
 		}
 		
 	}

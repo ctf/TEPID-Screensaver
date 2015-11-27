@@ -1,5 +1,6 @@
 package ca.mcgill.sus.screensaver.drawables;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -72,7 +73,9 @@ public class Logo implements Drawable {
 		w = canvasWidth;
 		h = canvasHeight;
 //		g.drawImage(logo, canvasWidth/2 - logo.getWidth() / 2, canvasHeight/2 - logo.getHeight() / 2, null);
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
 		g.drawImage(logo, x, y, null);
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 	}
 
 	@Override

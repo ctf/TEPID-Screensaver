@@ -47,7 +47,7 @@ public class Clock implements Drawable {
 
 	@Override
 	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
-		g.setFont(FontManager.getInstance().getFont("segoeui.ttf").deriveFont(72f));
+		g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont(72f));
 		g.setColor(this.color);
 		int x = canvasWidth - g.getFontMetrics().stringWidth(this.time) - 10;
 		g.drawString(time, x, 100);

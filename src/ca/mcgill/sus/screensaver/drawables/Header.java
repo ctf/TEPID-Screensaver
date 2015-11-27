@@ -35,7 +35,7 @@ public class Header implements Drawable {
 	@Override
 	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g.setFont(FontManager.getInstance().getFont(bold ? "constanb.ttf" : "constan.ttf").deriveFont((float) size));
+		g.setFont(FontManager.getInstance().getFont(bold ? "nhg-bold.ttf" : "nhg.ttf").deriveFont((float) size));
 		g.setColor(color);
 		int x;
 		switch (alignment) {

@@ -25,15 +25,28 @@ public class Main {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
 			for (int i = 0; i < gd.length; i++) {
+				final Screensaver screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
 					if (isReachable("taskforce.sus.mcgill.ca", 4000)) {
-						new ScreensaverMainDisplay(i, kiosk).setVisible(true);
+						screensaver = new ScreensaverMainDisplay(i, kiosk);
 					} else {
-						new ScreensaverError(i).setVisible(true);
+						screensaver = new ScreensaverError(i);
 					}
 				} else {
-					new ScreensaverLogo(i).setVisible(true);
+					screensaver = new ScreensaverSecondaryDisplay(i);
 				}
+//				SwingUtilities.invokeLater(new Runnable() {
+//					@Override
+//					public void run() {
+//						screensaver.setVisible(true);
+//					}
+//				});
+				new Thread("Screensaver Display " + i) {
+					@Override
+					public void run() {
+						screensaver.setVisible(true);
+					}
+				}.start();
 			}
 		} else {
 			System.out.println("Neither /K nor /S flag was passed. Not starting. ");

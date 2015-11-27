@@ -13,7 +13,7 @@ import javax.swing.JFrame;
 
 public class Screensaver extends JFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
-	private final int display;
+	protected final int display;
 	
 	public Screensaver(int display, final boolean kiosk) {
 		super("CTF Screensaver");

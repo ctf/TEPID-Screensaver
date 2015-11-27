@@ -2,7 +2,6 @@ package ca.mcgill.sus.screensaver.drawables;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -42,7 +41,7 @@ public class JobList implements Drawable {
 	public final int y;
 	private Runnable onChange;
 	private final AnimatedSprite pusheen = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200);
-	private static final Color clrUp = new Color(0xcc33691e, true), clrDown = new Color(0xccdc241f, true);
+	private static final Color clrDown = new Color(0xccdc241f, true);
 	
 	public JobList(int y) {
 		startDataFetch();
@@ -57,7 +56,7 @@ public class JobList implements Drawable {
 			for (Entry<String, JobData[]> jobs : jobData.entrySet()) {
 				BufferedImage table = renderTable(jobs.getValue().length > 13 ? Arrays.asList(jobs.getValue()).subList(0, 13) : Arrays.asList(jobs.getValue()), tableWidth - 16);
 				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
-				g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(24f));
+				g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont(24f));
 				g.setColor(new Color(0xaa000000, true));
 				g.drawString(jobs.getKey(), x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, tableY - 20);
 				g.drawImage(table, 8 + x++ * tableWidth, tableY, null);
@@ -109,20 +108,21 @@ public class JobList implements Drawable {
 			out = new BufferedImage(width, (fontPx + padding * 2) * (jobs.size() + 1) + 1, BufferedImage.TYPE_INT_ARGB);
 		}
 		Graphics2D g = out.createGraphics();
-		g.setColor(jobs.isEmpty() ? clrDown : clrUp);
-		g.fillRect(0, 0, out.getWidth(), out.getHeight());
+		if (jobs.isEmpty()) {
+			g.setColor(clrDown);
+			g.fillRect(0, 0, out.getWidth(), out.getHeight());
+		}
 		Color oddRows = new Color(0x1A000000, true), lines = new Color(0x4D000000, true);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont((float) fontPx));
-		g.setColor(Color.WHITE);
-		g.setFont(new Font("Arial", Font.BOLD, fontPx));
+		g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));
+		g.setColor(new Color(0xbb000000, true));
+		g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
 		g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
 		g.drawString("Date", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
 		g.setColor(lines);
 		g.setStroke(new BasicStroke(2));
 		g.drawLine(0, 1 * (fontPx + padding * 2) - 1, width, 1 * (fontPx + padding * 2) - 1);
 		g.setStroke(new BasicStroke(1));
-		g.setFont(new Font("Arial", Font.PLAIN, fontPx));
 		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, h:mm:ss a");
 		int i = 2;
 		if (!jobs.isEmpty()) {
@@ -131,8 +131,10 @@ public class JobList implements Drawable {
 					g.setColor(oddRows);
 					g.fillRect(0, (i - 1) * (fontPx + padding * 2), width, fontPx + padding * 2);
 				}
-				g.setColor(Color.WHITE);
+				g.setColor(new Color(0xbb000000, true));
+				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(job.getUser(), 5, i * (fontPx + padding * 2) - padding - 2);
+				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(dateFormat.format(job.getDate()), width / 2, i * (fontPx + padding * 2) - padding - 2);
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
