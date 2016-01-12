@@ -113,7 +113,7 @@ public class Marquee implements Drawable {
 	}
 	
 	public void changeTitle(final String title) {
-		new Thread("Change Entry") {
+		new Thread("Change Title") {
 			@Override
 			public void run() {
 				final int fadeInMs = 1400, fadeOutMs = 800;

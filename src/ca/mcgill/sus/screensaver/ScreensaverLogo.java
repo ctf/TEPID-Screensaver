@@ -10,7 +10,6 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import ca.mcgill.sus.screensaver.drawables.Logo;
-import ca.mcgill.sus.screensaver.drawables.OfficeHoursMarquee;
 
 public class ScreensaverLogo extends Screensaver {
 
@@ -50,8 +49,6 @@ public class ScreensaverLogo extends Screensaver {
 				}
 			};
 			drawables.add(new Logo(15).setOnChange(onChange));
-			//say until when for OH
-			drawables.add(new OfficeHoursMarquee(380).setOnChange(onChange));
 		}
 	}
 }

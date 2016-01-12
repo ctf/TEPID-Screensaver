@@ -38,6 +38,16 @@ public class SpriteManager {
 		return sprite;
 	}
 	
+	public BufferedImage getColoredSprite(String name, int color) {
+		BufferedImage sprite = cache.get(name + Integer.toHexString(color));
+		if (sprite != null) {
+			return sprite;
+		}
+		sprite = Util.color(getSprite(name), color);
+		cache.put(name + Integer.toHexString(color), sprite);
+		return sprite;
+	}
+	
 	public AnimatedSprite getAnimatedSprite(String name, int cols, int rows) {
 		AnimatedSprite sprite = animCache.get(name);
 		if (sprite != null) {

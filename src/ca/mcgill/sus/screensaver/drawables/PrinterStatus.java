@@ -25,12 +25,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import ca.mcgill.sus.screensaver.Drawable;
-import ca.mcgill.sus.screensaver.FontManager;
-import ca.mcgill.sus.screensaver.SpriteManager;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import ca.mcgill.sus.screensaver.Drawable;
+import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Main;
+import ca.mcgill.sus.screensaver.SpriteManager;
 
 public class PrinterStatus implements Drawable {
 	private Map<String, Boolean> status = new ConcurrentHashMap<>();
@@ -76,14 +77,14 @@ public class PrinterStatus implements Drawable {
 	
 	private static BufferedImage generatePrinter(String name, boolean up) {
 		int vpad = 16, fontSize = 32;
-		BufferedImage printer = SpriteManager.getInstance().getSprite(up ? "printer_working.png" : "printer_error.png"),
+		BufferedImage printer = SpriteManager.getInstance().getColoredSprite("printer.png", up ? Main.COLOR_UP : Main.COLOR_DOWN),
 		emoji = SpriteManager.getInstance().getSprite(up ? "smile.png" : "frown.png"),
 		out = new BufferedImage(printer.getWidth(), printer.getHeight() + vpad + fontSize + vpad + emoji.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
 		g.drawImage(printer, 0, 0, null);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont((float) fontSize));
-		g.setColor(new Color(up ? 0x40bb33 : 0xAA0000));
+		g.setColor(new Color(up ? Main.COLOR_UP : Main.COLOR_DOWN, true));
 		g.drawString(name, out.getWidth() / 2 - g.getFontMetrics().stringWidth(name) / 2, printer.getHeight() + vpad + fontSize);
 		g.drawImage(emoji, out.getWidth() / 2 - emoji.getWidth() / 2, printer.getHeight() + vpad + fontSize + vpad, null);
 		g.dispose();
@@ -97,6 +98,7 @@ public class PrinterStatus implements Drawable {
 			public void run() {
 				try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/bob/status.php").openStream(), "UTF-8")) {
 					Map<String, Boolean> newStatus = new Gson().fromJson(r, new TypeToken<Map<String, Boolean>>(){}.getType());
+//					newStatus = new Gson().fromJson("{\"1B16\":true,\"1B17\":false,\"1B18\":true} ", new TypeToken<Map<String, Boolean>>(){}.getType());
 					status.clear();
 					status.putAll(newStatus);
 					PrinterStatus.this.onChange();

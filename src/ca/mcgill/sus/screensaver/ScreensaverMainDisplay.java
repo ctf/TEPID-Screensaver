@@ -36,13 +36,15 @@ import ca.mcgill.sus.screensaver.filters.HardLight;
 public class ScreensaverMainDisplay extends Screensaver {
 	private static final long serialVersionUID = 4848839375816808489L;
 	private final Canvas canvas;
-	
+	private final boolean kiosk;
+
 	public ScreensaverMainDisplay(int display, boolean kiosk) {
 		super(display, kiosk);
+		this.kiosk = kiosk;
 		canvas = new Canvas(kiosk);
 		this.add(canvas);
 	}
-	
+
 	public BufferedImage screenshot(Rectangle bounds) {
 		try {
 			return new Robot().createScreenCapture(bounds);
@@ -50,10 +52,11 @@ public class ScreensaverMainDisplay extends Screensaver {
 			throw new RuntimeException("Could not take screenshot", e);
 		}
 	}
-	
+
 	@Override
 	public void setVisible(boolean visible) {
-		if (!System.getenv("username").equals("SYSTEM")) {
+		BufferedImage background;
+		if (Main.LOGGED_IN && !this.kiosk) {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
 			Rectangle bounds;
@@ -62,20 +65,32 @@ public class ScreensaverMainDisplay extends Screensaver {
 			} else {
 				throw new RuntimeException("Invalid display index");
 			}
-			final BufferedImage screenshot = screenshot(bounds);
+			background = screenshot(bounds);
 			super.setVisible(visible);
-			canvas.setBackground(screenshot);
-			canvas.repaint();
+			canvas.setBackground(background);
+		} else {
+			try {
+				background =  Util.convert(ImageIO.read(ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg")), BufferedImage.TYPE_INT_RGB);
+			} catch (IOException e) {
+				background = null;
+				System.err.println("Could not load background image...");
+			}
+			super.setVisible(visible);
+			canvas.setBackground(background);
+		}
+		canvas.repaint();
+		if (Main.LOGGED_IN) {
 			final int maxBlur = 32, frameCount = 8;
 			final BlockingQueue<BufferedImage> frames = new LinkedBlockingQueue<>();
+			final BufferedImage bg = background;
 			new Thread("Blurify") {
 				public void run() {
 					for (int i = 0; i < frameCount; i++) {
-						frames.offer(blur((i + 1) * (maxBlur / frameCount), screenshot));
+						frames.offer(blur((i + 1) * (maxBlur / frameCount), bg));
 					}
 				};
 			}.start();
-			BufferedImage b1 = screenshot, b2 = screenshot;
+			BufferedImage b1 = background, b2 = background;
 			int maxFrost = 0x77;
 			for (int i = 0; i < maxBlur; i++) {
 				if (i % frameCount == 0) {
@@ -94,45 +109,33 @@ public class ScreensaverMainDisplay extends Screensaver {
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 				int alpha = (int) (((double) i / maxBlur) * maxFrost);
 				g.setColor(new Color((alpha << 24) | 0xffffff, true));
-				g.fillRect(0, 0, this.getWidth(), this.getHeight());
+				g.fillRect(0, 0, this.getWidth(), this.getHeight()); //hihihihihihihihihihh merrrrrrrrrr meeeeeeemememeeeemememememee 
 				g.dispose();
 				canvas.setBackground(composite);
 				canvas.repaint();
 			}
-			canvas.create();
-			canvas.repaint();
-		} else {
-			BufferedImage background;
-			try {
-				background =  Util.convert(ImageIO.read(ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg")), BufferedImage.TYPE_INT_RGB);
-			} catch (IOException e) {
-				background = null;
-				System.err.println("Could not load background image...");
-			}
-			super.setVisible(visible);
-			canvas.setBackground(background);
-			canvas.create();
-			canvas.repaint();
 		}
+		canvas.create();
+		canvas.repaint();
 	}
 
 	public static class Canvas extends JPanel {
 		private static final long serialVersionUID = 2466660164920195989L;
-		
+
 		private final Queue<Drawable> drawables = new ConcurrentLinkedQueue<Drawable>();
 		private final boolean kiosk;
 		private BufferedImage background;
-		
+
 		public void setBackground(BufferedImage bg) {
 			this.background = bg;
 		}
-		
+
 		public Canvas(boolean kiosk) {
 			super(true);
 			this.kiosk = kiosk;
 			this.setBackground(new Color(0x292929));
 		}
-		
+
 		Filter overlay = new HardLight();
 		@Override
 		public void paint(Graphics graphics) {
@@ -153,7 +156,7 @@ public class ScreensaverMainDisplay extends Screensaver {
 				}
 			}
 		}
-		
+
 		public void create() {
 			final Runnable onChange = new Runnable() {
 				@Override
@@ -170,30 +173,28 @@ public class ScreensaverMainDisplay extends Screensaver {
 					}
 				}
 			};
-			int textColor = 0xbb000000;
-//			drawables.add(new Header("McGill Science Computer Taskforce", 70, 100, textColor));
+			//			drawables.add(new Header("McGill Science Computer Taskforce", 70, 100, textColor));
 			drawables.add(new PrinterStatus(60, 50).setOnChange(onChange));
 			drawables.add(new JobList(550).setOnChange(onChange));
-			drawables.add(new Clock("h:mm a", textColor).setOnChange(onChange));
-//			drawables.add(new Header("PRINTER STATUS", 32, 525, textColor));
+			drawables.add(new Clock("h:mm a", Main.TEXT_COLOR).setOnChange(onChange));
+			//			drawables.add(new Header("PRINTER STATUS", 32, 525, textColor));
 			if (kiosk) {
-				drawables.add(new NowPlaying(470).setOnChange(onChange));
-				drawables.add(new Marquee(380, textColor).setOnChange(onChange));
+				drawables.add(new NowPlaying(450, Main.TEXT_COLOR).setOnChange(onChange));
+				drawables.add(new Marquee(350, Main.TEXT_COLOR).setOnChange(onChange));
 			} else {
-				drawables.add(new Header(System.getenv("computerName"), 16, 22, textColor, false).setAlignment(Header.ALIGN_RIGHT));
-				//determining info about the current user could take time, so it has its own thread
+				drawables.add(new Header(System.getenv("computerName"), 16, 22, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_RIGHT));
 				UserInfoBar userInfo = new UserInfoBar(48, 450);
 				drawables.add(userInfo);
-				drawables.add(new Marquee(350, textColor).setOnChange(onChange));
-				if (userInfo.officeComputer && userInfo.loggedIn) {
+				drawables.add(new Marquee(350, Main.TEXT_COLOR).setOnChange(onChange));
+				if (userInfo.officeComputer && Main.LOGGED_IN) {
 					drawables.add(new ProfilePic().setOnChange(onChange));
 				}
 			}
 		}
-		
+
 	}
-	
-	public BufferedImage blur(int radius, BufferedImage original) {
+
+	public static BufferedImage blur(int radius, BufferedImage original) {
 		if (radius < 1) {
 			return (null);
 		}
@@ -231,21 +232,21 @@ public class ScreensaverMainDisplay extends Screensaver {
 				p = pix[yi + Math.min(wm, Math.max(i, 0))];
 				sir = stack[i + radius];
 				sir[0] = (p & 0xff0000) >> 16;
-				sir[1] = (p & 0x00ff00) >> 8;
-				sir[2] = (p & 0x0000ff);
-				rbs = r1 - Math.abs(i);
-				rsum += sir[0] * rbs;
-				gsum += sir[1] * rbs;
-				bsum += sir[2] * rbs;
-				if (i > 0) {
-					rinsum += sir[0];
-					ginsum += sir[1];
-					binsum += sir[2];
-				} else {
-					routsum += sir[0];
-					goutsum += sir[1];
-					boutsum += sir[2];
-				}
+			sir[1] = (p & 0x00ff00) >> 8;
+		sir[2] = (p & 0x0000ff);
+		rbs = r1 - Math.abs(i);
+		rsum += sir[0] * rbs;
+		gsum += sir[1] * rbs;
+		bsum += sir[2] * rbs;
+		if (i > 0) {
+			rinsum += sir[0];
+			ginsum += sir[1];
+			binsum += sir[2];
+		} else {
+			routsum += sir[0];
+			goutsum += sir[1];
+			boutsum += sir[2];
+		}
 			}
 			stackpointer = radius;
 			for (x = 0; x < w; x++) {
@@ -265,23 +266,23 @@ public class ScreensaverMainDisplay extends Screensaver {
 				}
 				p = pix[yw + vmin[x]];
 				sir[0] = (p & 0xff0000) >> 16;
-				sir[1] = (p & 0x00ff00) >> 8;
-				sir[2] = (p & 0x0000ff);
-				rinsum += sir[0];
-				ginsum += sir[1];
-				binsum += sir[2];
-				rsum += rinsum;
-				gsum += ginsum;
-				bsum += binsum;
-				stackpointer = (stackpointer + 1) % div;
-				sir = stack[(stackpointer) % div];
-				routsum += sir[0];
-				goutsum += sir[1];
-				boutsum += sir[2];
-				rinsum -= sir[0];
-				ginsum -= sir[1];
-				binsum -= sir[2];
-				yi++;
+			sir[1] = (p & 0x00ff00) >> 8;
+			sir[2] = (p & 0x0000ff);
+			rinsum += sir[0];
+			ginsum += sir[1];
+			binsum += sir[2];
+			rsum += rinsum;
+			gsum += ginsum;
+			bsum += binsum;
+			stackpointer = (stackpointer + 1) % div;
+			sir = stack[(stackpointer) % div];
+			routsum += sir[0];
+			goutsum += sir[1];
+			boutsum += sir[2];
+			rinsum -= sir[0];
+			ginsum -= sir[1];
+			binsum -= sir[2];
+			yi++;
 			}
 			yw += w;
 		}

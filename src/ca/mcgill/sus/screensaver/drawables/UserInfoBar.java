@@ -16,12 +16,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Main;
 
 public class UserInfoBar extends Header {
 
 	private Runnable onChange;
-	public final boolean officeComputer = System.getenv("computerName").startsWith("520-S"),
-	loggedIn = !System.getenv("username").equals("SYSTEM");
+	public final boolean officeComputer = System.getenv("computerName").matches(***REMOVED***);
 	public String displayName = "";
 	private final long startTime = System.currentTimeMillis();
 //	private final Color textColor = loggedIn ? new Color(0x707070) : new Color(0xcccccc);
@@ -30,7 +30,7 @@ public class UserInfoBar extends Header {
 	
 	public UserInfoBar(int size, int y) {
 		//old green: 0x40bb33
-		super(null, size, y, System.getenv("username").equals("SYSTEM") ? 0xdd33691e : 0xdddc241f);
+		super(null, size, y, !Main.LOGGED_IN ? Main.COLOR_UP : Main.COLOR_DOWN);
 		new Thread("User Info") {
 			@Override
 			public void run() {
@@ -59,13 +59,13 @@ public class UserInfoBar extends Header {
 		//time away from machine rounded to 5 minute intervals
 		int timeAway = (int) (((System.currentTimeMillis() - this.startTime) / 1000 / 60 / 5) * 5);
 		String text;
-		if (loggedIn && timeAway > 120) {
+		if (Main.LOGGED_IN && timeAway > 120) {
 			text = "SEEMS LIKE IT'S BEEN FOREVER " + displayName.toUpperCase() + " HAS BEEN GONE";
-		} else if (loggedIn && timeAway > 60) {
+		} else if (Main.LOGGED_IN && timeAway > 60) {
 				text = displayName.toUpperCase() + " HAS BEEN AWAY FOR OVER AN HOUR";
-		} else if (loggedIn && timeAway >= 5) {
+		} else if (Main.LOGGED_IN && timeAway >= 5) {
 				text = String.format(displayName.toUpperCase() + " HAS BEEN AWAY FOR ABOUT %d MINUTES", timeAway);
-		} else if (loggedIn) {
+		} else if (Main.LOGGED_IN) {
 			text = "THIS COMPUTER IS IN USE BY " + displayName.toUpperCase();
 		} else {
 			text = "PRESS CTRL + ALT + DELETE TO LOG IN";
@@ -96,6 +96,7 @@ public class UserInfoBar extends Header {
 	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
 		g.fill(v.getOutline(x, y + pad));
 	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+		if (!Main.LOGGED_IN) g.setColor(new Color(0x20000000,true));
 		g.fill(v.getOutline(x, y + pad));
 	}
 	

@@ -7,6 +7,11 @@ import javax.swing.JOptionPane;
 
 
 public class Main {
+	
+	public static final boolean LOGGED_IN = !System.getenv("username").equals("SYSTEM");
+//	public static final boolean LOGGED_IN = false;
+	public static final int COLOR_DOWN = LOGGED_IN ? 0xbbdc241f : 0xaaf11700, COLOR_UP = LOGGED_IN ? 0xbb82a200 : 0xaaaad400, TEXT_COLOR = LOGGED_IN ? 0xbb000000 : 0xddffffff;
+	
 	public static void main(String[] args) {
 		boolean start = false, kiosk = false;
 		for (String arg : args) {
@@ -33,7 +38,7 @@ public class Main {
 						screensaver = new ScreensaverError(i);
 					}
 				} else {
-					screensaver = new ScreensaverSecondaryDisplay(i);
+					screensaver = new ScreensaverSecondaryDisplay(i, kiosk);
 				}
 //				SwingUtilities.invokeLater(new Runnable() {
 //					@Override

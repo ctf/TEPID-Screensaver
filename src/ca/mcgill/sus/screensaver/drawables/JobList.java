@@ -31,6 +31,7 @@ import com.google.gson.reflect.TypeToken;
 import ca.mcgill.sus.screensaver.AnimatedSprite;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
 import ca.mcgill.sus.screensaver.io.JobData;
 
@@ -57,7 +58,7 @@ public class JobList implements Drawable {
 				BufferedImage table = renderTable(jobs.getValue().length > 13 ? Arrays.asList(jobs.getValue()).subList(0, 13) : Arrays.asList(jobs.getValue()), tableWidth - 16);
 				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
 				g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont(24f));
-				g.setColor(new Color(0xaa000000, true));
+				g.setColor(new Color(Main.TEXT_COLOR, true));
 				g.drawString(jobs.getKey(), x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, tableY - 20);
 				g.drawImage(table, 8 + x++ * tableWidth, tableY, null);
 			}
@@ -85,7 +86,7 @@ public class JobList implements Drawable {
 						try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/functions/last_jobs_json.php?sUser=" + printer.getKey()).openStream(), "UTF-8")) {
 							jobData.put(printer.getKey(), new Gson().fromJson(r, JobData[].class));
 						} catch (Exception e) {
-							new RuntimeException("Could not fetch data", e).printStackTrace();;
+							new RuntimeException("Could not fetch data", e).printStackTrace();
 						}
 					} else {
 						jobData.put(printer.getKey(), new JobData[0]);
@@ -112,10 +113,10 @@ public class JobList implements Drawable {
 			g.setColor(clrDown);
 			g.fillRect(0, 0, out.getWidth(), out.getHeight());
 		}
-		Color oddRows = new Color(0x1A000000, true), lines = new Color(0x4D000000, true);
+		Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));
-		g.setColor(new Color(0xbb000000, true));
+		g.setColor(new Color(Main.TEXT_COLOR, true));
 		g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
 		g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
 		g.drawString("Date", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
@@ -131,7 +132,7 @@ public class JobList implements Drawable {
 					g.setColor(oddRows);
 					g.fillRect(0, (i - 1) * (fontPx + padding * 2), width, fontPx + padding * 2);
 				}
-				g.setColor(new Color(0xbb000000, true));
+				g.setColor(new Color(Main.TEXT_COLOR, false));
 				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(job.getUser(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));

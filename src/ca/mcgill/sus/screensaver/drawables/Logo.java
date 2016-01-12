@@ -14,7 +14,7 @@ public class Logo implements Drawable {
 	
 	private int x, y, w = 1024, h = 768;
 	private Runnable onChange;
-	private final BufferedImage logo = SpriteManager.getInstance().getSprite("logo.png");
+	private final BufferedImage logo = SpriteManager.getInstance().getSprite("logo_nice.png");
 	
 	public Logo(int interval) {
 //		final int fps = 60, sleepMs = 1000 / fps;
@@ -61,7 +61,7 @@ public class Logo implements Drawable {
 			public void run() {
 				if (w > 0 && h > 0) {
 					x = random.nextInt(w - logo.getWidth());
-					y = random.nextInt(h - logo.getHeight());
+					y = random.nextInt(h - logo.getHeight() - 200) + 200;
 					onChange();
 				}
 			}
