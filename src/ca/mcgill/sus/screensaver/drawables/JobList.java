@@ -24,8 +24,12 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
 
-import com.google.gson.Gson;
+import org.glassfish.jersey.jackson.JacksonFeature;
+
+import com.google.gson.Gson;				//TODO: delete once transitioned
 import com.google.gson.reflect.TypeToken;
 
 import ca.mcgill.sus.screensaver.AnimatedSprite;
@@ -36,6 +40,8 @@ import ca.mcgill.sus.screensaver.SpriteManager;
 import ca.mcgill.sus.screensaver.io.JobData;
 
 public class JobList implements Drawable {
+	
+	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl);
 	
 	private final Map<String, JobData[]> jobData = new ConcurrentSkipListMap<>();
 	private ScheduledFuture<?> dataFetchHandle;
@@ -68,6 +74,15 @@ public class JobList implements Drawable {
 	public void startDataFetch() {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
+		
+		//UNDER CONSTRUCTION
+		// ~dgoldm3
+		
+		
+		
+		//END CONSTUCTION
+		// ~dgoldm3
+		
 		final Runnable dataFetch = new Runnable() {
 			public void run() {
 				System.out.println("Fetching job data");
