@@ -5,20 +5,17 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -26,11 +23,11 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.internal.util.Base64;
 import org.glassfish.jersey.jackson.JacksonFeature;
-
-import com.google.gson.Gson;				//TODO: delete once transitioned
-import com.google.gson.reflect.TypeToken;
 
 import ca.mcgill.sus.screensaver.AnimatedSprite;
 import ca.mcgill.sus.screensaver.Drawable;
@@ -42,6 +39,7 @@ import ca.mcgill.sus.screensaver.io.JobData;
 public class JobList implements Drawable {
 	
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl);
+	private static final Map<String, String> queueIds = new ConcurrentHashMap<>();
 	
 	private final Map<String, JobData[]> jobData = new ConcurrentSkipListMap<>();
 	private ScheduledFuture<?> dataFetchHandle;
@@ -53,6 +51,12 @@ public class JobList implements Drawable {
 	public JobList(int y) {
 		startDataFetch();
 		this.y = y;
+	}
+	
+	public static void main (String[] args)
+	{
+		new JobList (1337).startDataFetch();
+		
 	}
 
 	@Override
@@ -77,12 +81,31 @@ public class JobList implements Drawable {
 		
 		//UNDER CONSTRUCTION
 		// ~dgoldm3
+		final Runnable dataFetch = new Runnable() 
+		{
+			public void run()
+			{
+				System.out.println("Fetching job data");
+				PrintQueue[] queues =tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
+				Map<PrintQueue, List<PrintJob>> latestJobs = new HashMap<PrintQueue, List<PrintJob>>();		//creates a list of jobs, sorted by queues 
+				for (PrintQueue q : queues)
+				{
+					latestJobs.put(q, tepidServer
+							.path("queues").path(q.name)  	//path to specific queue
+							.queryParam("limit", 13)
+							.request(MediaType.APPLICATION_JSON)
+							.get(new GenericType <List<PrintJob>>(){}));
+				}
+			}
+			
+		};
 		
-		
+		dataFetch.run();
 		
 		//END CONSTUCTION
 		// ~dgoldm3
 		
+		/*
 		final Runnable dataFetch = new Runnable() {
 			public void run() {
 				System.out.println("Fetching job data");
@@ -113,6 +136,7 @@ public class JobList implements Drawable {
 		};
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
+		*/
 	}
 	
 	public BufferedImage renderTable(List<JobData> jobs, int width) {

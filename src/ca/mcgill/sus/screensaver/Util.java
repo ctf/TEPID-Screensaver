@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.UUID;
 
 public class Util {
 	
@@ -33,5 +34,8 @@ public class Util {
 			pix[i] = (alpha << 24) | color;
 		}
 		return image;
+	}
+	public static String newId() {
+		return UUID.randomUUID().toString().replace("-", "");
 	}
 }
