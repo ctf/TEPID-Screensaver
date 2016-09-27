@@ -8,14 +8,14 @@ import java.awt.image.BufferedImage;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.TreeMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -26,7 +26,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import org.glassfish.jersey.internal.util.Base64;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import ca.mcgill.sus.screensaver.AnimatedSprite;
@@ -34,14 +33,19 @@ import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
-import ca.mcgill.sus.screensaver.io.JobData;
 
 public class JobList implements Drawable {
 	
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl);
-	private static final Map<String, String> queueIds = new ConcurrentHashMap<>();
+
+	private final Map<PrintQueue, List<PrintJob>> jobData = new TreeMap<PrintQueue, List<PrintJob>>(new Comparator<PrintQueue>(){
+		@Override
+		public int compare(PrintQueue arg0, PrintQueue arg1) {
+			return arg0.name.compareTo(arg1.name);
+		}
+		
+	});		//creates a list of jobs, sorted by queues 
 	
-	private final Map<String, JobData[]> jobData = new ConcurrentSkipListMap<>();
 	private ScheduledFuture<?> dataFetchHandle;
 	public final int y;
 	private Runnable onChange;
@@ -52,24 +56,24 @@ public class JobList implements Drawable {
 		startDataFetch();
 		this.y = y;
 	}
-	
+/*	
 	public static void main (String[] args)
 	{
 		new JobList (1337).startDataFetch();
 		
-	}
+	}*/
 
 	@Override
 	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
 		if (!jobData.isEmpty()) {
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			int x = 0, tableWidth = canvasWidth / jobData.size();
-			for (Entry<String, JobData[]> jobs : jobData.entrySet()) {
-				BufferedImage table = renderTable(jobs.getValue().length > 13 ? Arrays.asList(jobs.getValue()).subList(0, 13) : Arrays.asList(jobs.getValue()), tableWidth - 16);
+			for (Entry<PrintQueue, List<PrintJob>> jobs : jobData.entrySet()) {
+				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16);
 				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
 				g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont(24f));
 				g.setColor(new Color(Main.TEXT_COLOR, true));
-				g.drawString(jobs.getKey(), x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, tableY - 20);
+				g.drawString(jobs.getKey().name, x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey().name) / 2, tableY - 20);
 				g.drawImage(table, 8 + x++ * tableWidth, tableY, null);
 			}
 		}
@@ -86,21 +90,26 @@ public class JobList implements Drawable {
 			public void run()
 			{
 				System.out.println("Fetching job data");
-				PrintQueue[] queues =tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
-				Map<PrintQueue, List<PrintJob>> latestJobs = new HashMap<PrintQueue, List<PrintJob>>();		//creates a list of jobs, sorted by queues 
-				for (PrintQueue q : queues)
+				PrintQueue[] printers =tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
+//TODO: delete				Map<PrintQueue, List<PrintJob>> latestJobs = new HashMap<PrintQueue, List<PrintJob>>();		//creates a list of jobs, sorted by queues 
+				jobData.clear();
+				for (PrintQueue q : printers)
 				{
-					latestJobs.put(q, tepidServer
-							.path("queues").path(q.name)  	//path to specific queue
-							.queryParam("limit", 13)
-							.request(MediaType.APPLICATION_JSON)
-							.get(new GenericType <List<PrintJob>>(){}));
+					System.out.println(q.name);
+					jobData.put(q, tepidServer
+									.path("queues").path(q.name)  	//path to specific queue
+									.queryParam("limit", 13)
+									.request(MediaType.APPLICATION_JSON)
+									.get(new GenericType <List<PrintJob>>(){}));
 				}
+				onChange();
+				System.out.println("Done");
 			}
 			
 		};
-		
-		dataFetch.run();
+		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
+		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
+
 		
 		//END CONSTUCTION
 		// ~dgoldm3
@@ -139,16 +148,16 @@ public class JobList implements Drawable {
 		*/
 	}
 	
-	public BufferedImage renderTable(List<JobData> jobs, int width) {
+	public BufferedImage renderTable(List<PrintJob> list, int width) {
 		int fontPx = 16, padding = 10;
 		BufferedImage out;
-		if (jobs.isEmpty()) {
+		if (list.isEmpty()) {
 			out = new BufferedImage(width, 350, BufferedImage.TYPE_INT_ARGB);
 		} else {
-			out = new BufferedImage(width, (fontPx + padding * 2) * (jobs.size() + 1) + 1, BufferedImage.TYPE_INT_ARGB);
+			out = new BufferedImage(width, (fontPx + padding * 2) * (list.size() + 1) + 1, BufferedImage.TYPE_INT_ARGB);
 		}
 		Graphics2D g = out.createGraphics();
-		if (jobs.isEmpty()) {
+		if (list.isEmpty()) {
 			g.setColor(clrDown);
 			g.fillRect(0, 0, out.getWidth(), out.getHeight());
 		}
@@ -165,17 +174,17 @@ public class JobList implements Drawable {
 		g.setStroke(new BasicStroke(1));
 		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, h:mm:ss a");
 		int i = 2;
-		if (!jobs.isEmpty()) {
-			for (JobData job : jobs) {
+		if (!list.isEmpty()) {
+			for (PrintJob job : list) {
 				if (i % 2 == 0) {
 					g.setColor(oddRows);
 					g.fillRect(0, (i - 1) * (fontPx + padding * 2), width, fontPx + padding * 2);
 				}
 				g.setColor(new Color(Main.TEXT_COLOR, false));
 				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
-				g.drawString(job.getUser(), 5, i * (fontPx + padding * 2) - padding - 2);
+				g.drawString(job.getUserIdentification(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
-				g.drawString(dateFormat.format(job.getDate()), width / 2, i * (fontPx + padding * 2) - padding - 2);
+				if(job.getPrinted() != null) {g.drawString(dateFormat.format(job.getPrinted()), width / 2, i * (fontPx + padding * 2) - padding - 2);}
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
 				i++;
