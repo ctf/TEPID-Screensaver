@@ -82,22 +82,19 @@ public class JobList implements Drawable {
 	public void startDataFetch() {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
-		
-		//UNDER CONSTRUCTION
-		// ~dgoldm3
+
 		final Runnable dataFetch = new Runnable() 
 		{
 			public void run()
 			{
 				System.out.println("Fetching job data");
-				PrintQueue[] printers =tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
-//TODO: delete				Map<PrintQueue, List<PrintJob>> latestJobs = new HashMap<PrintQueue, List<PrintJob>>();		//creates a list of jobs, sorted by queues 
+				PrintQueue[] printers =tepidServer.path("screensaver/queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
 				jobData.clear();
 				for (PrintQueue q : printers)
 				{
 					System.out.println(q.name);
 					jobData.put(q, tepidServer
-									.path("queues").path(q.name)  	//path to specific queue
+									.path("screensaver/queues").path(q.name)  	//path to specific queue
 									.queryParam("limit", 13)
 									.request(MediaType.APPLICATION_JSON)
 									.get(new GenericType <List<PrintJob>>(){}));
@@ -109,43 +106,6 @@ public class JobList implements Drawable {
 		};
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
-
-		
-		//END CONSTUCTION
-		// ~dgoldm3
-		
-		/*
-		final Runnable dataFetch = new Runnable() {
-			public void run() {
-				System.out.println("Fetching job data");
-				Map<String, Boolean> printers;
-				try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/bob/status.php").openStream(), "UTF-8")) {
-					printers = new Gson().fromJson(r, new TypeToken<Map<String, Boolean>>(){}.getType());
-//					printers = new Gson().fromJson("{\"1B16\":true,\"1B17\":false,\"1B18\":true} ", new TypeToken<Map<String, Boolean>>(){}.getType());
-				} catch (Exception e) {
-					RuntimeException re = new RuntimeException("Could not fetch data", e);
-					re.printStackTrace();
-					throw re;
-				}
-				jobData.clear();
-				for (Entry<String, Boolean> printer : printers.entrySet()) {
-					if (printer.getValue()) {
-						try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/functions/last_jobs_json.php?sUser=" + printer.getKey()).openStream(), "UTF-8")) {
-							jobData.put(printer.getKey(), new Gson().fromJson(r, JobData[].class));
-						} catch (Exception e) {
-							new RuntimeException("Could not fetch data", e).printStackTrace();
-						}
-					} else {
-						jobData.put(printer.getKey(), new JobData[0]);
-					}
-				}
-				onChange();
-				System.out.println("Done");
-			}
-		};
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
-		*/
 	}
 	
 	public BufferedImage renderTable(List<PrintJob> list, int width) {
