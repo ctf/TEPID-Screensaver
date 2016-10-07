@@ -11,7 +11,10 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -70,7 +73,14 @@ public class ScreensaverMainDisplay extends Screensaver {
 			canvas.setBackground(background);
 		} else {
 			try {
-				background =  Util.convert(ImageIO.read(ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg")), BufferedImage.TYPE_INT_RGB);
+				InputStream bgJpg; 
+				File localBg = new File(System.getenv("systemdrive") + "\\CTF Screensaver.jpg");
+				if (localBg.exists()) {
+					bgJpg = new FileInputStream(localBg);
+				} else {
+					bgJpg = ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg");
+				}
+				background =  Util.convert(ImageIO.read(bgJpg), BufferedImage.TYPE_INT_RGB);
 			} catch (IOException e) {
 				background = null;
 				System.err.println("Could not load background image...");
@@ -141,7 +151,7 @@ public class ScreensaverMainDisplay extends Screensaver {
 		public void paint(Graphics graphics) {
 			Graphics2D g = (Graphics2D) graphics;
 			if (background != null) {
-				g.drawImage(background, 0, 0, null);
+				g.drawImage(background, getWidth() / 2 - background.getWidth() / 2, getHeight() / 2 - background.getHeight() / 2, null);
 				if (!drawables.isEmpty()) {
 					BufferedImage fg = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
 					g = fg.createGraphics();
@@ -151,7 +161,7 @@ public class ScreensaverMainDisplay extends Screensaver {
 					g.dispose();
 					g = (Graphics2D) graphics;
 					//uncomment this to reenable hard-light filtering on fg
-//					g.drawImage(overlay.filter(fg, background), 0, 0, null);
+					//					g.drawImage(overlay.filter(fg, background), 0, 0, null);
 					g.drawImage(fg, 0, 0, null);
 				}
 			}
