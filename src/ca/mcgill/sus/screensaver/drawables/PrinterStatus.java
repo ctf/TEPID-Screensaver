@@ -4,9 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -24,16 +21,25 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import org.glassfish.jersey.jackson.JacksonFeature;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
 
-public class PrinterStatus implements Drawable {
+public class PrinterStatus implements Drawable 
+{
+	final static WebTarget tepidServer = ClientBuilder
+												.newBuilder()
+												.register(JacksonFeature.class)
+												.build()
+												.target(Main.serverUrl); //initialises the server as a targetable thing
 	private Map<String, Boolean> status = new ConcurrentHashMap<>();
 	public final int y, padding;
 	private Runnable onChange;
@@ -94,8 +100,19 @@ public class PrinterStatus implements Drawable {
 	public void startDataFetch() {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
-		final Runnable dataFetch = new Runnable() {
-			public void run() {
+		final Runnable dataFetch = new Runnable() 
+		{
+			public void run() 
+			{
+				System.out.println("Fetching printer status");
+				Map<String, Boolean> newStatus =(tepidServer
+					.path("/queues/status")
+					.request(MediaType.APPLICATION_JSON)
+					.get(new GenericType <Map<String, Boolean>>(){}));	//a newStatus is created so that the status map is never empty
+				status.clear();				//clears status map
+				status.putAll(newStatus); 	//loads new statuses into the main status map
+				
+				/*
 				try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/bob/status.php").openStream(), "UTF-8")) {
 					Map<String, Boolean> newStatus = new Gson().fromJson(r, new TypeToken<Map<String, Boolean>>(){}.getType());
 //					newStatus = new Gson().fromJson("{\"1B16\":true,\"1B17\":false,\"1B18\":true} ", new TypeToken<Map<String, Boolean>>(){}.getType());
@@ -104,7 +121,7 @@ public class PrinterStatus implements Drawable {
 					PrinterStatus.this.onChange();
 				} catch (Exception e) {
 					new RuntimeException("Could not fetch data", e).printStackTrace();
-				}
+				}*/
 			}
 		};
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
