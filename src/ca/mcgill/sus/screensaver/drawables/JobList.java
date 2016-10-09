@@ -38,7 +38,7 @@ public class JobList implements Drawable {
 	
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 
-	private final Map<PrintQueue, List<PrintJob>> jobData = new TreeMap<PrintQueue, List<PrintJob>>(new Comparator<PrintQueue>() //TODO: rewrite this as Map<String, List<PrintJob>>
+	private final Map<String, List<PrintJob>> jobData = new TreeMap<String, List<PrintJob>>() /*(new Comparator<PrintQueue>() //TODO: rewrite this as Map<String, List<PrintJob>>
 	{
 		@Override
 		public int compare(PrintQueue arg0, PrintQueue arg1) 
@@ -46,7 +46,7 @@ public class JobList implements Drawable {
 			return arg0.name.compareTo(arg1.name);
 		}
 		
-	});		//creates a list of jobs, sorted by queues 
+	});		//creates a list of jobs, sorted by queues */;
 	
 	private ScheduledFuture<?> dataFetchHandle;
 	public final int y;
@@ -71,17 +71,20 @@ public class JobList implements Drawable {
 		if (!jobData.isEmpty()) {
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			int x = 0, tableWidth = canvasWidth / jobData.size();
-			for (Entry<PrintQueue, List<PrintJob>> jobs : jobData.entrySet()) {
-				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, statuses.get(jobs.getKey().name));
+			for (Entry<String, List<PrintJob>> jobs : jobData.entrySet()) {
+				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, statuses.get(jobs.getKey()));
 				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
 				g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont(24f));
 				g.setColor(new Color(Main.TEXT_COLOR, true));
-				g.drawString(jobs.getKey().name, x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey().name) / 2, tableY - 20);
+				g.drawString(jobs.getKey(), x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, tableY - 20);
 				g.drawImage(table, 8 + x++ * tableWidth, tableY, null);
 			}
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	public void startDataFetch() {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
@@ -91,12 +94,12 @@ public class JobList implements Drawable {
 			public void run()
 			{
 				System.out.println("Fetching job data");
-				PrintQueue[] printers =tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
+				PrintQueue[] printers = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
 				jobData.clear();
 				for (PrintQueue q : printers)
 				{
 					System.out.println(q.name);
-					jobData.put(q, tepidServer
+					jobData.put(q.name, tepidServer
 									.path("queues").path(q.name)  	//path to specific queue
 									.queryParam("limit", 13)
 									.request(MediaType.APPLICATION_JSON)

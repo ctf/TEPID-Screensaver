@@ -20,15 +20,23 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+
+import org.glassfish.jersey.jackson.JacksonFeature;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 
 public class Marquee implements Drawable {
+	
+	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 	
 	private final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	private ScheduledFuture<?> dataFetchHandle, marqueeHandle;
@@ -49,6 +57,9 @@ public class Marquee implements Drawable {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.mcgill.sus.screensaver.Drawable#draw(java.awt.Graphics2D, int, int)
+	 */
 	@Override
 	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -70,14 +81,11 @@ public class Marquee implements Drawable {
 		final Runnable dataFetch = new Runnable() {
 			public void run() {
 				System.out.println("Fetching marquee data");
-				try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/functions/newsFeedApi.php").openStream(), "UTF-8")) {
-					marqueeData.clear();
-					marqueeData.addAll(Arrays.asList(new Gson().fromJson(new JsonParser().parse(r).getAsJsonObject().get("ctf"), MarqueeData[].class)));
-					if (marqueeHandle == null) {
-						startMarquee();
-					}
-				} catch (Exception e) {
-					new RuntimeException("Could not fetch data", e).printStackTrace();;
+				marqueeData.clear();
+				marqueeData.addAll(Arrays.asList( tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).get(MarqueeData[].class)));
+				if (marqueeHandle == null)
+				{
+					startMarquee();
 				}
 				System.out.println("Done");
 			}
