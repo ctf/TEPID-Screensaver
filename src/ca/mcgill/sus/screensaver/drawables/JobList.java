@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -118,7 +117,7 @@ public class JobList implements Drawable {
 		int fontPx = 16, padding = 10;
 		BufferedImage out;
 		if (list.isEmpty()) {
-			out = new BufferedImage(width, 350, BufferedImage.TYPE_INT_ARGB);
+			out = new BufferedImage(width, 425, BufferedImage.TYPE_INT_ARGB);
 		} else {
 			out = new BufferedImage(width, (fontPx + padding * 2) * (list.size() + 1) + 1, BufferedImage.TYPE_INT_ARGB);
 		}

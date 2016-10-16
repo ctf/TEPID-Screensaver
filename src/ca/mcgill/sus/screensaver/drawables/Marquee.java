@@ -3,9 +3,6 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -25,9 +22,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
