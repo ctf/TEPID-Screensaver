@@ -95,9 +95,9 @@ public class OfficeHoursMarquee implements Drawable {
 				SimpleDateFormat dayFormat = new SimpleDateFormat ("EEEEE");
 				
 				//debug (preset options to set time data) 
-				calendar.set(Calendar.MINUTE, 30);
-				calendar.set(Calendar.HOUR, 2);
-				calendar.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+//				calendar.set(Calendar.MINUTE, 30);
+//				calendar.set(Calendar.HOUR, 2);
+//				calendar.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
 				//end debug				
 				
 				calendar.set(Calendar.MINUTE, (calendar.get(Calendar.MINUTE)/30)*30);
