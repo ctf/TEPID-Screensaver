@@ -76,7 +76,10 @@ public class Marquee implements Drawable {
 			public void run() {
 				System.out.println("Fetching marquee data");
 				marqueeData.clear();
-				marqueeData.addAll(Arrays.asList( tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).get(MarqueeData[].class)));
+				marqueeData.addAll(Arrays.asList( tepidServer
+													.path("marquee")
+													.request(MediaType.APPLICATION_JSON)
+													.get(MarqueeData[].class)));
 				if (marqueeHandle == null)
 				{
 					startMarquee();

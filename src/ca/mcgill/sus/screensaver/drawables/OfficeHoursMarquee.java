@@ -6,7 +6,6 @@ import java.awt.RenderingHints;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,6 +33,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
+import ca.mcgill.sus.screensaver.io.CheckedInData;
 import ca.mcgill.sus.screensaver.io.SignUp;
 
 public class OfficeHoursMarquee implements Drawable {
@@ -44,39 +44,57 @@ public class OfficeHoursMarquee implements Drawable {
 			.build()
 			.target(Main.serverUrl); //initialises the server as a targetable thing
 	
-	private final Queue<String> names = new ConcurrentLinkedQueue<>(Arrays.asList(new String[]{}));
+	private final Queue<CheckedInData> checkedInData = new ConcurrentLinkedQueue<>();
 	private ScheduledFuture<?> dataFetchHandle, marqueeHandle;
 	public final int y;
 	private int alphaEntry = 0;
-	private String currentEntry = "";
+	private CheckedInData currentEntry = new CheckedInData();
 	private final String title = "CURRENT VOLUNTEERS ON DUTY";
 	private Runnable onChange;
 	private final int color, maxAlpha;
+	private final int pad = 14;
+	private static final Color clrNotCheckedIn = new Color(0xccdc241f, true);	//TODO: factor all of these into main
+	private static final Color clrCheckedIn = new Color (0xcc50c954, true);
 	
 	private final Random randomizer = new Random(); 	//"necessary" for the random nickname selector
-	private final List<String> genericNicknames = Arrays.asList("The Great", "Unnicknamed", "awesomesauce", "Mr. Clean", "Captain America", "Cupcake", "Kiddo", "Stitches", "Spookypants", "Professor", "Bugs", "The Nice", "The Magnificent", "The Clever", "The Kind", "The Courageous", "The Hero", "The Beloved", "McCool", "Bob", "Bob", "Bob", "Bob", "Jimbo", "Oompa", "Loompa", "Finch", "Hawk", "Eagle", "SegFault", "Elmer", "Tweety Bird", "Grover", "Cookie Monster", "Yarwhal", "Spock-lite","Darth", "Skywalker", "");
+	private final List<String> genericNicknames = Arrays.asList("The Great", "Unnicknamed", "awesomesauce", "Mr. Clean", "Captain America", "Cupcake", "Kiddo", "Stitches", "Spookypants", "Professor", "Bugs", "The Nice", "The Magnificent", "The Clever", "The Kind", "The Courageous", "The Hero", "The Beloved", "McCool", "Bob", "Bob", "Bob", "Bob", "Jimbo", "Oompa", "Loompa", "Finch", "Hawk", "Eagle", "SegFault", "Elmer", "Tweety Bird", "Grover", "Cookie Monster", "Yarwhal", "Spock-lite","Darth", "Skywalker");
 	
-	public OfficeHoursMarquee(int y, int color) {
+/*	public static void main(String[] args) 
+	{
+		OfficeHoursMarquee t = new OfficeHoursMarquee(100, Main.TEXT_COLOR);
+		t.startDataFetch();
+	}*/
+	
+	
+	public OfficeHoursMarquee(int y, int color) 
+	{
 		startDataFetch();
 		this.y = y;
 		this.color = 0xffffff & color;
-		if (((color >> 24) & 0xff) > 0) { 
-			maxAlpha = (color >> 24) & 0xff;
-		} else {
-			maxAlpha = 0xff;
-		}
+		if (((color >> 24) & 0xff) > 0) 
+			{maxAlpha = (color >> 24) & 0xff;} 
+		else 
+			{maxAlpha = 0xff;}
+		this.currentEntry.checkedIn=false;
+		this.currentEntry.shortUserName="null";
+		this.currentEntry.text = "";
 	}
 	
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) 
+	{
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(32f));
 		g.setColor(new Color((maxAlpha << 24) | color, true));
 		g.drawString(title, canvasWidth / 2 - g.getFontMetrics().stringWidth(title) / 2, y);
 		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(24f));
 		g.setColor(new Color((alphaEntry << 24) | color, true));
-		synchronized(currentEntry) {
-			g.drawString(currentEntry, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentEntry) / 2, y + 40);
+		synchronized(currentEntry) 
+		{
+			g.setColor(new Color ( (alphaEntry << 24) | ((currentEntry.checkedIn?clrCheckedIn.getRGB():clrNotCheckedIn.getRGB()) & 0x00FFFFFF) , true)); 	//sets red for offline, green for online
+			g.fillRect(0, y + g.getFontMetrics().getAscent() - pad, canvasWidth, g.getFontMetrics().getHeight()+pad);			//coloured rectangle for the back of the office hours
+			g.setColor(new Color((alphaEntry << 24) | color, true));
+			g.drawString(currentEntry.text, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentEntry.text) / 2, y + 40);
 		}
 	}
 	
@@ -87,7 +105,7 @@ public class OfficeHoursMarquee implements Drawable {
 			public void run() 
 			{
 				System.out.println("Fetching OH data");
-				names.clear();
+				checkedInData.clear();
 				Calendar calendar = GregorianCalendar.getInstance(); //creates a new calendar instance
 				calendar.setTime(new Date());
 				SimpleDateFormat slotFormat = new SimpleDateFormat ("EEEEE-HH:mm");
@@ -110,18 +128,29 @@ public class OfficeHoursMarquee implements Drawable {
 						.path(slotFormat.format(calendar.getTime()))
 						.request(MediaType.APPLICATION_JSON)
 						.get(new GenericType <List<SignUp>>(){}));
-				String out;
+				List<String> checkedIn = (tepidServer
+						.path("office-hours").path("checked-in")
+						.request(MediaType.APPLICATION_JSON)
+						.get(new GenericType <List<String>>(){}));
+				
 				for (SignUp s : signUps)
 				{
-					out = "";
-					out = (s.getGivenName());
+					CheckedInData out = new CheckedInData();
+					//sets short user (for further ID if necessary) and checked in status
+					out.shortUserName = s.getName();
+					out.checkedIn = checkedIn.contains(s.getName());
+					
+					//builds the text
+					out.text = "";
+					out.checkedIn = (checkedIn.contains(s.getName())?true:false);
+					out.text = (s.getGivenName());
 					if (s.getNickname() != null)
 					{
-						out += " \"" + s.getNickname() + "\" "; //TODO: get lastname here as well
+						out.text += " \"" + s.getNickname() + "\" "; //TODO: get lastname here as well
 					}
 					else
 					{
-						out += " \"" +  genericNicknames.get(randomizer.nextInt(genericNicknames.size())) + "\" ";
+						out.text += " \"" +  genericNicknames.get(randomizer.nextInt(genericNicknames.size())) + "\" ";	//adds a generic nickname
 					}
 					
 					Calendar tempTime = (Calendar) calendar.clone();
@@ -131,69 +160,30 @@ public class OfficeHoursMarquee implements Drawable {
 						//this part will determine whether the person's next slot is contiguous with this one.
 						//it increments to the beginning of the next time slot, and then iterates over the person's slots for today looking for one which is equal to it
 						//if it finds one, it increments again and continues looking for a slot which is equal to that
-						
 						if (timeFormat.format(tempTime.getTime()).compareTo(slot) == 0) 
 						{
 							tempTime.add(Calendar.MINUTE, 30);
 						}
 					}
-					out = out + "until " + timeFormat.format(tempTime.getTime());
-//					System.out.println("formedstring " + out);
-					if (!out.isEmpty())
-					{
-						names.add(out);
-					}
+					out.text += "until " + timeFormat.format(tempTime.getTime());
+					checkedInData.add(out);		//appends to list
 				}
-				
-				
-//				System.out.println("isEmpty?" + names.isEmpty());
-				if (names.isEmpty())
+				if (checkedInData.isEmpty())
 				{
-					names.add("Nobody!");
-				}
+					CheckedInData out = new CheckedInData();
+					out.text = "Nobody!";
+					out.shortUserName = null;
+					out.checkedIn = true;
+					checkedInData.add(out);
+				} 		//an else clause for none signed in
+
 				if (marqueeHandle == null) 
-				{
-					startMarquee();
-				}
+					{startMarquee();}
 				
 				System.out.println("Marquee Done");
 			}
 		};
-			
-/*
-				
-		{
-				try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/functions/office_hours_names_json.php").openStream(), "UTF-8")) {
-					names.clear();
-					OhName[][][] oh = new Gson().fromJson(r, OhName[][][].class);
-					Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
-					calendar.setTime(new Date());
-					int hour = calendar.get(Calendar.HOUR_OF_DAY),
-					min = calendar.get(Calendar.MINUTE),
-					day = calendar.get(Calendar.DAY_OF_WEEK) - 2,
-					slot = (hour - 9) * 2 + (min > 30 ? 1 : 0);
-					if (day < oh.length && slot < oh[day].length) {
-						for (OhName name : oh[day][slot]) {
-							int until;
-							for (until = slot; until < oh[day].length; until++) {
-								if (!Arrays.asList(oh[day][until]).contains(name)) {
-									break;
-								}
-							}
-							names.add(name.first_name + " " + name.last_name + " (until " + (9 + until / 2) + (until % 2 == 0 ? ":00" : ":30") + ")");
-						}
-					} else {
-						names.add("Nobody!");
-					}
-					if (marqueeHandle == null) {
-						startMarquee();
-					}
-				} catch (Exception e) {
-					new RuntimeException("Could not fetch data", e).printStackTrace();
-				}
-				System.out.println("Done");
-			}
-		};*/
+		
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS); //TODO: restore to 60 seconds
 	}
@@ -205,20 +195,26 @@ public class OfficeHoursMarquee implements Drawable {
 	/**Changes from one entry to another, with a fadeout/fadein effect
 	 * @param entry
 	 */
-	public void changeEntry(final String entry) {
-		new Thread("Change Entry") {
+	public void changeEntry(final CheckedInData entry) 
+	{
+		new Thread("Change Entry") 
+		{
 			@Override
-			public void run() {
+			public void run() 
+			{
 				final int fadeInMs = 1400, fadeOutMs = 800;
-				while (alphaEntry > 0) {
+				while (alphaEntry > 0) 
+				{
 					alphaEntry--;
 					OfficeHoursMarquee.this.onChange();
 					OfficeHoursMarquee.sleep(fadeInMs / maxAlpha);
 				}
-				synchronized(OfficeHoursMarquee.this.currentEntry) {
+				synchronized(OfficeHoursMarquee.this.currentEntry) 
+				{
 					OfficeHoursMarquee.this.currentEntry = entry;
 				}
-				while (alphaEntry < maxAlpha) {
+				while (alphaEntry < maxAlpha) 
+				{
 					alphaEntry++;
 					OfficeHoursMarquee.this.onChange();
 					OfficeHoursMarquee.sleep(fadeOutMs / maxAlpha);
@@ -239,11 +235,11 @@ public class OfficeHoursMarquee implements Drawable {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
 		final Runnable marquee = new Runnable() {
-			Iterator<String> iterNames = names.iterator();
+			Iterator<CheckedInData> iterNames = checkedInData.iterator();
 			public void run() {
 				try {
 					if (!iterNames.hasNext()) {
-						iterNames = names.iterator();
+						iterNames = checkedInData.iterator();
 					}
 					
 					
