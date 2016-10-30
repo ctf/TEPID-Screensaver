@@ -2,6 +2,8 @@ package ca.mcgill.sus.screensaver;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.net.InetAddress;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
@@ -30,6 +32,14 @@ public class Main {
 			}
 		}
 		if (start) {
+			if (kiosk) {
+				Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+					@Override
+					public void run() {
+						System.exit(1);
+					}
+				}, 30, TimeUnit.MINUTES);
+			}
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
 			for (int i = 0; i < gd.length; i++) {

@@ -12,7 +12,10 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -50,24 +53,30 @@ public class ScreensaverSecondaryDisplay extends Screensaver {
 
 	@Override
 	public void setVisible(boolean visible) {
-
 		BufferedImage background;
+		Rectangle bounds;
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gd = ge.getScreenDevices();
+		if (this.display >= 0 && this.display < gd.length) {
+			bounds = gd[this.display].getDefaultConfiguration().getBounds();
+		} else {
+			throw new RuntimeException("Invalid display index");
+		}
 		if (Main.LOGGED_IN && !this.kiosk) {
-			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			GraphicsDevice[] gd = ge.getScreenDevices();
-			Rectangle bounds;
-			if (this.display >= 0 && this.display < gd.length) {
-				bounds = gd[this.display].getDefaultConfiguration().getBounds();
-			} else {
-				throw new RuntimeException("Invalid display index");
-			}
 			background = screenshot(bounds);
 			super.setVisible(visible);
 			canvas.setBackground(background);
 		} else {
 			try {
-					background =  Util.convert(ImageIO.read(ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg")), BufferedImage.TYPE_INT_RGB);
-				} catch (IOException e) {
+				InputStream bgJpg; 
+				File localBg = new File(System.getenv("systemdrive") 
+						+ "\\CTF Screensaver" + (bounds.getHeight() > bounds.getWidth() ? " Vertical" : "") + ".jpg");
+				if (localBg.exists()) {
+					bgJpg = new FileInputStream(localBg);
+				} else {
+					bgJpg = ScreensaverMainDisplay.class.getResourceAsStream("background/bg.jpg");
+				}
+				background =  Util.convert(ImageIO.read(bgJpg), BufferedImage.TYPE_INT_RGB);				} catch (IOException e) {
 					background = null;
 					System.err.println("Could not load background image...");
 				}
@@ -135,7 +144,7 @@ public class ScreensaverSecondaryDisplay extends Screensaver {
 		public void paint(Graphics graphics) {
 			Graphics2D g = (Graphics2D) graphics;
 			if (background != null) {
-				g.drawImage(background, 0, 0, null);
+				g.drawImage(background, getWidth() / 2 - background.getWidth() / 2, getHeight() / 2 - background.getHeight() / 2, null);
 				if (!drawables.isEmpty()) {
 					BufferedImage fg = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
 					g = fg.createGraphics();

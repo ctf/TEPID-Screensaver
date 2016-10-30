@@ -6,10 +6,10 @@
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPPRODUCTICON" Value="ctfscreen.exe" Type="8"/>
     <ROW Property="Manufacturer" Value="McGill Science Computer Taskforce"/>
-    <ROW Property="ProductCode" Value="1033:{5DC38376-FCDC-44A4-B2F6-6702AEAB1C2D} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{1761B147-3078-4767-BB74-41E5B2C9B07B} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="CTF Screensaver"/>
-    <ROW Property="ProductVersion" Value="2.3.4" Type="32"/>
+    <ROW Property="ProductVersion" Value="2.3.7" Type="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{EB638595-E06B-4002-8C48-96514116B7E2}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
