@@ -7,6 +7,8 @@ import java.awt.RenderingHints;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 
+/** Used to display the computer name
+ */
 public class Header implements Drawable {
 	
 	public static final int ALIGN_LEFT = 0, ALIGN_CENTER = 1, ALIGN_RIGHT = 2;

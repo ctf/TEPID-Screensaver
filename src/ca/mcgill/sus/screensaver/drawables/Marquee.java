@@ -40,9 +40,14 @@ public class Marquee implements Drawable {
 	private Runnable onChange;
 	private final int color, maxAlpha;
 	
+	/**
+	 * @param y			the y coordinate
+	 * @param color		the text colour
+	 */
 	public Marquee(int y, int color) {
 		startDataFetch();
 		this.y = y;
+		//handles the colour. calibrates the maximum alpha to not excede the alpha specified
 		this.color = 0xffffff & color;
 		if (((color >> 24) & 0xff) > 0) { 
 			maxAlpha = (color >> 24) & 0xff;
@@ -69,6 +74,9 @@ public class Marquee implements Drawable {
 		}
 	}
 	
+	/**fetches the data and plugs it into the IO object
+	 * @see ca.mcgill.sus.screensaver.io.MarqueeData
+	 */
 	public void startDataFetch() {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
@@ -76,6 +84,7 @@ public class Marquee implements Drawable {
 			public void run() {
 				System.out.println("Fetching marquee data");
 				marqueeData.clear();
+				//Just needs to plug the data into the objects, everything matches 
 				marqueeData.addAll(Arrays.asList( tepidServer
 													.path("marquee")
 													.request(MediaType.APPLICATION_JSON)
@@ -95,7 +104,12 @@ public class Marquee implements Drawable {
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 	}
 	
-	public void changeEntry(final String entry) {
+	/** Changes the entry on the marquee with a fadein/fadeout
+	 * Note that this method does not change the title.
+	 * @param entry the entry to display
+	 */
+	public void changeEntry(final String entry) 
+	{
 		new Thread("Change Entry") {
 			@Override
 			public void run() {
@@ -117,6 +131,10 @@ public class Marquee implements Drawable {
 		}.start();
 	}
 	
+	/** Changes the title
+	 * Note that this method only changes the title, and is invoked whenever the entries of one title are exhausted
+	 * @param title the new title to display
+	 */
 	public void changeTitle(final String title) {
 		new Thread("Change Title") {
 			@Override
@@ -139,6 +157,9 @@ public class Marquee implements Drawable {
 		}.start();
 	}
 	
+	/**A function which causes the thread to wait for a time 
+	 * @param ms	The time for which the thread should do nothing
+	 */
 	public static void sleep(long ms) {
 		try {
 			Thread.sleep(ms);
@@ -147,7 +168,11 @@ public class Marquee implements Drawable {
 		}
 	}
 	
-	public void startMarquee() {
+	/**starts the marquee. It will then iterate over all titles, iterating over all of their display items
+	 * 
+	 */
+	public void startMarquee() 
+	{
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
 		final Runnable marquee = new Runnable() {
@@ -156,9 +181,12 @@ public class Marquee implements Drawable {
 			MarqueeData md;
 			public void run() {
 				try {
-					if (!iterMarquee.hasNext()) {
-						iterMarquee = marqueeData.iterator();
+					//gets the next entry to display
+					if (!iterMarquee.hasNext()) 
+					{
+						iterMarquee = marqueeData.iterator(); 
 					}
+					//if there are no more entries under the current title, it will change to the next title
 					if (iterEntry == null || !iterEntry.hasNext()) {
 						md = iterMarquee.next();
 						changeTitle(md.title);
@@ -179,6 +207,9 @@ public class Marquee implements Drawable {
 		if (marqueeHandle != null) marqueeHandle.cancel(false);
 	}
 	
+	/**A fix for it not trusting the certs by default. is an open to do item
+	 * 
+	 */
 	public static void trustAllCerts() {
 		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
 		    public X509Certificate[] getAcceptedIssuers(){return null;}

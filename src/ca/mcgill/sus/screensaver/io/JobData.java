@@ -3,6 +3,11 @@ package ca.mcgill.sus.screensaver.io;
 import java.util.Date;
 
 
+/**An IO class for jobs.
+ * 
+ * 
+ *
+ */
 public class JobData {
 	
 	private String user = "";
@@ -21,3 +26,5 @@ public class JobData {
 	}
 	
 }
+
+

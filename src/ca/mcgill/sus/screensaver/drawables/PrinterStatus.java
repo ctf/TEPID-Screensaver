@@ -45,6 +45,10 @@ public class PrinterStatus implements Drawable
 	private Runnable onChange;
 	private ScheduledFuture<?> dataFetchHandle;
 	
+	/**Constructor
+	 * @param y			the y position
+	 * @param padding	the amount of padding
+	 */
 	public PrinterStatus(int y, int padding) {
 		this.y = y;
 		this.padding = padding;
@@ -57,6 +61,9 @@ public class PrinterStatus implements Drawable
 		if (printers != null) g.drawImage(printers, canvasWidth / 2 - printers.getWidth() / 2, y, null);
 	}
 	
+	/**
+	 * @return
+	 */
 	private BufferedImage generatePrinters() {
 		BufferedImage out = null;
 		int i = 0;
@@ -81,12 +88,18 @@ public class PrinterStatus implements Drawable
 		return out;
 	}
 	
+	/** Draws an individual printer
+	 * @param name	the name of the printer
+	 * @param up	its up status
+	 * @return		a BufferedImage containing the printer, name, 
+	 */
 	private static BufferedImage generatePrinter(String name, boolean up) {
 		int vpad = 16, fontSize = 32;
-		BufferedImage printer = SpriteManager.getInstance().getColoredSprite("printer.png", up ? Main.COLOR_UP : Main.COLOR_DOWN),
-		emoji = SpriteManager.getInstance().getSprite(up ? "smile.png" : "frown.png"),
-		out = new BufferedImage(printer.getWidth(), printer.getHeight() + vpad + fontSize + vpad + emoji.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage 	printer = SpriteManager.getInstance().getColoredSprite("printer.png", up ? Main.COLOR_UP : Main.COLOR_DOWN), 	//Creates the image of the printer (coloured depending on its status
+						emoji = SpriteManager.getInstance().getSprite(up ? "smile.png" : "frown.png"),									//The emoji to go with it
+						out = new BufferedImage(printer.getWidth(), printer.getHeight() + vpad + fontSize + vpad + emoji.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
+		
 		g.drawImage(printer, 0, 0, null);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont((float) fontSize));
@@ -97,6 +110,9 @@ public class PrinterStatus implements Drawable
 		return out;
 	}
 	
+	/**Get the up status of the printers, and puts it in the map
+	 * 
+	 */
 	public void startDataFetch() {
 		//TODO figure out why cert isn't validating
 		trustAllCerts();
@@ -111,17 +127,6 @@ public class PrinterStatus implements Drawable
 					.get(new GenericType <Map<String, Boolean>>(){}));	//a newStatus is created so that the status map is never empty
 				status.clear();				//clears status map
 				status.putAll(newStatus); 	//loads new statuses into the main status map
-				
-				/*
-				try (Reader r = new InputStreamReader(new URL("https://cups.sus.mcgill.ca/bob/status.php").openStream(), "UTF-8")) {
-					Map<String, Boolean> newStatus = new Gson().fromJson(r, new TypeToken<Map<String, Boolean>>(){}.getType());
-//					newStatus = new Gson().fromJson("{\"1B16\":true,\"1B17\":false,\"1B18\":true} ", new TypeToken<Map<String, Boolean>>(){}.getType());
-					status.clear();
-					status.putAll(newStatus);
-					PrinterStatus.this.onChange();
-				} catch (Exception e) {
-					new RuntimeException("Could not fetch data", e).printStackTrace();
-				}*/
 			}
 		};
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
@@ -132,6 +137,9 @@ public class PrinterStatus implements Drawable
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 	}
 	
+	/**A fix for it not trusting the certs by default. is an open to do item
+	 * 
+	 */
 	public static void trustAllCerts() {
 		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
 		    public X509Certificate[] getAcceptedIssuers(){return null;}

@@ -32,20 +32,14 @@ import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
+import ca.mcgill.sus.screensaver.io.PrintJob;
+import ca.mcgill.sus.screensaver.io.PrintQueue;
 
 public class JobList implements Drawable {
 	
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 
-	private final Map<String, List<PrintJob>> jobData = new TreeMap<String, List<PrintJob>>() /*(new Comparator<PrintQueue>() //TODO: rewrite this as Map<String, List<PrintJob>>
-	{
-		@Override
-		public int compare(PrintQueue arg0, PrintQueue arg1) 
-		{
-			return arg0.name.compareTo(arg1.name);
-		}
-		
-	});		//creates a list of jobs, sorted by queues */;
+	private final Map<String, List<PrintJob>> jobData = new TreeMap<String, List<PrintJob>>();
 	
 	private ScheduledFuture<?> dataFetchHandle;
 	public final int y;
@@ -55,11 +49,16 @@ public class JobList implements Drawable {
 	private static final Color clrDown = new Color(0xccdc241f, true);
 	private static final Color clrEmpty = new Color (0xcc50c954, true);
 	
+	/**map of the printer statuses
+	 */
 	private static final Map<String, Boolean> statuses =(tepidServer
 			.path("/queues/status")
 			.request(MediaType.APPLICATION_JSON)
 			.get(new GenericType <Map<String, Boolean>>(){}));	//a map of statuses 
 	
+	/**Constructor
+	 * @param y	The Y position
+	 */
 	public JobList(int y) {
 		startDataFetch();
 		this.y = y;
@@ -81,7 +80,7 @@ public class JobList implements Drawable {
 		}
 	}
 	
-	/**
+	/**Fetches the data. Puts them into the map
 	 * 
 	 */
 	public void startDataFetch() {
@@ -95,12 +94,13 @@ public class JobList implements Drawable {
 				System.out.println("Fetching job data");
 				PrintQueue[] printers = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
 				jobData.clear();
+				//iterates over each queue and gets a list of jobs sent to them
 				for (PrintQueue q : printers)
 				{
 					System.out.println(q.name);
 					jobData.put(q.name, tepidServer
 									.path("queues").path(q.name)  	//path to specific queue
-									.queryParam("limit", 13)
+									.queryParam("limit", 13)		//will return the last 13 print jobs, which is what we had before
 									.request(MediaType.APPLICATION_JSON)
 									.get(new GenericType <List<PrintJob>>(){}));
 				}
@@ -113,6 +113,12 @@ public class JobList implements Drawable {
 		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
 	}
 	
+	/**
+	 * @param list 		the list of print jobs to display
+	 * @param width		the width of the table
+	 * @param status	the status of the print queue. will determine whether an empty queue gets the popcorn pusheen or the sad pusheen
+	 * @return
+	 */
 	public BufferedImage renderTable(List<PrintJob> list, int width, boolean status) {
 		int fontPx = 16, padding = 10;
 		BufferedImage out;
@@ -136,16 +142,20 @@ public class JobList implements Drawable {
 			}
 		}
 		Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
+		
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		//writes the table headers
 		g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));
 		g.setColor(new Color(Main.TEXT_COLOR, true));
 		g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
 		g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
 		g.drawString("Date", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
+		//draws the divider
 		g.setColor(lines);
 		g.setStroke(new BasicStroke(2));
 		g.drawLine(0, 1 * (fontPx + padding * 2) - 1, width, 1 * (fontPx + padding * 2) - 1);
 		g.setStroke(new BasicStroke(1));
+		//draws list of printed jobs
 		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, h:mm:ss a");
 		int i = 2;
 		if (!list.isEmpty()) {
@@ -158,21 +168,22 @@ public class JobList implements Drawable {
 				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(job.getUserIdentification(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
-				if(job.getPrinted() != null) {g.drawString(dateFormat.format(job.getPrinted()), width / 2, i * (fontPx + padding * 2) - padding - 2);}
+				if(job.getPrinted() != null) 
+					{g.drawString(dateFormat.format(job.getPrinted()), width / 2, i * (fontPx + padding * 2) - padding - 2);}
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
 				i++;
 			}
 		} 
-		else 
+		else //if there are no jobs to print
 		{
-			if (status == false)
+			if (status == false)	//if the printer is down
 			{
-				pusheenSad.draw(g, width / 2 - pusheenSad.getWidth() / 2, 100);
+				pusheenSad.draw(g, width / 2 - pusheenSad.getWidth() / 2, 100); //draws the sad pusheen
 			}
-			else
+			else	//if nothing has been printed today
 			{
-				pusheenPopcorn.draw(g, width / 2 - pusheenPopcorn.getWidth() / 2, 100);
+				pusheenPopcorn.draw(g, width / 2 - pusheenPopcorn.getWidth() / 2, 100); //draws the popcorn pusheen
 			}
 			
 		}
@@ -184,6 +195,9 @@ public class JobList implements Drawable {
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 	}
 	
+	/**A fix for it not trusting the certs by default. is an open to do item
+	 * 
+	 */
 	public static void trustAllCerts() {
 		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
 		    public X509Certificate[] getAcceptedIssuers(){return null;}

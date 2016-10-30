@@ -8,6 +8,9 @@ import java.util.Date;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 
+/**The big clock in the corner
+ * 
+ */
 public class Clock implements Drawable {
 	
 	private Runnable onChange;
@@ -15,13 +18,17 @@ public class Clock implements Drawable {
 	public String time = "";
 	private final Color color;
 	
+	/**Constructor
+	 * @param format	the format for the time
+	 * @param color		the colour for the font
+	 */
 	public Clock(String format, int color) {
 		if (((color >> 24) & 0xff) > 0) { 
 			this.color = new Color(color, true);
 		} else {
 			this.color = new Color(color);
 		}
-		this.format = new SimpleDateFormat(format == null ? "h:mm a" : format);
+		this.format = new SimpleDateFormat(format == null ? "h:mm a" : format); //will provide a default format
 		new Thread("Time Update"){
 			@Override
 			public void run() {

@@ -1,4 +1,4 @@
-package ca.mcgill.sus.screensaver.drawables;
+package ca.mcgill.sus.screensaver.io;
 
 import java.util.List;
 

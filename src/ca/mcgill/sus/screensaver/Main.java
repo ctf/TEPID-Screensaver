@@ -12,21 +12,21 @@ public class Main {
 //	public static final boolean LOGGED_IN = false;
 	public static final int COLOR_DOWN = LOGGED_IN ? 0xbbdc241f : 0xaaf11700, COLOR_UP = LOGGED_IN ? 0xcc50c954 : 0xaaaad400, TEXT_COLOR = LOGGED_IN ? 0xbb000000 : 0xddffffff;
 	
-//	public final static String serverUrl = "https://tepid.sus.mcgill.ca:8443/tepid/screensaver";
-	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";
+	public final static String serverUrl = "https://tepid.sus.mcgill.ca:8443/tepid/screensaver"; 	//real tepid url
+//	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";				//debugging url
 	
 	public static void main(String[] args) {
 		boolean start = false, kiosk = false;
 		for (String arg : args) {
 			if (arg.equalsIgnoreCase("/s")) {
-				start = true;
+				start = true; //normal operation mode
 			} else if (arg.equalsIgnoreCase("/k")) {
-				kiosk = start = true;
+				kiosk = start = true; //kiosk operation mode; for display stations
 			} else if (arg.equalsIgnoreCase("/p")) {
 				System.exit(0);
 			} else if (arg.equalsIgnoreCase("/c")) {
 				JOptionPane.showMessageDialog(null, "There are (currently) no options to configure :(", "Nothing to configure", JOptionPane.INFORMATION_MESSAGE);
-				System.exit(0);
+				System.exit(0);		//for configuration options. none are configurable (yet)
 			}
 		}
 		if (start) {

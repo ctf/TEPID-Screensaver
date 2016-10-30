@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.SpriteManager;
 
+/**Used to draw the error sprite if something has gone wrong with the computer
+ * 
+ */
 public class Error implements Drawable {
 
 	private final BufferedImage error = SpriteManager.getInstance().getSprite("error.png");

@@ -176,7 +176,7 @@ public class ScreensaverMainDisplay extends Screensaver {
 			//			drawables.add(new Header("McGill Science Computer Taskforce", 70, 100, textColor));
 			drawables.add(new PrinterStatus(60, 50).setOnChange(onChange));
 			drawables.add(new JobList(550).setOnChange(onChange));
-			drawables.add(new Clock("h:mm a", Main.TEXT_COLOR).setOnChange(onChange));
+			drawables.add(new Clock("HH:mm", Main.TEXT_COLOR).setOnChange(onChange));
 			//			drawables.add(new Header("PRINTER STATUS", 32, 525, textColor));
 			if (kiosk) {
 				drawables.add(new NowPlaying(450, Main.TEXT_COLOR).setOnChange(onChange));
