@@ -4,12 +4,12 @@
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="ALLUSERS" Value="1"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
-    <ROW Property="ARPPRODUCTICON" Value="ctfscreen.exe" Type="8"/>
+    <ROW Property="ARPPRODUCTICON" Value="ctflogo.exe" Type="8"/>
     <ROW Property="Manufacturer" Value="McGill Science Computer Taskforce"/>
-    <ROW Property="ProductCode" Value="1033:{1761B147-3078-4767-BB74-41E5B2C9B07B} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{2C59F3DB-D080-4ED2-A7BE-913BD5D3FD23} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="CTF Screensaver"/>
-    <ROW Property="ProductVersion" Value="2.3.7" Type="32"/>
+    <ROW Property="ProductVersion" Value="2.4.1" Type="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{EB638595-E06B-4002-8C48-96514116B7E2}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -35,7 +35,24 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
     <ROW File="ctfscreen.jar" Component_="ctfscreen.jar" FileName="CTFSCR~1.JAR|ctfscreen.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\ctfscreen.jar" SelfReg="false" NextFile="gson2.3.1.jar"/>
     <ROW File="ctfscreen.scr" Component_="ctfscreen.scr" FileName="CTFSCR~1.SCR|ctfscreen.scr" Attributes="0" SourcePath="winrun4j\ctfscreen.scr" SelfReg="false" NextFile="ctfscreen.jar"/>
-    <ROW File="gson2.3.1.jar" Component_="ctfscreen.jar" FileName="GSON-2~1.JAR|gson-2.3.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\gson-2.3.1.jar" SelfReg="false"/>
+    <ROW File="gson2.3.1.jar" Component_="ctfscreen.jar" FileName="GSON-2~1.JAR|gson-2.3.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\gson-2.3.1.jar" SelfReg="false" NextFile="jerseymediajsonjackson2.22.1.jar"/>
+    <ROW File="hk2api2.4.0b31.jar" Component_="ctfscreen.jar" FileName="HK2-AP~1.JAR|hk2-api-2.4.0-b31.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\hk2-api-2.4.0-b31.jar" SelfReg="false" NextFile="hk2locator2.4.0b31.jar"/>
+    <ROW File="hk2locator2.4.0b31.jar" Component_="ctfscreen.jar" FileName="HK2-LO~1.JAR|hk2-locator-2.4.0-b31.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\hk2-locator-2.4.0-b31.jar" SelfReg="false" NextFile="hk2utils2.4.0b31.jar"/>
+    <ROW File="hk2utils2.4.0b31.jar" Component_="ctfscreen.jar" FileName="HK2-UT~1.JAR|hk2-utils-2.4.0-b31.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\hk2-utils-2.4.0-b31.jar" SelfReg="false" NextFile="jacksonannotations2.5.4.jar"/>
+    <ROW File="jacksonannotations2.5.4.jar" Component_="ctfscreen.jar" FileName="JACKSO~1.JAR|jackson-annotations-2.5.4.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jackson-annotations-2.5.4.jar" SelfReg="false" NextFile="jacksoncore2.5.4.jar"/>
+    <ROW File="jacksoncore2.5.4.jar" Component_="ctfscreen.jar" FileName="JACKSO~2.JAR|jackson-core-2.5.4.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jackson-core-2.5.4.jar" SelfReg="false" NextFile="jacksondatabind2.5.4.jar"/>
+    <ROW File="jacksondatabind2.5.4.jar" Component_="ctfscreen.jar" FileName="JACKSO~3.JAR|jackson-databind-2.5.4.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jackson-databind-2.5.4.jar" SelfReg="false" NextFile="jacksonjaxrsbase2.5.4.jar"/>
+    <ROW File="jacksonjaxrsbase2.5.4.jar" Component_="ctfscreen.jar" FileName="JACKSO~4.JAR|jackson-jaxrs-base-2.5.4.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jackson-jaxrs-base-2.5.4.jar" SelfReg="false" NextFile="jacksonjaxrsjsonprovider2.5.4.jar"/>
+    <ROW File="jacksonjaxrsjsonprovider2.5.4.jar" Component_="ctfscreen.jar" FileName="JACKSO~5.JAR|jackson-jaxrs-json-provider-2.5.4.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jackson-jaxrs-json-provider-2.5.4.jar" SelfReg="false" NextFile="jacksonmodulejaxbannotations2.5.4.jar"/>
+    <ROW File="jacksonmodulejaxbannotations2.5.4.jar" Component_="ctfscreen.jar" FileName="JACKSO~6.JAR|jackson-module-jaxb-annotations-2.5.4.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jackson-module-jaxb-annotations-2.5.4.jar" SelfReg="false" NextFile="javax.annotationapi1.2.jar"/>
+    <ROW File="javax.annotationapi1.2.jar" Component_="ctfscreen.jar" FileName="JAVAXA~1.JAR|javax.annotation-api-1.2.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\javax.annotation-api-1.2.jar" SelfReg="false" NextFile="javax.inject2.4.0b31.jar"/>
+    <ROW File="javax.inject2.4.0b31.jar" Component_="ctfscreen.jar" FileName="JAVAXI~1.JAR|javax.inject-2.4.0-b31.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\javax.inject-2.4.0-b31.jar" SelfReg="false" NextFile="javax.ws.rsapi2.0.1.jar"/>
+    <ROW File="javax.ws.rsapi2.0.1.jar" Component_="ctfscreen.jar" FileName="JAVAXW~1.JAR|javax.ws.rs-api-2.0.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\javax.ws.rs-api-2.0.1.jar" SelfReg="false" NextFile="jerseyclient.jar"/>
+    <ROW File="jerseyclient.jar" Component_="ctfscreen.jar" FileName="JERSEY~2.JAR|jersey-client.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-client.jar" SelfReg="false" NextFile="jerseycommon.jar"/>
+    <ROW File="jerseycommon.jar" Component_="ctfscreen.jar" FileName="JERSEY~3.JAR|jersey-common.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-common.jar" SelfReg="false" NextFile="jerseyentityfiltering2.22.1.jar"/>
+    <ROW File="jerseyentityfiltering2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~4.JAR|jersey-entity-filtering-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-entity-filtering-2.22.1.jar" SelfReg="false" NextFile="jerseyguava2.22.1.jar"/>
+    <ROW File="jerseyguava2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~5.JAR|jersey-guava-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-guava-2.22.1.jar" SelfReg="false"/>
+    <ROW File="jerseymediajsonjackson2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~1.JAR|jersey-media-json-jackson-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-media-json-jackson-2.22.1.jar" SelfReg="false" NextFile="hk2api2.4.0b31.jar"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFileName="ctfscreensaver-[|ProductVersion]" Languages="en" InstallationType="4" UseLargeSchema="true" MsiPackageType="x64"/>
@@ -100,7 +117,7 @@
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
-    <ROW Name="ctfscreen.exe" SourcePath="..\ctf-screensaver-node\ctfscreen.scr" Index="0"/>
+    <ROW Name="ctflogo.exe" SourcePath="winrun4j\ctflogo.ico" Index="0"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
     <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
