@@ -126,7 +126,7 @@ public class OfficeHoursMarquee implements Drawable {
 //				calendar.set(Calendar.HOUR, 2);
 //				calendar.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
 				//end debug				
-				
+				System.out.println("1");
 				calendar.set(Calendar.MINUTE, (calendar.get(Calendar.MINUTE)/30)*30);
 				slotFormat.setCalendar(calendar);
 				dayFormat.setCalendar(calendar);
@@ -138,12 +138,13 @@ public class OfficeHoursMarquee implements Drawable {
 						.path(slotFormat.format(calendar.getTime()))
 						.request(MediaType.APPLICATION_JSON)
 						.get(new GenericType <List<SignUp>>(){}));
+				System.out.println("2");
 				//pulls the list of people checked in
 				List<String> checkedIn = (tepidServer
 						.path("office-hours").path("checked-in")
 						.request(MediaType.APPLICATION_JSON)
 						.get(new GenericType <List<String>>(){}));
-				
+				System.out.println("3");
 				//iterates over all the fetched signUp objects and turns them into checkedInData
 				for (SignUp s : signUps)
 				{
@@ -184,6 +185,7 @@ public class OfficeHoursMarquee implements Drawable {
 					checkedInData.add(out);		//appends to list
 				}
 				//an else clause for none registered for office hours
+				System.out.println("checkedindata is empty?" + checkedInData.isEmpty());
 				if (checkedInData.isEmpty())
 				{
 					CheckedInData out = new CheckedInData();

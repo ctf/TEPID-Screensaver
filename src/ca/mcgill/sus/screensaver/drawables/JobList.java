@@ -8,6 +8,10 @@ import java.awt.image.BufferedImage;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,7 +55,7 @@ public class JobList implements Drawable {
 	
 	/**map of the printer statuses
 	 */
-	private static final Map<String, Boolean> statuses =(tepidServer
+	private static Map<String, Boolean> statuses =(tepidServer
 			.path("/queues/status")
 			.request(MediaType.APPLICATION_JSON)
 			.get(new GenericType <Map<String, Boolean>>(){}));	//a map of statuses 
@@ -93,16 +97,34 @@ public class JobList implements Drawable {
 			{
 				System.out.println("Fetching job data");
 				PrintQueue[] printers = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
+				statuses =(tepidServer
+						.path("/queues/status")
+						.request(MediaType.APPLICATION_JSON)
+						.get(new GenericType <Map<String, Boolean>>(){}));	//refreshes the statuses of the printers
+				
+				Calendar calendar = GregorianCalendar.getInstance(); 
+				calendar.setTime(new Date());
+				calendar.set(Calendar.HOUR, 0); calendar.set(Calendar.MINUTE, 0); calendar.set(Calendar.SECOND, 0); calendar.set(Calendar.MILLISECOND, 0); //sets the calendar to the start of the day
+
 				jobData.clear();
 				//iterates over each queue and gets a list of jobs sent to them
 				for (PrintQueue q : printers)
 				{
 					System.out.println(q.name);
-					jobData.put(q.name, tepidServer
-									.path("queues").path(q.name)  	//path to specific queue
-									.queryParam("limit", 13)		//will return the last 13 print jobs, which is what we had before
-									.request(MediaType.APPLICATION_JSON)
-									.get(new GenericType <List<PrintJob>>(){}));
+					if (statuses.get(q.name)==true)
+					{						
+						jobData.put(q.name, tepidServer
+										.path("queues").path(q.name)  	//path to specific queue
+										.queryParam("limit", 13)		//will return the last 13 print jobs, which is what we had before
+										.queryParam("from", calendar.getTimeInMillis())
+										.request(MediaType.APPLICATION_JSON)
+										.get(new GenericType <List<PrintJob>>(){}));
+						
+					}
+					else
+					{
+						jobData.put(q.name, new ArrayList<PrintJob>());
+					}
 				}
 				onChange();
 				System.out.println("Done");
