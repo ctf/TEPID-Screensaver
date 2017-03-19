@@ -14,7 +14,7 @@ public class Main {
 //	public static final boolean LOGGED_IN = false;
 	public static final int COLOR_DOWN = LOGGED_IN ? 0xbbdc241f : 0xaaf11700, COLOR_UP = LOGGED_IN ? 0xcc50c954 : 0xaaaad400, TEXT_COLOR = LOGGED_IN ? 0xbb000000 : 0xddffffff;
 	
-	public final static String serverUrl = "https://tepid.sus.mcgill.ca:8443/tepid/screensaver"; 	//real tepid url
+	public final static String serverUrl = ***REMOVED***; 	//real tepid url
 //	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";				//debugging url
 	
 	public static void main(String[] args) {
@@ -45,7 +45,7 @@ public class Main {
 			for (int i = 0; i < gd.length; i++) {
 				final Screensaver screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
-					if (isReachable("taskforce.sus.mcgill.ca", 4000)) {
+					if (isReachable("taskforce.science.mcgill.ca", 4000)) {
 						screensaver = new ScreensaverMainDisplay(i, kiosk);
 					} else {
 						screensaver = new ScreensaverError(i);

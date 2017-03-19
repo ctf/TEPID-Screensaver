@@ -144,11 +144,8 @@ public class JobList implements Drawable {
 	public BufferedImage renderTable(List<PrintJob> list, int width, boolean status) {
 		int fontPx = 16, padding = 10;
 		BufferedImage out;
-		if (list.isEmpty()) {
-			out = new BufferedImage(width, 425, BufferedImage.TYPE_INT_ARGB);
-		} else {
-			out = new BufferedImage(width, (fontPx + padding * 2) * (list.size() + 1) + 1, BufferedImage.TYPE_INT_ARGB);
-		}
+		out = new BufferedImage(width, 425, BufferedImage.TYPE_INT_ARGB);
+		
 		Graphics2D g = out.createGraphics();
 		
 		if (list.isEmpty()) {
