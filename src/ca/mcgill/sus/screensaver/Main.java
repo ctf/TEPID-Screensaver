@@ -2,8 +2,9 @@ package ca.mcgill.sus.screensaver;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.net.InetAddress;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 
 import javax.swing.JOptionPane;
 
@@ -32,16 +33,10 @@ public class Main {
 			}
 		}
 		if (start) {
-			if (kiosk) {
-				Executors.newScheduledThreadPool(1).schedule(new Runnable() {
-					@Override
-					public void run() {
-						System.exit(1);
-					}
-				}, 30, TimeUnit.MINUTES);
-			}
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
+			final List<Screensaver> screensavers = new ArrayList<>(6);
+			final List<Thread> screensaverThreads = new ArrayList<>(6);
 			for (int i = 0; i < gd.length; i++) {
 				final Screensaver screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
@@ -53,19 +48,58 @@ public class Main {
 				} else {
 					screensaver = new ScreensaverSecondaryDisplay(i, kiosk);
 				}
-//				SwingUtilities.invokeLater(new Runnable() {
-//					@Override
-//					public void run() {
-//						screensaver.setVisible(true);
-//					}
-//				});
-				new Thread("Screensaver Display " + i) {
+				screensavers.add(screensaver);
+				Thread displayThread = new Thread("Screensaver Display " + i) {
 					@Override
 					public void run() {
 						screensaver.setVisible(true);
 					}
-				}.start();
+				};
+				screensaverThreads.add(displayThread);
+				displayThread.start();
 			}
+			final boolean KIOSK = kiosk;
+			new Thread("Network Monitor") {
+				int interval = 10_000;
+				@Override
+				public void run() {
+					for (;;) {
+						long before = System.currentTimeMillis();
+						boolean reachable = isReachable("taskforce.science.mcgill.ca", 4000);
+						for (ListIterator<Screensaver> iter = screensavers.listIterator(); iter.hasNext();) {
+							Screensaver screensaver = iter.next();
+							if (screensaver instanceof ScreensaverMainDisplay && !reachable) {
+								screensaver.dispose();
+								screensaver = new ScreensaverError(screensaver.display);
+								iter.set(screensaver);
+							} else if (screensaver instanceof ScreensaverError && reachable) {
+								screensaver.dispose();
+								screensaver = new ScreensaverMainDisplay(screensaver.display, KIOSK);
+								
+							} else {
+								continue;
+							}
+							iter.set(screensaver);
+							screensaverThreads.get(screensaver.display).interrupt();
+							final Screensaver s = screensaver;
+							Thread displayThread = new Thread("Screensaver Display " + s.display) {
+								@Override
+								public void run() {
+									s.setVisible(true);
+								}
+							};
+							screensaverThreads.set(screensaver.display, displayThread);
+							displayThread.start();
+						}
+						try {
+							Thread.sleep(interval - (System.currentTimeMillis() - before));
+						} catch (InterruptedException e) {
+							break;
+						}
+					}
+				}
+			}.start();
+			
 		} else {
 			System.out.println("Neither /K nor /S flag was passed. Not starting. ");
 		}

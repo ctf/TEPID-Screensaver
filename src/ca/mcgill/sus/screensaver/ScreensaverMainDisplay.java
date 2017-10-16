@@ -160,8 +160,6 @@ public class ScreensaverMainDisplay extends Screensaver {
 					}
 					g.dispose();
 					g = (Graphics2D) graphics;
-					//uncomment this to reenable hard-light filtering on fg
-					//					g.drawImage(overlay.filter(fg, background), 0, 0, null);
 					g.drawImage(fg, 0, 0, null);
 				}
 			}
