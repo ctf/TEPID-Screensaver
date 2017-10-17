@@ -41,7 +41,7 @@ public class Main {
 				final Screensaver screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
 					if (isReachable("taskforce.science.mcgill.ca", 4000)) {
-						screensaver = new ScreensaverSecondaryDisplay(i, kiosk);
+						screensaver = new ScreensaverMainDisplay(i, kiosk);
 					} else {
 						screensaver = new ScreensaverError(i);
 					}
