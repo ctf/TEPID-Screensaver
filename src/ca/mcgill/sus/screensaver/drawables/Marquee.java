@@ -3,8 +3,6 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Queue;
@@ -13,10 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -78,8 +72,6 @@ public class Marquee implements Drawable {
 	 * @see ca.mcgill.sus.screensaver.io.MarqueeData
 	 */
 	public void startDataFetch() {
-		//TODO figure out why cert isn't validating
-		trustAllCerts();
 		final Runnable dataFetch = new Runnable() {
 			public void run() {
 				System.out.println("Fetching marquee data");
@@ -173,8 +165,6 @@ public class Marquee implements Drawable {
 	 */
 	public void startMarquee() 
 	{
-		//TODO figure out why cert isn't validating
-		trustAllCerts();
 		final Runnable marquee = new Runnable() {
 			Iterator<MarqueeData> iterMarquee = marqueeData.iterator();
 			Iterator<String> iterEntry;
@@ -205,24 +195,6 @@ public class Marquee implements Drawable {
 	
 	public void stopMarquee() {
 		if (marqueeHandle != null) marqueeHandle.cancel(false);
-	}
-	
-	/**A fix for it not trusting the certs by default. is an open to do item
-	 * 
-	 */
-	public static void trustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
-		    public X509Certificate[] getAcceptedIssuers(){return null;}
-		    public void checkClientTrusted(X509Certificate[] certs, String authType){}
-		    public void checkServerTrusted(X509Certificate[] certs, String authType){}
-		}};
-		try {
-		    SSLContext sc = SSLContext.getInstance("TLS");
-		    sc.init(null, trustAllCerts, new SecureRandom());
-		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (Exception e) {
-		    ;
-		}
 	}
 
 	@Override

@@ -31,7 +31,6 @@ import ca.mcgill.sus.screensaver.drawables.JobList;
 import ca.mcgill.sus.screensaver.drawables.Marquee;
 import ca.mcgill.sus.screensaver.drawables.NowPlaying;
 import ca.mcgill.sus.screensaver.drawables.PrinterStatus;
-import ca.mcgill.sus.screensaver.drawables.ProfilePic;
 import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
 import ca.mcgill.sus.screensaver.filters.Filter;
 import ca.mcgill.sus.screensaver.filters.HardLight;
@@ -184,7 +183,7 @@ public class ScreensaverMainDisplay extends Screensaver {
 			//			drawables.add(new Header("McGill Science Computer Taskforce", 70, 100, textColor));
 			drawables.add(new PrinterStatus(60, 50).setOnChange(onChange));
 			drawables.add(new JobList(550).setOnChange(onChange));
-			drawables.add(new Clock("HH:mm", Main.TEXT_COLOR).setOnChange(onChange));
+			drawables.add(new Clock("hh:mm a", Main.TEXT_COLOR).setOnChange(onChange));
 			//			drawables.add(new Header("PRINTER STATUS", 32, 525, textColor));
 			if (kiosk) {
 				drawables.add(new NowPlaying(450, Main.TEXT_COLOR).setOnChange(onChange));
@@ -194,9 +193,9 @@ public class ScreensaverMainDisplay extends Screensaver {
 				UserInfoBar userInfo = new UserInfoBar(48, 450);
 				drawables.add(userInfo);
 				drawables.add(new Marquee(350, Main.TEXT_COLOR).setOnChange(onChange));
-				if (userInfo.officeComputer && Main.LOGGED_IN) {
-					drawables.add(new ProfilePic().setOnChange(onChange));
-				}
+//				if (userInfo.officeComputer && Main.LOGGED_IN) {
+//					drawables.add(new ProfilePic().setOnChange(onChange));
+//				}
 			}
 		}
 

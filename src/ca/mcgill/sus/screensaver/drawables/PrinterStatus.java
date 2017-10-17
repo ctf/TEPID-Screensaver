@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,10 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
@@ -114,8 +108,6 @@ public class PrinterStatus implements Drawable
 	 * 
 	 */
 	public void startDataFetch() {
-		//TODO figure out why cert isn't validating
-		trustAllCerts();
 		final Runnable dataFetch = new Runnable() 
 		{
 			public void run() 
@@ -127,6 +119,7 @@ public class PrinterStatus implements Drawable
 					.get(new GenericType <Map<String, Boolean>>(){}));	//a newStatus is created so that the status map is never empty
 				status.clear();				//clears status map
 				status.putAll(newStatus); 	//loads new statuses into the main status map
+				onChange();
 			}
 		};
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
@@ -135,24 +128,6 @@ public class PrinterStatus implements Drawable
 	
 	public void stopDataFetch() {
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-	}
-	
-	/**A fix for it not trusting the certs by default. is an open to do item
-	 * 
-	 */
-	public static void trustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
-		    public X509Certificate[] getAcceptedIssuers(){return null;}
-		    public void checkClientTrusted(X509Certificate[] certs, String authType){}
-		    public void checkServerTrusted(X509Certificate[] certs, String authType){}
-		}};
-		try {
-		    SSLContext sc = SSLContext.getInstance("TLS");
-		    sc.init(null, trustAllCerts, new SecureRandom());
-		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (Exception e) {
-		    ;
-		}
 	}
 
 	@Override

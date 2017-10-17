@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,10 +18,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
@@ -88,8 +82,6 @@ public class JobList implements Drawable {
 	 * 
 	 */
 	public void startDataFetch() {
-		//TODO figure out why cert isn't validating
-		trustAllCerts();
 
 		final Runnable dataFetch = new Runnable() 
 		{
@@ -212,24 +204,6 @@ public class JobList implements Drawable {
 	
 	public void stopDataFetch() {
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-	}
-	
-	/**A fix for it not trusting the certs by default. is an open to do item
-	 * 
-	 */
-	public static void trustAllCerts() {
-		TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager(){
-		    public X509Certificate[] getAcceptedIssuers(){return null;}
-		    public void checkClientTrusted(X509Certificate[] certs, String authType){}
-		    public void checkServerTrusted(X509Certificate[] certs, String authType){}
-		}};
-		try {
-		    SSLContext sc = SSLContext.getInstance("TLS");
-		    sc.init(null, trustAllCerts, new SecureRandom());
-		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (Exception e) {
-		    ;
-		}
 	}
 
 	@Override
