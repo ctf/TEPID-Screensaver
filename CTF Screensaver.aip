@@ -6,10 +6,10 @@
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPPRODUCTICON" Value="ctflogo.exe" Type="8"/>
     <ROW Property="Manufacturer" Value="McGill Science Computer Taskforce"/>
-    <ROW Property="ProductCode" Value="1033:{DA5B219B-6A34-4EE8-98FA-6382371D2EE9} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{F02C9312-51E4-457E-BF24-A4CA54238C90} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="CTF Screensaver"/>
-    <ROW Property="ProductVersion" Value="2.4.3" Type="32"/>
+    <ROW Property="ProductVersion" Value="2.5.1" Type="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{EB638595-E06B-4002-8C48-96514116B7E2}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -33,6 +33,7 @@
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="biweekly0.6.1.jar" Component_="ctfscreen.jar" FileName="BIWEEK~1.JAR|biweekly-0.6.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\biweekly-0.6.1.jar" SelfReg="false" NextFile="vinnie2.0.0.jar"/>
     <ROW File="ctfscreen.jar" Component_="ctfscreen.jar" FileName="CTFSCR~1.JAR|ctfscreen.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\ctfscreen.jar" SelfReg="false" NextFile="gson2.3.1.jar"/>
     <ROW File="ctfscreen.scr" Component_="ctfscreen.scr" FileName="CTFSCR~1.SCR|ctfscreen.scr" Attributes="0" SourcePath="winrun4j\ctfscreen.scr" SelfReg="false" NextFile="ctfscreen.jar"/>
     <ROW File="gson2.3.1.jar" Component_="ctfscreen.jar" FileName="GSON-2~1.JAR|gson-2.3.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\gson-2.3.1.jar" SelfReg="false" NextFile="jerseymediajsonjackson2.22.1.jar"/>
@@ -51,8 +52,9 @@
     <ROW File="jerseyclient.jar" Component_="ctfscreen.jar" FileName="JERSEY~2.JAR|jersey-client.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-client.jar" SelfReg="false" NextFile="jerseycommon.jar"/>
     <ROW File="jerseycommon.jar" Component_="ctfscreen.jar" FileName="JERSEY~3.JAR|jersey-common.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-common.jar" SelfReg="false" NextFile="jerseyentityfiltering2.22.1.jar"/>
     <ROW File="jerseyentityfiltering2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~4.JAR|jersey-entity-filtering-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-entity-filtering-2.22.1.jar" SelfReg="false" NextFile="jerseyguava2.22.1.jar"/>
-    <ROW File="jerseyguava2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~5.JAR|jersey-guava-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-guava-2.22.1.jar" SelfReg="false"/>
+    <ROW File="jerseyguava2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~5.JAR|jersey-guava-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-guava-2.22.1.jar" SelfReg="false" NextFile="biweekly0.6.1.jar"/>
     <ROW File="jerseymediajsonjackson2.22.1.jar" Component_="ctfscreen.jar" FileName="JERSEY~1.JAR|jersey-media-json-jackson-2.22.1.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\jersey-media-json-jackson-2.22.1.jar" SelfReg="false" NextFile="hk2api2.4.0b31.jar"/>
+    <ROW File="vinnie2.0.0.jar" Component_="ctfscreen.jar" FileName="VINNIE~1.JAR|vinnie-2.0.0.jar" Attributes="0" SourcePath="winrun4j\ctfscreen-data\vinnie-2.0.0.jar" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="0" PackageFileName="ctfscreensaver-[|ProductVersion]" Languages="en" InstallationType="4" UseLargeSchema="true" MsiPackageType="x64"/>
