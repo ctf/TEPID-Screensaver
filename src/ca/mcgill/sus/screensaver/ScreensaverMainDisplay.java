@@ -180,11 +180,9 @@ public class ScreensaverMainDisplay extends Screensaver {
 					}
 				}
 			};
-			//			drawables.add(new Header("McGill Science Computer Taskforce", 70, 100, textColor));
 			drawables.add(new PrinterStatus(60, 50).setOnChange(onChange));
 			drawables.add(new JobList(550).setOnChange(onChange));
 			drawables.add(new Clock("hh:mm a", Main.TEXT_COLOR).setOnChange(onChange));
-			//			drawables.add(new Header("PRINTER STATUS", 32, 525, textColor));
 			if (kiosk) {
 				drawables.add(new NowPlaying(450, Main.TEXT_COLOR).setOnChange(onChange));
 				drawables.add(new Marquee(350, Main.TEXT_COLOR).setOnChange(onChange));
@@ -193,9 +191,6 @@ public class ScreensaverMainDisplay extends Screensaver {
 				UserInfoBar userInfo = new UserInfoBar(48, 450);
 				drawables.add(userInfo);
 				drawables.add(new Marquee(350, Main.TEXT_COLOR).setOnChange(onChange));
-//				if (userInfo.officeComputer && Main.LOGGED_IN) {
-//					drawables.add(new ProfilePic().setOnChange(onChange));
-//				}
 			}
 		}
 
