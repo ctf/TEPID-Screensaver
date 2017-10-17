@@ -11,11 +11,11 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
 
-public class Screensaver extends JFrame {
+public class ScreensaverFrame extends JFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
 	protected final int display;
 	
-	public Screensaver(int display, final boolean kiosk) {
+	public ScreensaverFrame(int display, final boolean kiosk) {
 		super("CTF Screensaver");
 		this.display = display;
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -26,7 +26,7 @@ public class Screensaver extends JFrame {
 			public void keyReleased(KeyEvent e) {
 				super.keyReleased(e);
 				if (!kiosk || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					Screensaver.this.dispose();
+					ScreensaverFrame.this.dispose();
 					System.exit(0);
 				}
 			}
@@ -37,7 +37,7 @@ public class Screensaver extends JFrame {
 				@Override
 				public void mouseReleased(MouseEvent e) {
 					super.mouseReleased(e);
-					Screensaver.this.dispose();
+					ScreensaverFrame.this.dispose();
 					System.exit(0);
 				}
 				
@@ -48,7 +48,7 @@ public class Screensaver extends JFrame {
 				public void mouseMoved(MouseEvent e) {
 					super.mouseMoved(e);
 					if (lastX != -1 && distance(lastX, lastY, e.getX(), e.getY()) > 10) {
-						Screensaver.this.dispose();
+						ScreensaverFrame.this.dispose();
 						System.exit(0);
 					}
 					lastX = e.getX();

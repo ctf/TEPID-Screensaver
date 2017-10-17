@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 
 import ca.mcgill.sus.screensaver.drawables.Logo;
 
-public class ScreensaverLogo extends Screensaver {
+public class ScreensaverLogo extends ScreensaverFrame {
 
 	private static final long serialVersionUID = 8717935860219395871L;
 

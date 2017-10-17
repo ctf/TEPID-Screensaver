@@ -206,8 +206,8 @@ public class UpcomingEvents implements Drawable {
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-		String hash = new BigInteger(1, md5.digest(("" + System.currentTimeMillis()).getBytes(Charset.forName("UTF-8")))).toString(16);
-		int ind = Integer.parseInt(hash.substring(0,2) + hash.substring(hash.length()-2), 16) / 0xffff;
+		String hash = new BigInteger(1, md5.digest(("" + new SimpleDateFormat("yyyy-MM-dd'T'HH").format(new Date())).getBytes(Charset.forName("UTF-8")))).toString(16);
+		double ind = (double) Integer.parseInt(hash.substring(0,2) + hash.substring(hash.length()-2), 16) / 0xffff;
 		return titles[(int) Math.floor(ind * titles.length)].toUpperCase();
 	}
 

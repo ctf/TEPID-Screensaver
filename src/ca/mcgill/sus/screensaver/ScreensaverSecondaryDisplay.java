@@ -31,7 +31,7 @@ import ca.mcgill.sus.screensaver.drawables.UpcomingEvents;
 import ca.mcgill.sus.screensaver.filters.Filter;
 import ca.mcgill.sus.screensaver.filters.HardLight;
 
-public class ScreensaverSecondaryDisplay extends Screensaver {
+public class ScreensaverSecondaryDisplay extends ScreensaverFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
 	private final Canvas canvas;
 	private final boolean kiosk;

@@ -35,13 +35,13 @@ public class Main {
 		if (start) {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
-			final List<Screensaver> screensavers = new ArrayList<>(6);
+			final List<ScreensaverFrame> screensavers = new ArrayList<>(6);
 			final List<Thread> screensaverThreads = new ArrayList<>(6);
 			for (int i = 0; i < gd.length; i++) {
-				final Screensaver screensaver;
+				final ScreensaverFrame screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
 					if (isReachable("taskforce.science.mcgill.ca", 4000)) {
-						screensaver = new ScreensaverMainDisplay(i, kiosk);
+						screensaver = new ScreensaverSecondaryDisplay(i, kiosk);
 					} else {
 						screensaver = new ScreensaverError(i);
 					}
@@ -66,8 +66,8 @@ public class Main {
 					for (;;) {
 						long before = System.currentTimeMillis();
 						boolean reachable = isReachable("taskforce.science.mcgill.ca", 4000);
-						for (ListIterator<Screensaver> iter = screensavers.listIterator(); iter.hasNext();) {
-							Screensaver screensaver = iter.next();
+						for (ListIterator<ScreensaverFrame> iter = screensavers.listIterator(); iter.hasNext();) {
+							ScreensaverFrame screensaver = iter.next();
 							if (screensaver instanceof ScreensaverMainDisplay && !reachable) {
 								screensaver.dispose();
 								screensaver = new ScreensaverError(screensaver.display);
@@ -81,7 +81,7 @@ public class Main {
 							}
 							iter.set(screensaver);
 							screensaverThreads.get(screensaver.display).interrupt();
-							final Screensaver s = screensaver;
+							final ScreensaverFrame s = screensaver;
 							Thread displayThread = new Thread("Screensaver Display " + s.display) {
 								@Override
 								public void run() {

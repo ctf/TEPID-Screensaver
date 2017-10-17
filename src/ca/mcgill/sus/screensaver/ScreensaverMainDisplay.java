@@ -35,7 +35,7 @@ import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
 import ca.mcgill.sus.screensaver.filters.Filter;
 import ca.mcgill.sus.screensaver.filters.HardLight;
 
-public class ScreensaverMainDisplay extends Screensaver {
+public class ScreensaverMainDisplay extends ScreensaverFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
 	private final Canvas canvas;
 	private final boolean kiosk;

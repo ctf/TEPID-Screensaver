@@ -12,7 +12,7 @@ import ca.mcgill.sus.screensaver.drawables.Header;
 
 import javax.swing.JPanel;
 
-public class ScreensaverError extends Screensaver {
+public class ScreensaverError extends ScreensaverFrame {
 
 	private static final long serialVersionUID = 6079399489665204371L;
 
