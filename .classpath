@@ -19,6 +19,8 @@
 	<classpathentry kind="lib" path="lib/jersey-entity-filtering-2.22.1.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-guava-2.22.1.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.22.1.jar"/>
+	<classpathentry kind="lib" path="lib/biweekly-0.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/vinnie-2.0.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

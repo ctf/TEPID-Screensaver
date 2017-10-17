@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import ca.mcgill.sus.screensaver.drawables.Logo;
-import ca.mcgill.sus.screensaver.drawables.OfficeHoursMarquee;
+import ca.mcgill.sus.screensaver.drawables.UpcomingEvents;
 import ca.mcgill.sus.screensaver.filters.Filter;
 import ca.mcgill.sus.screensaver.filters.HardLight;
 
@@ -176,7 +176,7 @@ public class ScreensaverSecondaryDisplay extends Screensaver {
 					}
 				}
 			};
-			drawables.add(new OfficeHoursMarquee(100, Main.TEXT_COLOR).setOnChange(onChange));
+			drawables.add(new UpcomingEvents(100, Main.TEXT_COLOR).setOnChange(onChange));
 			drawables.add(new Logo(15).setOnChange(onChange));
 		}
 
