@@ -21,6 +21,7 @@
 	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.22.1.jar"/>
 	<classpathentry kind="lib" path="lib/biweekly-0.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/vinnie-2.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/javatuples-1.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

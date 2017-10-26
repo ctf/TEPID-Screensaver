@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +17,7 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -26,10 +28,15 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.javatuples.Pair;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
+import biweekly.io.TimezoneAssignment;
+import biweekly.io.TimezoneInfo;
+import biweekly.property.DateStart;
+import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 
@@ -41,9 +48,14 @@ public class UpcomingEvents implements Drawable {
 	private int alphaEntry = 0;
 	private String currentEntry = "";
 	private final static String[] titles = {"upcoming", "stay in the know", "don't be lazy", "good CTFers are informed CTFers"};
-	private final String title = getTitle();
 	private Runnable onChange;
 	private final int color, maxAlpha;	//maximum alpha value for the marquee during fadein 
+	private final WebTarget icalServer = ClientBuilder
+			.newBuilder()
+			.register(JacksonFeature.class)
+			.build()
+			.target("https://calendar.google.com/calendar/ical"); 
+	private final String icsPath = ***REMOVED***;
 	
 
 	/**Constructor
@@ -73,6 +85,7 @@ public class UpcomingEvents implements Drawable {
 		//draws the "CURRENT VOLUNTEERS ON DUTY"
 		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(32f));
 		g.setColor(new Color((maxAlpha << 24) | color, true));
+		String title = getTitle();
 		g.drawString(title, canvasWidth / 2 - g.getFontMetrics().stringWidth(title) / 2, y);
 		//draws the person logged in
 		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(24f));
@@ -90,23 +103,33 @@ public class UpcomingEvents implements Drawable {
 		final Runnable dataFetch = new Runnable() {
 			public void run() 
 			{
-				final WebTarget icalServer = ClientBuilder
-						.newBuilder()
-						.register(JacksonFeature.class)
-						.build()
-						.target("https://calendar.google.com/calendar/ical"); 
-				ICalendar ical = Biweekly.parse(icalServer.path(***REMOVED***).request(MediaType.TEXT_PLAIN).get(String.class)).first();
+				ICalendar ical = Biweekly.parse(icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).get(String.class)).first();
+				TimezoneInfo tzInfo = ical.getTimezoneInfo();
 				entries.clear();
-				List<VEvent> events = ical.getEvents();
-				Collections.sort(events, new Comparator<VEvent>() {
+				Date rightNow = new Date();
+				Semester currentSemester = getSemester(rightNow);
+				List<VEvent> rawEvents = ical.getEvents();
+				List<Pair<Date, VEvent>> events = new ArrayList<>();
+				//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
+				for (VEvent e : rawEvents) {
+					Date soonest = null;
+					for (DateIterator iter = e.getDateIterator(getTimezone(tzInfo, e)); iter.hasNext();) {
+						Date d = iter.next();
+						if (d.before(rightNow) || getSemester(d) != currentSemester) continue;
+						if (soonest == null || d.before(soonest)) soonest = d;
+					}
+					if (soonest != null) events.add(new Pair<Date, VEvent>(soonest, e));
+				}
+				Collections.sort(events, new Comparator<Pair<Date, VEvent>>() {
 					@Override
-					public int compare(VEvent e1, VEvent e2) {
-						return e1.getDateStart().getValue().compareTo(e2.getDateStart().getValue());
+					public int compare(Pair<Date, VEvent> e1, Pair<Date, VEvent> e2) {
+						return e1.getValue0().compareTo(e2.getValue0());
 					}
 				});
-				for (VEvent e : events) {
-					Date d = e.getDateStart().getValue();
-					if (d.before(new Date())) continue;
+				//format into human-friendly strings
+				for (Pair<Date, VEvent> event : events) {
+					Date d = event.getValue0();
+					VEvent e = event.getValue1();
 					Calendar c = GregorianCalendar.getInstance();
 					c.setTime(d);
 					Calendar oneWeek = GregorianCalendar.getInstance();
@@ -209,6 +232,30 @@ public class UpcomingEvents implements Drawable {
 		String hash = new BigInteger(1, md5.digest(("" + new SimpleDateFormat("yyyy-MM-dd'T'HH").format(new Date())).getBytes(Charset.forName("UTF-8")))).toString(16);
 		double ind = (double) Integer.parseInt(hash.substring(0,2) + hash.substring(hash.length()-2), 16) / 0xffff;
 		return titles[(int) Math.floor(ind * titles.length)].toUpperCase();
+	}
+	
+	private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
+		DateStart dtstart = e.getDateStart();
+		TimeZone timezone;
+		if (tzInfo.isFloating(dtstart)){
+		  timezone = TimeZone.getDefault();
+		} else {
+		  TimezoneAssignment dtstartTimezone = tzInfo.getTimezone(dtstart);
+		  timezone = (dtstartTimezone == null) ? TimeZone.getTimeZone("UTC") : dtstartTimezone.getTimeZone();
+		}
+		return timezone;
+	}
+	
+	private static enum Semester {
+		FALL, WINTER, SPRING
+	}
+	private static Semester getSemester(Date d) {
+		Calendar c = GregorianCalendar.getInstance();
+		c.setTime(d);
+		int month = c.get(Calendar.MONTH);
+		if (month > Calendar.AUGUST) return Semester.FALL;
+		if (month > Calendar.APRIL) return Semester.SPRING;
+		return Semester.WINTER;
 	}
 
 	@Override
