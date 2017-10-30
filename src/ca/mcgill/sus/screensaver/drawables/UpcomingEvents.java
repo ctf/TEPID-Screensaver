@@ -27,7 +27,7 @@ public class UpcomingEvents implements Drawable {
 	public final int y;
 	private int alphaEntry = 0;
 	private String currentEntry = "";
-	private final static String[] titles = {"upcoming", "stay in the know", "don't be lazy", "good CTFers are informed CTFers"};
+	private final static String[] titles = {"upcoming", "stay in the know", "don’t be lazy", "good CTFers are informed CTFers"};
 	private final int color, maxAlpha;	//maximum alpha value for the marquee during fadein 
 	private Stage parent;
 	
@@ -45,9 +45,10 @@ public class UpcomingEvents implements Drawable {
 			{maxAlpha = (color >> 24) & 0xff;} 
 		else 
 			{maxAlpha = 0xff;}
+		if (marqueeHandle == null && !entries.isEmpty()) startMarquee();
 		DataFetch.getInstance().addChangeListener(new Runnable() {
 			public void run() {
-				if (marqueeHandle == null)startMarquee();
+				if (marqueeHandle == null) startMarquee();
 			}
 		});
 	}

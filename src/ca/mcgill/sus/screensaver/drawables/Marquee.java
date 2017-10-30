@@ -47,6 +47,7 @@ public class Marquee implements Drawable {
 		} else {
 			maxAlpha = 0xff;
 		}
+		if (marqueeHandle == null && !marqueeData.isEmpty()) startMarquee();
 		DataFetch.getInstance().addChangeListener(new Runnable() {
 			public void run() {
 				if (marqueeHandle == null) startMarquee();
