@@ -17,6 +17,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -39,7 +40,7 @@ import ca.mcgill.sus.screensaver.io.PrintQueue;
 
 public class DataFetch extends Thread {
 	
-	public static final int interval = 15;
+	public static final int interval = 15, icalInterval = 5 * 60;
  
 	private DataFetch() {
 		this.setDaemon(true);
@@ -72,26 +73,28 @@ public class DataFetch extends Thread {
 	
 	@Override
 	public void run() {
+		int iterations = 0;
 		while (!Thread.interrupted()) {
 			boolean fail = true;
 			long startTime = System.currentTimeMillis();
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 			Future<PrintQueue[]> futureQueues = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).async().get(PrintQueue[].class);
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
-			Future<String> futureEvents = Main.OFFICE_COMPUTER ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
+			boolean pullEvents = (Main.OFFICE_COMPUTER && iterations++ * interval % icalInterval == 0) || !networkUp; 
+			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
 				//update marquee data
-				List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get());
+				List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get(interval, TimeUnit.SECONDS));
 				marqueeData.clear();
 				marqueeData.addAll(newMarquee);
 				
 				//update printer status
-				Map<String, Boolean> newStatus = futureStatus.get();
+				Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
 				printerStatus.clear();
 				printerStatus.putAll(newStatus);
 				
 				//process and update printer queues
-				PrintQueue[] printers = futureQueues.get();	
+				PrintQueue[] printers = futureQueues.get(interval, TimeUnit.SECONDS);	
 				Calendar calendar = GregorianCalendar.getInstance(); 
 				calendar.setTime(new Date());
 				calendar.set(Calendar.HOUR, 0); calendar.set(Calendar.MINUTE, 0); calendar.set(Calendar.SECOND, 0); calendar.set(Calendar.MILLISECOND, 0); //sets the calendar to the start of the day
@@ -112,7 +115,7 @@ public class DataFetch extends Thread {
 					}
 				}
 				for (Entry<String, Future<List<PrintJob>>> e : futureJobs.entrySet()) {
-					newJobs.put(e.getKey(), e.getValue().get());
+					newJobs.put(e.getKey(), e.getValue().get(interval, TimeUnit.SECONDS));
 				}
 				jobData.clear();
 				jobData.putAll(newJobs);
@@ -122,8 +125,8 @@ public class DataFetch extends Thread {
 			}
 			try {
 				//process upcoming events (if this is an office computer) 
-				if (Main.OFFICE_COMPUTER) {
-					ICalendar ical = Biweekly.parse(futureEvents.get()).first();
+				if (pullEvents) {
+					ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
 					TimezoneInfo tzInfo = ical.getTimezoneInfo();
 					Date rightNow = new Date();
 					Semester currentSemester = getSemester(rightNow);
@@ -158,6 +161,7 @@ public class DataFetch extends Thread {
 						String dateFormat = (isSoon ? "E": "MMM d") + (c.get(Calendar.MINUTE) == 0 ? " @ h a" : " @ h:mm a");
 						upcomingEvents.add(new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
 					}
+					System.out.println("Fetched events");
 				}
 				fail = false;
 			} catch (Exception e) {
@@ -167,9 +171,10 @@ public class DataFetch extends Thread {
 			for (Runnable listener : listeners) {
 				listener.run();
 			}
-			System.out.println("Data fetch complete in " + (System.currentTimeMillis() - startTime) + "ms");
+			long elapsed = System.currentTimeMillis() - startTime;
+			System.out.println("Data fetch complete in " + elapsed + "ms");
 			try {
-				Thread.sleep(interval * 1000);
+				Thread.sleep(Math.max(0, interval * 1000 - elapsed));
 			} catch (InterruptedException e) {
 				break;
 			}
