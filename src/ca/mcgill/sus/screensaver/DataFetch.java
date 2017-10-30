@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.TimeZone;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
@@ -66,13 +65,14 @@ public class DataFetch extends Thread {
 	
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
-	public final Map<String, List<PrintJob>> jobData = new TreeMap<String, List<PrintJob>>();
+	public final Map<String, List<PrintJob>> jobData = new ConcurrentHashMap<>();
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
 	
 	@Override
 	public void run() {
 		while (!Thread.interrupted()) {
+			long startTime = System.currentTimeMillis();
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 			Future<PrintQueue[]> futureQueues = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).async().get(PrintQueue[].class);
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
@@ -114,7 +114,10 @@ public class DataFetch extends Thread {
 				}
 				jobData.clear();
 				jobData.putAll(newJobs);
-				
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+			try {
 				//process upcoming events (if this is an office computer) 
 				if (Main.OFFICE_COMPUTER) {
 					ICalendar ical = Biweekly.parse(futureEvents.get()).first();
@@ -160,6 +163,7 @@ public class DataFetch extends Thread {
 			for (Runnable listener : listeners) {
 				listener.run();
 			}
+			System.out.println("Data fetch complete in " + (System.currentTimeMillis() - startTime) + "ms");
 			try {
 				Thread.sleep(interval * 1000);
 			} catch (InterruptedException e) {

@@ -63,6 +63,7 @@ public class JobList implements Drawable {
 		if (!jobData.isEmpty()) {
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			int x = 0, tableWidth = canvasWidth / jobData.size();
+			if (tableWidth <= 0) return;
 			for (Entry<String, List<PrintJob>> jobs : jobData.entrySet()) {
 				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, statuses.get(jobs.getKey()));
 				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
