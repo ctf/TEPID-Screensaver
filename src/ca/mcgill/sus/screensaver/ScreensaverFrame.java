@@ -68,10 +68,15 @@ public class ScreensaverFrame extends JFrame {
 			GraphicsDevice[] gd = ge.getScreenDevices();
 			if (this.display >= 0 && this.display < gd.length) {
 				this.setBounds(gd[this.display].getDefaultConfiguration().getBounds());
+				this.setResizable(true);
+				this.setExtendedState(MAXIMIZED_BOTH);
+				if (!System.getProperty("os.name").startsWith("Windows") && gd[this.display].isFullScreenSupported()) {
+					gd[this.display].setFullScreenWindow(this);
+				}
 			} else {
 				throw new RuntimeException("Invalid display index");
 			}
-			this.setExtendedState(MAXIMIZED_BOTH);
+			
 		}
 	}
 

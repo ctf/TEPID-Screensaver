@@ -26,7 +26,7 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 		super(display, kiosk);
 		this.kiosk = kiosk;
 		stage = new Stage();
-		stage.setDrawableOpacity(0);
+		if (Main.LOGGED_IN) stage.setDrawableOpacity(0);
 		this.add(stage);
 	}
 
