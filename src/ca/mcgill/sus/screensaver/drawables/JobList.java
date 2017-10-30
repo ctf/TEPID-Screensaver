@@ -108,18 +108,21 @@ public class JobList implements Drawable {
 		g.setColor(new Color(Main.TEXT_COLOR, true));
 		g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
 		g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
-		g.drawString("Date", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
+		g.drawString("Status", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
 		//draws the divider
 		g.setColor(lines);
 		g.setStroke(new BasicStroke(2));
 		g.drawLine(0, 1 * (fontPx + padding * 2) - 1, width, 1 * (fontPx + padding * 2) - 1);
 		g.setStroke(new BasicStroke(1));
 		//draws list of printed jobs
-		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, h:mm:ss a");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
 		int i = 2;
 		if (!list.isEmpty()) {
 			for (PrintJob job : list) {
-				if (i % 2 == 0) {
+				if (job.getFailed() != null) {
+					g.setColor(clrDown);
+					g.fillRect(0, (i - 1) * (fontPx + padding * 2), width, fontPx + padding * 2);
+				} else if (i % 2 == 0) {
 					g.setColor(oddRows);
 					g.fillRect(0, (i - 1) * (fontPx + padding * 2), width, fontPx + padding * 2);
 				}
@@ -127,8 +130,9 @@ public class JobList implements Drawable {
 				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(job.getUserIdentification(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
-				if(job.getPrinted() != null) 
-					{g.drawString(dateFormat.format(job.getPrinted()), width / 2, i * (fontPx + padding * 2) - padding - 2);}
+				if(job.getPrinted() != null) g.drawString("Printed  " + dateFormat.format(job.getPrinted()), width / 2, i * (fontPx + padding * 2) - padding - 2);
+				else if(job.getError() != null) g.drawString(job.getError(), width / 2, i * (fontPx + padding * 2) - padding - 2);
+				else if(job.getReceived() != null) g.drawString("Received  " + dateFormat.format(job.getReceived()), width / 2, i * (fontPx + padding * 2) - padding - 2);
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
 				i++;
