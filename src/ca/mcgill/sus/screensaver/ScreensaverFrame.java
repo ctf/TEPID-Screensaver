@@ -15,6 +15,7 @@ public class ScreensaverFrame extends JFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
 	protected final int display;
 	
+	//use kiosk mode to disable close on mouse move and only close on escape key
 	public ScreensaverFrame(int display, final boolean kiosk) {
 		super("CTF Screensaver");
 		this.display = display;

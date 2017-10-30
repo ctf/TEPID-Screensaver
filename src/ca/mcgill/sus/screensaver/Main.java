@@ -19,12 +19,10 @@ public class Main {
 //	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";				//debugging url
 	
 	public static void main(String[] args) {
-		boolean start = false, kiosk = false;
+		boolean start = false;
 		for (String arg : args) {
 			if (arg.equalsIgnoreCase("/s")) {
 				start = true; //normal operation mode
-			} else if (arg.equalsIgnoreCase("/k")) {
-				kiosk = start = true; //kiosk operation mode; for display stations
 			} else if (arg.equalsIgnoreCase("/p")) {
 				System.exit(0);
 			} else if (arg.equalsIgnoreCase("/c")) {
@@ -41,12 +39,12 @@ public class Main {
 				final ScreensaverFrame screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
 					if (isReachable("taskforce.science.mcgill.ca", 4000)) {
-						screensaver = new ScreensaverMainDisplay(i, kiosk);
+						screensaver = new ScreensaverMainDisplay(i);
 					} else {
 						screensaver = new ScreensaverError(i);
 					}
 				} else {
-					screensaver = new ScreensaverSecondaryDisplay(i, kiosk);
+					screensaver = new ScreensaverSecondaryDisplay(i);
 				}
 				screensavers.add(screensaver);
 				Thread displayThread = new Thread("Screensaver Display " + i) {
@@ -58,7 +56,6 @@ public class Main {
 				screensaverThreads.add(displayThread);
 				displayThread.start();
 			}
-			final boolean KIOSK = kiosk;
 			new Thread("Network Monitor") {
 				int interval = 10_000;
 				@Override
@@ -74,7 +71,7 @@ public class Main {
 								iter.set(screensaver);
 							} else if (screensaver instanceof ScreensaverError && reachable) {
 								screensaver.dispose();
-								screensaver = new ScreensaverMainDisplay(screensaver.display, KIOSK);
+								screensaver = new ScreensaverMainDisplay(screensaver.display);
 								
 							} else {
 								continue;

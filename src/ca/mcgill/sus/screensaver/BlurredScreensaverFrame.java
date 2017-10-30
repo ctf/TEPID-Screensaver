@@ -11,17 +11,15 @@ import java.util.concurrent.TimeUnit;
 public class BlurredScreensaverFrame extends ScreensaverFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
 	protected final Stage stage;
-	private final boolean kiosk;
 	private BufferedImage background;
 	private boolean alreadyVisible = false;
 
-	public BlurredScreensaverFrame(int display, boolean kiosk) {
-		super(display, kiosk);
-		this.kiosk = kiosk;
+	public BlurredScreensaverFrame(int display) {
+		super(display, false);
 		stage = new Stage();
 		if (Main.LOGGED_IN) stage.setDrawableOpacity(0);
 		this.add(stage);
-		if (Main.LOGGED_IN && !this.kiosk) {
+		if (Main.LOGGED_IN) {
 			background = Util.screenshot(display);
 		} else {
 			background = Util.loadBackground();
