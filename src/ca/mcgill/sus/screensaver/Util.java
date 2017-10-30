@@ -2,11 +2,19 @@ package ca.mcgill.sus.screensaver;
 
 import java.awt.AWTException;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
 
 public class Util {
 	
@@ -207,5 +215,34 @@ public class Util {
 		} catch (AWTException e) {
 			throw new RuntimeException("Could not take screenshot", e);
 		}
+	}
+	
+	public static BufferedImage screenshot(int display) {
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] gd = ge.getScreenDevices();
+		Rectangle bounds;
+		if (display >= 0 && display < gd.length) {
+			bounds = gd[display].getDefaultConfiguration().getBounds();
+		} else {
+			throw new RuntimeException("Invalid display index");
+		}
+		return screenshot(bounds);
+	}
+	
+	public static BufferedImage loadBackground() {
+		BufferedImage background;
+		try {
+			InputStream bgJpg; 
+			File localBg = new File(System.getenv("systemdrive") + "\\CTF Screensaver.jpg");
+			if (localBg.exists()) {
+				bgJpg = new FileInputStream(localBg);
+			} else {
+				bgJpg = BlurredScreensaverFrame.class.getResourceAsStream("background/bg.jpg");
+			}
+			background =  Util.convert(ImageIO.read(bgJpg), BufferedImage.TYPE_INT_RGB);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not load background image...", e);
+		}
+		return background;
 	}
 }
