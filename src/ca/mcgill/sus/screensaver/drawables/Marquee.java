@@ -3,20 +3,18 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
+import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
@@ -27,8 +25,8 @@ public class Marquee implements Drawable {
 	
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 	
-	private final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
-	private ScheduledFuture<?> dataFetchHandle, marqueeHandle;
+	private final Queue<MarqueeData> marqueeData = DataFetch.getInstance().marqueeData;
+	private ScheduledFuture<?> marqueeHandle;
 	public final int y;
 	private int alphaTitle = 0, alphaEntry = 0;
 	private String currentTitle = "", currentEntry = "";
@@ -41,7 +39,6 @@ public class Marquee implements Drawable {
 	 * @param color		the text colour
 	 */
 	public Marquee(int y, int color) {
-		startDataFetch();
 		this.y = y;
 		//handles the colour. calibrates the maximum alpha to not excede the alpha specified
 		this.color = 0xffffff & color;
@@ -50,6 +47,11 @@ public class Marquee implements Drawable {
 		} else {
 			maxAlpha = 0xff;
 		}
+		DataFetch.getInstance().addChangeListener(new Runnable() {
+			public void run() {
+				if (marqueeHandle == null) startMarquee();
+			}
+		});
 	}
 
 	/* (non-Javadoc)
@@ -70,33 +72,6 @@ public class Marquee implements Drawable {
 		}
 	}
 	
-	/**fetches the data and plugs it into the IO object
-	 * @see ca.mcgill.sus.screensaver.io.MarqueeData
-	 */
-	public void startDataFetch() {
-		final Runnable dataFetch = new Runnable() {
-			public void run() {
-				System.out.println("Fetching marquee data");
-				marqueeData.clear();
-				//Just needs to plug the data into the objects, everything matches 
-				marqueeData.addAll(Arrays.asList( tepidServer
-													.path("marquee")
-													.request(MediaType.APPLICATION_JSON)
-													.get(MarqueeData[].class)));
-				if (marqueeHandle == null)
-				{
-					startMarquee();
-				}
-				System.out.println("Done");
-			}
-		};
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
-	}
-	
-	public void stopDataFetch() {
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-	}
 	
 	/** Changes the entry on the marquee with a fadein/fadeout
 	 * Note that this method does not change the title.

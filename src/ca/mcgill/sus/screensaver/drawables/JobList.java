@@ -6,17 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -26,21 +18,20 @@ import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import ca.mcgill.sus.screensaver.AnimatedSprite;
+import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
 import ca.mcgill.sus.screensaver.Stage;
 import ca.mcgill.sus.screensaver.io.PrintJob;
-import ca.mcgill.sus.screensaver.io.PrintQueue;
 
 public class JobList implements Drawable {
 	
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 
-	private final Map<String, List<PrintJob>> jobData = new TreeMap<String, List<PrintJob>>();
+	private final Map<String, List<PrintJob>> jobData = DataFetch.getInstance().jobData;
 	
-	private ScheduledFuture<?> dataFetchHandle;
 	public final int y;
 	private Stage parent;
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
@@ -59,8 +50,12 @@ public class JobList implements Drawable {
 	 * @param y	The Y position
 	 */
 	public JobList(int y) {
-		startDataFetch();
 		this.y = y;
+		DataFetch.getInstance().addChangeListener(new Runnable() {
+			public void run() {
+				if (parent != null) parent.safeRepaint();
+			}
+		});
 	}
 
 	@Override
@@ -77,55 +72,6 @@ public class JobList implements Drawable {
 				g.drawImage(table, 8 + x++ * tableWidth, tableY, null);
 			}
 		}
-	}
-	
-	/**Fetches the data. Puts them into the map
-	 * 
-	 */
-	public void startDataFetch() {
-
-		final Runnable dataFetch = new Runnable() 
-		{
-			public void run()
-			{
-				System.out.println("Fetching job data");
-				PrintQueue[] printers = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).get(PrintQueue[].class);	//gets a list of queues
-				statuses =(tepidServer
-						.path("/queues/status")
-						.request(MediaType.APPLICATION_JSON)
-						.get(new GenericType <Map<String, Boolean>>(){}));	//refreshes the statuses of the printers
-				
-				Calendar calendar = GregorianCalendar.getInstance(); 
-				calendar.setTime(new Date());
-				calendar.set(Calendar.HOUR, 0); calendar.set(Calendar.MINUTE, 0); calendar.set(Calendar.SECOND, 0); calendar.set(Calendar.MILLISECOND, 0); //sets the calendar to the start of the day
-
-				jobData.clear();
-				//iterates over each queue and gets a list of jobs sent to them
-				for (PrintQueue q : printers)
-				{
-					System.out.println(q.name);
-					if (statuses.get(q.name)==true)
-					{						
-						jobData.put(q.name, tepidServer
-										.path("queues").path(q.name)  	//path to specific queue
-										.queryParam("limit", 13)		//will return the last 13 print jobs, which is what we had before
-										.queryParam("from", calendar.getTimeInMillis())
-										.request(MediaType.APPLICATION_JSON)
-										.get(new GenericType <List<PrintJob>>(){}));
-						
-					}
-					else
-					{
-						jobData.put(q.name, new ArrayList<PrintJob>());
-					}
-				}
-				if (parent != null) parent.safeRepaint();
-				System.out.println("Done");
-			}
-			
-		};
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
 	}
 	
 	/**
@@ -202,11 +148,6 @@ public class JobList implements Drawable {
 		g.dispose();
 		return out;
 	}
-	
-	public void stopDataFetch() {
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-	}
-
 	@Override
 	public void setParent(Stage r) {
 		this.parent = r;

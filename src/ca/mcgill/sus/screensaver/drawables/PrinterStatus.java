@@ -10,18 +10,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-
-import org.glassfish.jersey.jackson.JacksonFeature;
-
+import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
@@ -30,14 +20,9 @@ import ca.mcgill.sus.screensaver.Stage;
 
 public class PrinterStatus implements Drawable 
 {
-	final static WebTarget tepidServer = ClientBuilder
-												.newBuilder()
-												.register(JacksonFeature.class)
-												.build()
-												.target(Main.serverUrl); //initialises the server as a targetable thing
-	private Map<String, Boolean> status = new ConcurrentHashMap<>();
+
+	private Map<String, Boolean> status = DataFetch.getInstance().printerStatus;
 	public final int y, padding;
-	private ScheduledFuture<?> dataFetchHandle;
 	private Stage parent;
 	
 	/**Constructor
@@ -47,7 +32,11 @@ public class PrinterStatus implements Drawable
 	public PrinterStatus(int y, int padding) {
 		this.y = y;
 		this.padding = padding;
-		startDataFetch();
+		DataFetch.getInstance().addChangeListener(new Runnable() {
+			public void run() {
+				if (parent != null) parent.safeRepaint();
+			}
+		});
 	}
 	
 	@Override
@@ -103,32 +92,6 @@ public class PrinterStatus implements Drawable
 		g.drawImage(emoji, out.getWidth() / 2 - emoji.getWidth() / 2, printer.getHeight() + vpad + fontSize + vpad, null);
 		g.dispose();
 		return out;
-	}
-	
-	/**Get the up status of the printers, and puts it in the map
-	 * 
-	 */
-	public void startDataFetch() {
-		final Runnable dataFetch = new Runnable() 
-		{
-			public void run() 
-			{
-				System.out.println("Fetching printer status");
-				Map<String, Boolean> newStatus =(tepidServer
-					.path("/queues/status")
-					.request(MediaType.APPLICATION_JSON)
-					.get(new GenericType <Map<String, Boolean>>(){}));	//a newStatus is created so that the status map is never empty
-				status.clear();				//clears status map
-				status.putAll(newStatus); 	//loads new statuses into the main status map
-				if (parent != null) parent.safeRepaint();
-			}
-		};
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
-		dataFetchHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(dataFetch, 0, 60, TimeUnit.SECONDS);
-	}
-	
-	public void stopDataFetch() {
-		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
 	}
 
 	@Override

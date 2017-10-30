@@ -21,7 +21,6 @@ import ca.mcgill.sus.screensaver.Stage;
 
 public class UserInfoBar extends Header {
 
-	public final boolean officeComputer = System.getenv("computerName").matches(***REMOVED***);
 	public String displayName = "";
 	private final long startTime = System.currentTimeMillis();
 //	private final Color textColor = loggedIn ? new Color(0x707070) : new Color(0xcccccc);
@@ -40,7 +39,7 @@ private Stage parent;
 					if (userInfo.size() == 0) {
 						displayName = System.getenv("username");
 					} else {
-						if (officeComputer) {
+						if (Main.OFFICE_COMPUTER) {
 							displayName = userInfo.get("fn");
 						} else {
 							displayName = String.format("%s. %s", userInfo.get("fn").charAt(0), userInfo.get("ln"));
