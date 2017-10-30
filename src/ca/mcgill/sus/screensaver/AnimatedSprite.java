@@ -7,7 +7,7 @@ public class AnimatedSprite {
 	
 	private final BufferedImage[] frames;
 	private int frame, speedMs = 100;
-	private Runnable onChange;
+	private Stage parent;
 	
 	public AnimatedSprite(BufferedImage[] frames) {
 		this.frames = frames;
@@ -31,14 +31,13 @@ public class AnimatedSprite {
 		g.drawImage(frames[frame], x, y, null);
 	}
 	
-	public AnimatedSprite setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 	
 	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
+		if (parent != null) {
+			if (parent != null) parent.safeRepaint();
 		}
 	}
 

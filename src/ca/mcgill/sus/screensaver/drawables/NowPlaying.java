@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Stage;
 
 public class NowPlaying implements Drawable {
 	
@@ -21,7 +22,6 @@ public class NowPlaying implements Drawable {
 	public final int y;
 	private int alphaEntry = 0;
 	private String currentSong = "";
-	private Runnable onChange;
 	private final int color, maxAlpha;
 	
 	private final String host = "grunt.sus.mcgill.ca", password = "taskforce";
@@ -29,6 +29,7 @@ public class NowPlaying implements Drawable {
 	private Socket socket;
 	private InputStream socketIn;
 	private PrintStream socketOut;
+	private Stage parent;
 	
 	public NowPlaying(int y, int color) {
 		startDataFetch();
@@ -126,7 +127,7 @@ public class NowPlaying implements Drawable {
 				final int fadeInMs = 1400, fadeOutMs = 800;
 				while (alphaEntry > 0) {
 					alphaEntry--;
-					NowPlaying.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					NowPlaying.sleep(fadeInMs / maxAlpha);
 				}
 				synchronized(NowPlaying.this.currentSong) {
@@ -134,7 +135,7 @@ public class NowPlaying implements Drawable {
 				}
 				while (alphaEntry < maxAlpha) {
 					alphaEntry++;
-					NowPlaying.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					NowPlaying.sleep(fadeOutMs / maxAlpha);
 				}
 			}
@@ -169,15 +170,8 @@ public class NowPlaying implements Drawable {
 	}
 
 	@Override
-	public NowPlaying setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 
 }

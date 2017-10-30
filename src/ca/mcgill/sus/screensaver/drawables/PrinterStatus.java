@@ -26,6 +26,7 @@ import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
+import ca.mcgill.sus.screensaver.Stage;
 
 public class PrinterStatus implements Drawable 
 {
@@ -36,8 +37,8 @@ public class PrinterStatus implements Drawable
 												.target(Main.serverUrl); //initialises the server as a targetable thing
 	private Map<String, Boolean> status = new ConcurrentHashMap<>();
 	public final int y, padding;
-	private Runnable onChange;
 	private ScheduledFuture<?> dataFetchHandle;
+	private Stage parent;
 	
 	/**Constructor
 	 * @param y			the y position
@@ -119,7 +120,7 @@ public class PrinterStatus implements Drawable
 					.get(new GenericType <Map<String, Boolean>>(){}));	//a newStatus is created so that the status map is never empty
 				status.clear();				//clears status map
 				status.putAll(newStatus); 	//loads new statuses into the main status map
-				onChange();
+				if (parent != null) parent.safeRepaint();
 			}
 		};
 		if (dataFetchHandle != null) dataFetchHandle.cancel(false);
@@ -131,15 +132,8 @@ public class PrinterStatus implements Drawable
 	}
 
 	@Override
-	public PrinterStatus setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 
 }

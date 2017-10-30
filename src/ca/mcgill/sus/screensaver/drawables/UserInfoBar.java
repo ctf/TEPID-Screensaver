@@ -17,15 +17,16 @@ import java.util.Scanner;
 
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
+import ca.mcgill.sus.screensaver.Stage;
 
 public class UserInfoBar extends Header {
 
-	private Runnable onChange;
 	public final boolean officeComputer = System.getenv("computerName").matches(***REMOVED***);
 	public String displayName = "";
 	private final long startTime = System.currentTimeMillis();
 //	private final Color textColor = loggedIn ? new Color(0x707070) : new Color(0xcccccc);
 	private final Color textColor = new Color(0x44ffffff, true);
+private Stage parent;
 
 	
 	public UserInfoBar(int size, int y) {
@@ -49,7 +50,7 @@ public class UserInfoBar extends Header {
 					displayName = System.getenv("username");
 				}
 //				displayName = "Jae Yong";
-				onChange();
+				if (parent != null) parent.safeRepaint();
 			}
 		}.start();
 	}
@@ -98,18 +99,6 @@ public class UserInfoBar extends Header {
 	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
 		if (!Main.LOGGED_IN) g.setColor(new Color(0x20000000,true));
 		g.fill(v.getOutline(x, y + pad));
-	}
-	
-	@Override
-	public UserInfoBar setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
 	}
 	
 	public static Rectangle getRealStringBounds(GlyphVector v) {
@@ -180,6 +169,11 @@ public class UserInfoBar extends Header {
 		T[] out = Arrays.copyOf(a1, a1.length + a2.length);
 		System.arraycopy(a2, 0, out, a1.length, a2.length);
 		return out;
+	}
+	
+	@Override
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 
 }

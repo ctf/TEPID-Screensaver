@@ -9,12 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.SpriteManager;
+import ca.mcgill.sus.screensaver.Stage;
 
 public class Logo implements Drawable {
 	
 	private int x, y, w = 1024, h = 768;
-	private Runnable onChange;
 	private final BufferedImage logo = SpriteManager.getInstance().getSprite("logo_nice.png");
+	private Stage parent;
 	
 	public Logo(int interval) {
 //		final int fps = 60, sleepMs = 1000 / fps;
@@ -62,7 +63,7 @@ public class Logo implements Drawable {
 				if (w > 0 && h > 0) {
 					x = random.nextInt(w - logo.getWidth());
 					y = random.nextInt(h - logo.getHeight() - 200) + 200;
-					onChange();
+					if (parent != null) parent.safeRepaint();
 				}
 			}
 		}, 0, interval, TimeUnit.SECONDS);
@@ -79,15 +80,7 @@ public class Logo implements Drawable {
 	}
 
 	@Override
-	public Logo setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
-	}
-
 }

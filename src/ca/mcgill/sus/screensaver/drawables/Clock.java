@@ -7,16 +7,17 @@ import java.util.Date;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Stage;
 
 /**The big clock in the corner
  * 
  */
 public class Clock implements Drawable {
 	
-	private Runnable onChange;
 	private final SimpleDateFormat format;
 	public String time = "";
 	private final Color color;
+	private Stage parent;
 	
 	/**Constructor
 	 * @param format	the format for the time
@@ -36,7 +37,7 @@ public class Clock implements Drawable {
 					String oldTime = time;
 					time = Clock.this.format.format(new Date());
 					if (!oldTime.equals(time)) {
-						onChange();
+						if (parent != null) parent.safeRepaint();
 					}
 					try {
 						Thread.sleep(1000);
@@ -45,7 +46,7 @@ public class Clock implements Drawable {
 				}
 			}
 		}.start();
-		onChange();
+		if (parent != null) parent.safeRepaint();
 	}
 	
 	public Clock() {
@@ -61,15 +62,8 @@ public class Clock implements Drawable {
 	}
 
 	@Override
-	public Clock setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 
 }

@@ -20,6 +20,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
+import ca.mcgill.sus.screensaver.Stage;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 
 public class Marquee implements Drawable {
@@ -31,8 +32,9 @@ public class Marquee implements Drawable {
 	public final int y;
 	private int alphaTitle = 0, alphaEntry = 0;
 	private String currentTitle = "", currentEntry = "";
-	private Runnable onChange;
 	private final int color, maxAlpha;
+
+	private Stage parent;
 	
 	/**
 	 * @param y			the y coordinate
@@ -108,7 +110,7 @@ public class Marquee implements Drawable {
 				final int fadeInMs = 1400, fadeOutMs = 800;
 				while (alphaEntry > 0) {
 					alphaEntry--;
-					Marquee.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					Marquee.sleep(fadeInMs / maxAlpha);
 				}
 				synchronized(Marquee.this.currentEntry) {
@@ -116,7 +118,7 @@ public class Marquee implements Drawable {
 				}
 				while (alphaEntry < maxAlpha) {
 					alphaEntry++;
-					Marquee.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					Marquee.sleep(fadeOutMs / maxAlpha);
 				}
 			}
@@ -134,7 +136,7 @@ public class Marquee implements Drawable {
 				final int fadeInMs = 1400, fadeOutMs = 800;
 				while (alphaTitle > 0) {
 					alphaTitle--;
-					Marquee.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					Marquee.sleep(fadeInMs / maxAlpha);
 				}
 				synchronized(Marquee.this.currentTitle) {
@@ -142,7 +144,7 @@ public class Marquee implements Drawable {
 				}
 				while (alphaTitle < maxAlpha) {
 					alphaTitle++;
-					Marquee.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					Marquee.sleep(fadeOutMs / maxAlpha);
 				}
 			}
@@ -183,7 +185,7 @@ public class Marquee implements Drawable {
 						iterEntry = md.entry.iterator();
 					}
 					changeEntry(iterEntry.next());
-					Marquee.this.onChange();
+					if (parent != null) parent.safeRepaint();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -198,15 +200,8 @@ public class Marquee implements Drawable {
 	}
 
 	@Override
-	public Marquee setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 
 }

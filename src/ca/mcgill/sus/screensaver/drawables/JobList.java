@@ -30,6 +30,7 @@ import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
+import ca.mcgill.sus.screensaver.Stage;
 import ca.mcgill.sus.screensaver.io.PrintJob;
 import ca.mcgill.sus.screensaver.io.PrintQueue;
 
@@ -41,7 +42,7 @@ public class JobList implements Drawable {
 	
 	private ScheduledFuture<?> dataFetchHandle;
 	public final int y;
-	private Runnable onChange;
+	private Stage parent;
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
 								 pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
 	private static final Color clrDown = new Color(0xccdc241f, true);
@@ -118,7 +119,7 @@ public class JobList implements Drawable {
 						jobData.put(q.name, new ArrayList<PrintJob>());
 					}
 				}
-				onChange();
+				if (parent != null) parent.safeRepaint();
 				System.out.println("Done");
 			}
 			
@@ -207,17 +208,10 @@ public class JobList implements Drawable {
 	}
 
 	@Override
-	public JobList setOnChange(Runnable r) {
-		this.onChange = r;
-		this.pusheenSad.setOnChange(r);
-		this.pusheenPopcorn.setOnChange(r);
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
+	public void setParent(Stage r) {
+		this.parent = r;
+		this.pusheenSad.setParent(r);
+		this.pusheenPopcorn.setParent(r);
 	}
 
 }

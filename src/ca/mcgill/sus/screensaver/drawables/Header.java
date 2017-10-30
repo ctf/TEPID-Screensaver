@@ -6,6 +6,7 @@ import java.awt.RenderingHints;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Stage;
 
 /** Used to display the computer name
  */
@@ -55,12 +56,6 @@ public class Header implements Drawable {
 		g.drawString(text, x, y);
 	}
 
-	@Override
-	public Header setOnChange(Runnable r) {
-		//never changes
-		return this;
-	}
-	
 	public Header setAlignment(int alignment) {
 		this.alignment = alignment;
 		return this;
@@ -68,6 +63,11 @@ public class Header implements Drawable {
 	
 	public int getAlignment() {
 		return this.alignment;
+	}
+	
+	@Override
+	public void setParent(Stage s) {
+		//never changes
 	}
 
 }

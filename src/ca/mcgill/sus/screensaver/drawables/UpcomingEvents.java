@@ -39,6 +39,7 @@ import biweekly.property.DateStart;
 import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
+import ca.mcgill.sus.screensaver.Stage;
 
 public class UpcomingEvents implements Drawable {
 	
@@ -48,7 +49,6 @@ public class UpcomingEvents implements Drawable {
 	private int alphaEntry = 0;
 	private String currentEntry = "";
 	private final static String[] titles = {"upcoming", "stay in the know", "don't be lazy", "good CTFers are informed CTFers"};
-	private Runnable onChange;
 	private final int color, maxAlpha;	//maximum alpha value for the marquee during fadein 
 	private final WebTarget icalServer = ClientBuilder
 			.newBuilder()
@@ -56,6 +56,7 @@ public class UpcomingEvents implements Drawable {
 			.build()
 			.target("https://calendar.google.com/calendar/ical"); 
 	private final String icsPath = ***REMOVED***;
+	private Stage parent;
 	
 
 	/**Constructor
@@ -168,7 +169,7 @@ public class UpcomingEvents implements Drawable {
 				while (alphaEntry > 0)
 				{
 					alphaEntry--;
-					UpcomingEvents.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					UpcomingEvents.sleep(fadeInMs / maxAlpha);
 				}
 				synchronized(UpcomingEvents.this.currentEntry) 
@@ -178,7 +179,7 @@ public class UpcomingEvents implements Drawable {
 				while (alphaEntry < maxAlpha) 
 				{
 					alphaEntry++;
-					UpcomingEvents.this.onChange();
+					if (parent != null) parent.safeRepaint();
 					UpcomingEvents.sleep(fadeOutMs / maxAlpha);
 				}
 			}
@@ -208,7 +209,7 @@ public class UpcomingEvents implements Drawable {
 						{iterNames = entries.iterator();}
 					if (iterNames.hasNext())
 						{changeEntry(iterNames.next());}
-					UpcomingEvents.this.onChange();
+					if (parent != null) parent.safeRepaint();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -259,15 +260,8 @@ public class UpcomingEvents implements Drawable {
 	}
 
 	@Override
-	public UpcomingEvents setOnChange(Runnable r) {
-		this.onChange = r;
-		return this;
-	}
-	
-	private void onChange() {
-		if (onChange != null) {
-			onChange.run();
-		}
+	public void setParent(Stage parent) {
+		this.parent = parent;
 	}
 
 }
