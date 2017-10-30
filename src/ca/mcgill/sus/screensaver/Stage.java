@@ -78,4 +78,8 @@ public class Stage extends JPanel {
 		this.drawableOpacity = drawableOpacity;
 	}
 
+	public void clear() {
+		this.drawables.clear();
+	}
+
 }

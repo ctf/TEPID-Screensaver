@@ -1,5 +1,6 @@
 package ca.mcgill.sus.screensaver.drawables;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -19,6 +20,8 @@ public class Error implements Drawable {
 
 	@Override
 	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, canvasWidth, canvasHeight);
 		int x = canvasWidth / 2, y = canvasHeight / 2;
 		g.drawImage(error, x - error.getWidth() / 2, y - error.getHeight() / 2, null);
 	}

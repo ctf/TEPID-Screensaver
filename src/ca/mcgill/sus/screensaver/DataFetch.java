@@ -16,7 +16,6 @@ import java.util.Queue;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.ws.rs.client.ClientBuilder;
@@ -40,7 +39,7 @@ import ca.mcgill.sus.screensaver.io.PrintQueue;
 
 public class DataFetch extends Thread {
 	
-	public static final int interval = 60;
+	public static final int interval = 15;
  
 	private DataFetch() {
 		this.setDaemon(true);
@@ -54,7 +53,7 @@ public class DataFetch extends Thread {
 		return INSTANCE;
 	}
 	
-	private final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); 
+	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); 
 	private final WebTarget icalServer = ClientBuilder
 			.newBuilder()
 			.register(JacksonFeature.class)
@@ -62,6 +61,8 @@ public class DataFetch extends Thread {
 			.target("https://calendar.google.com/calendar/ical"); 
 	private final String icsPath = ***REMOVED***;
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
+	
+	private boolean networkUp = true;
 	
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -72,6 +73,7 @@ public class DataFetch extends Thread {
 	@Override
 	public void run() {
 		while (!Thread.interrupted()) {
+			boolean fail = true;
 			long startTime = System.currentTimeMillis();
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 			Future<PrintQueue[]> futureQueues = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).async().get(PrintQueue[].class);
@@ -114,8 +116,9 @@ public class DataFetch extends Thread {
 				}
 				jobData.clear();
 				jobData.putAll(newJobs);
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				fail = false;
+			} catch (Exception e) {
+//				e.printStackTrace();
 			}
 			try {
 				//process upcoming events (if this is an office computer) 
@@ -156,10 +159,11 @@ public class DataFetch extends Thread {
 						upcomingEvents.add(new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
 					}
 				}
-				
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				fail = false;
+			} catch (Exception e) {
+//				e.printStackTrace();
 			}
+			networkUp = !fail;
 			for (Runnable listener : listeners) {
 				listener.run();
 			}
@@ -199,5 +203,13 @@ public class DataFetch extends Thread {
 	
 	public void addChangeListener(Runnable listener) {
 		listeners.add(listener);
+	}
+
+	public boolean isNetworkUp() {
+		return networkUp;
+	}
+
+	public void setNetworkUp(boolean networkUp) {
+		this.networkUp = networkUp;
 	}
 }

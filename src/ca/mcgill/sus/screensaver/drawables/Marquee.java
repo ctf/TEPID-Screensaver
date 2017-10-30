@@ -148,6 +148,10 @@ public class Marquee implements Drawable {
 			Iterator<String> iterEntry;
 			MarqueeData md;
 			public void run() {
+				if (marqueeData.isEmpty()) {
+					marqueeHandle = null;
+					return;
+				}
 				try {
 					//gets the next entry to display
 					if (!iterMarquee.hasNext()) 

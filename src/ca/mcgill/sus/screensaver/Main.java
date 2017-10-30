@@ -1,10 +1,8 @@
 package ca.mcgill.sus.screensaver;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.swing.JOptionPane;
 
@@ -39,11 +37,7 @@ public class Main {
 			for (int i = 0; i < gd.length; i++) {
 				final ScreensaverFrame screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
-					if (isReachable("taskforce.science.mcgill.ca", 4000)) {
-						screensaver = new ScreensaverMainDisplay(i);
-					} else {
-						screensaver = new ScreensaverError(i);
-					}
+					screensaver = new ScreensaverMainDisplay(i);
 				} else {
 					screensaver = new ScreensaverSecondaryDisplay(i);
 				}
@@ -55,59 +49,13 @@ public class Main {
 					}
 				};
 				screensaverThreads.add(displayThread);
+				displayThread.setDaemon(true);
 				displayThread.start();
 			}
-			new Thread("Network Monitor") {
-				int interval = 10_000;
-				@Override
-				public void run() {
-					for (;;) {
-						long before = System.currentTimeMillis();
-						boolean reachable = isReachable("taskforce.science.mcgill.ca", 4000);
-						for (ListIterator<ScreensaverFrame> iter = screensavers.listIterator(); iter.hasNext();) {
-							ScreensaverFrame screensaver = iter.next();
-							if (screensaver instanceof ScreensaverMainDisplay && !reachable) {
-								screensaver.dispose();
-								screensaver = new ScreensaverError(screensaver.display);
-								iter.set(screensaver);
-							} else if (screensaver instanceof ScreensaverError && reachable) {
-								screensaver.dispose();
-								screensaver = new ScreensaverMainDisplay(screensaver.display);
-								
-							} else {
-								continue;
-							}
-							iter.set(screensaver);
-							screensaverThreads.get(screensaver.display).interrupt();
-							final ScreensaverFrame s = screensaver;
-							Thread displayThread = new Thread("Screensaver Display " + s.display) {
-								@Override
-								public void run() {
-									s.setVisible(true);
-								}
-							};
-							screensaverThreads.set(screensaver.display, displayThread);
-							displayThread.start();
-						}
-						try {
-							Thread.sleep(interval - (System.currentTimeMillis() - before));
-						} catch (InterruptedException e) {
-							break;
-						}
-					}
-				}
-			}.start();
 			
 		} else {
 			System.out.println("Neither /K nor /S flag was passed. Not starting. ");
 		}
 	}
 	
-	public static boolean isReachable(String url, int timeoutMs) {
-		try {
-			for (InetAddress address : InetAddress.getAllByName(url)) if (address.isReachable(timeoutMs)) return true;
-		} catch (Exception e) {
-		}
-		return false;
-	}
 }

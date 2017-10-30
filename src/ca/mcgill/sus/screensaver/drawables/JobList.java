@@ -12,8 +12,6 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 
@@ -31,6 +29,7 @@ public class JobList implements Drawable {
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 
 	private final Map<String, List<PrintJob>> jobData = DataFetch.getInstance().jobData;
+	private final Map<String, Boolean> statuses = DataFetch.getInstance().printerStatus;
 	
 	public final int y;
 	private Stage parent;
@@ -38,13 +37,6 @@ public class JobList implements Drawable {
 								 pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
 	private static final Color clrDown = new Color(0xccdc241f, true);
 	private static final Color clrEmpty = new Color (0xcc50c954, true);
-	
-	/**map of the printer statuses
-	 */
-	private static Map<String, Boolean> statuses =(tepidServer
-			.path("/queues/status")
-			.request(MediaType.APPLICATION_JSON)
-			.get(new GenericType <Map<String, Boolean>>(){}));	//a map of statuses 
 	
 	/**Constructor
 	 * @param y	The Y position
