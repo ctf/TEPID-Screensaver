@@ -89,7 +89,7 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 				Graphics2D g = composite.createGraphics();
 				g.drawImage(b1, 0, 0, null);
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i % frameCount) / frameCount));
-				stage.setDrawableOpacity((float) i / maxBlur);
+				stage.setDrawableOpacity(i < maxBlur * 0.2 ? 0 : 1.25f * i / maxBlur - 0.25f);
 				g.drawImage(b2, 0, 0, null);
 				g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 				int alpha = (int) (((double) i / maxBlur) * maxFrost);
