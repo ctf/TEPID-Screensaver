@@ -229,11 +229,11 @@ public class Util {
 		return screenshot(bounds);
 	}
 	
-	public static BufferedImage loadBackground() {
+	public static BufferedImage loadBackground(boolean vertical) {
 		BufferedImage background;
 		try {
 			InputStream bgJpg; 
-			File localBg = new File(System.getenv("systemdrive") + "\\CTF Screensaver.jpg");
+			File localBg = new File(System.getenv("systemdrive") + "\\CTF Screensaver" + (vertical ? " Vertical" : "") + ".jpg");
 			if (localBg.exists()) {
 				bgJpg = new FileInputStream(localBg);
 			} else {

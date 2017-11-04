@@ -3,6 +3,9 @@ package ca.mcgill.sus.screensaver;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,7 +25,14 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 		if (Main.LOGGED_IN) {
 			background = Util.screenshot(display);
 		} else {
-			background = Util.loadBackground();
+			Rectangle bounds;
+			GraphicsDevice[] gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+			if (this.display >= 0 && this.display < gd.length) {
+				bounds = gd[this.display].getDefaultConfiguration().getBounds();
+			} else {
+				throw new RuntimeException("Invalid display index");
+			}
+			background = Util.loadBackground(bounds.getHeight() > bounds.getWidth());
 		}
 		stage.setBackground(background);
 	}
