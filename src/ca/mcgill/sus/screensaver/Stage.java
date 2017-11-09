@@ -4,6 +4,8 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -26,14 +28,18 @@ public class Stage extends JPanel {
 	@Override
 	public void paint(Graphics graphics) {
 		Graphics2D g = (Graphics2D) graphics;
+		double scaleFactor = this.getHeight() != 1080 ? this.getHeight() / 1080.0 : 1080;
+		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
+		scaledHeight = 1080;
 		if (background != null) {
-			g.drawImage(background, getWidth() / 2 - background.getWidth() / 2, getHeight() / 2 - background.getHeight() / 2, null);
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.drawImage(background, 0, 0, getWidth(), getHeight(), null);
+			g.setTransform(AffineTransform.getScaleInstance(scaleFactor, scaleFactor));
 			if (!drawables.isEmpty()) {
-				BufferedImage fg = new BufferedImage(this.getWidth(), this.getHeight(), BufferedImage.TYPE_INT_ARGB);
+				BufferedImage fg = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
 				g = fg.createGraphics();
-
 				for (Drawable d : drawables) {
-					d.draw(g, this.getWidth(), this.getHeight());
+					d.draw(g, scaledWidth, scaledHeight);
 				}
 				g.dispose();
 				g = (Graphics2D) graphics;
