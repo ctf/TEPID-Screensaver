@@ -36,7 +36,6 @@ import biweekly.property.DateStart;
 import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 import ca.mcgill.sus.screensaver.io.PrintJob;
-import ca.mcgill.sus.screensaver.io.PrintQueue;
 
 public class DataFetch extends Thread {
 	
@@ -78,7 +77,6 @@ public class DataFetch extends Thread {
 			boolean fail = true;
 			long startTime = System.currentTimeMillis();
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
-			Future<PrintQueue[]> futureQueues = tepidServer.path("queues").request(MediaType.APPLICATION_JSON).async().get(PrintQueue[].class);
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
 			boolean pullEvents = (Main.OFFICE_COMPUTER && iterations++ * interval % icalInterval == 0) || !networkUp; 
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
@@ -94,24 +92,23 @@ public class DataFetch extends Thread {
 				printerStatus.putAll(newStatus);
 				
 				//process and update printer queues
-				PrintQueue[] printers = futureQueues.get(interval, TimeUnit.SECONDS);	
 				Calendar calendar = GregorianCalendar.getInstance(); 
 				calendar.setTime(new Date());
 				calendar.set(Calendar.HOUR, 0); calendar.set(Calendar.MINUTE, 0); calendar.set(Calendar.SECOND, 0); calendar.set(Calendar.MILLISECOND, 0); //sets the calendar to the start of the day
 				Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
 				Map<String, List<PrintJob>> newJobs = new HashMap<>();
 				//iterates over each queue and gets a list of jobs sent to them
-				for (PrintQueue q : printers) {
-					if (printerStatus.get(q.name)) {						
-						futureJobs.put(q.name, tepidServer
-										.path("queues").path(q.name)  	//path to specific queue
+				for (Entry<String, Boolean> q : newStatus.entrySet()) {
+					if (printerStatus.get(q.getKey())) {						
+						futureJobs.put(q.getKey(), tepidServer
+										.path("queues").path(q.getKey())  	//path to specific queue
 										.queryParam("limit", 13)		//will return the last 13 print jobs, which is what we had before
 										.queryParam("from", calendar.getTimeInMillis())
 										.request(MediaType.APPLICATION_JSON).async()
 										.get(new GenericType <List<PrintJob>>(){}));
 						
 					} else {
-						newJobs.put(q.name, new ArrayList<PrintJob>(0));
+						newJobs.put(q.getKey(), new ArrayList<PrintJob>(0));
 					}
 				}
 				for (Entry<String, Future<List<PrintJob>>> e : futureJobs.entrySet()) {

@@ -6,6 +6,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +59,14 @@ public class JobList implements Drawable {
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			int x = 0, tableWidth = canvasWidth / jobData.size();
 			if (tableWidth <= 0) return;
-			for (Entry<String, List<PrintJob>> jobs : jobData.entrySet()) {
+			List<Entry<String, List<PrintJob>>> queues = new ArrayList<>(jobData.entrySet());
+			Collections.sort(queues, new Comparator<Entry<String, List<PrintJob>>>() {
+				@Override
+				public int compare(Entry<String, List<PrintJob>> e1, Entry<String, List<PrintJob>> e2) {
+					return e1.getKey().compareTo(e2.getKey());
+				}
+			});
+			for (Entry<String, List<PrintJob>> jobs : queues) {
 				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, statuses.get(jobs.getKey()));
 				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
 				g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont(24f));
