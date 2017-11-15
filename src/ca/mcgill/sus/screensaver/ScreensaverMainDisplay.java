@@ -16,6 +16,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 		Runnable checkNetwork = new Runnable() {
 			boolean networkUp = true, firstRun = true;
 			public void run() {
+				if (!DataFetch.getInstance().isLoaded()) return;
 				if (DataFetch.getInstance().isNetworkUp() != networkUp || firstRun) {
 					firstRun = false;
 					networkUp = DataFetch.getInstance().isNetworkUp();

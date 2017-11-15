@@ -55,6 +55,10 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 			}.start();
 			new Thread("Fadeify") {
 				public void run() {
+					try {
+						while (!DataFetch.getInstance().isLoaded()) Thread.sleep(400);
+					} catch (InterruptedException e) {
+					}
 					BufferedImage b1 = background, b2 = background;
 					int maxFrost = 0x77;
 					for (int i = 0; i < maxBlur; i++) {

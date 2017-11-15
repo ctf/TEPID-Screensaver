@@ -63,6 +63,7 @@ public class DataFetch extends Thread {
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
 	
 	private boolean networkUp = true;
+	private boolean loaded = false;
 	
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -164,6 +165,7 @@ public class DataFetch extends Thread {
 			} catch (Exception e) {
 //				e.printStackTrace();
 			}
+			this.loaded = true;
 			networkUp = !fail;
 			for (Runnable listener : listeners) {
 				listener.run();
@@ -211,7 +213,7 @@ public class DataFetch extends Thread {
 		return networkUp;
 	}
 
-	public void setNetworkUp(boolean networkUp) {
-		this.networkUp = networkUp;
+	public boolean isLoaded() {
+		return loaded;
 	}
 }
