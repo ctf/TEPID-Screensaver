@@ -62,17 +62,17 @@ public class UpcomingEvents implements Drawable {
 	{
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		//draws the "CURRENT VOLUNTEERS ON DUTY"
-		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(32f));
+		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(64f));
 		g.setColor(new Color((maxAlpha << 24) | color, true));
 		String title = getTitle();
 		g.drawString(title, canvasWidth / 2 - g.getFontMetrics().stringWidth(title) / 2, y);
 		//draws the person logged in
-		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(24f));
+		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(48f));
 		g.setColor(new Color((alphaEntry << 24) | color, true));
 		synchronized(currentEntry)
 		{
 			g.setColor(new Color((alphaEntry << 24) | color, true));	//sets the colour for the font
-			g.drawString(currentEntry, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentEntry) / 2, y + 40); //draws the font
+			g.drawString(currentEntry, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentEntry) / 2, y + 80); //draws the font
 		}
 	}
 	/**Changes from one entry to another, with a fadeout/fadein effect
