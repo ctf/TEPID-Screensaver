@@ -158,9 +158,9 @@ public class DataFetch extends Thread {
 						String dateFormat = (isSoon ? "E": "MMM d") + (c.get(Calendar.MINUTE) == 0 ? " @ h a" : " @ h:mm a");
 						upcomingEvents.add(new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
 					}
+					fail = false;
 					System.out.println("Fetched events");
 				}
-				fail = false;
 			} catch (Exception e) {
 //				e.printStackTrace();
 			}

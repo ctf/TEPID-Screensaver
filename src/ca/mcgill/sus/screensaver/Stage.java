@@ -28,7 +28,8 @@ public class Stage extends JPanel {
 	@Override
 	public void paint(Graphics graphics) {
 		Graphics2D g = (Graphics2D) graphics;
-		double scaleFactor = this.getHeight() != 1080 ? this.getHeight() / 1080.0 : 1080;
+//		double scaleFactor = this.getHeight() != 1080 ? this.getHeight() / 1080.0 : 1080;
+		double scaleFactor = 1;
 		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
 		scaledHeight = 1080;
 		if (background != null) {

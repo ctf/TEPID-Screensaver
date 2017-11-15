@@ -32,11 +32,11 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 					} else {
 						//if network is down display special error screen
 						stage.addDrawable(new Error());
-						stage.addDrawable(new Header("This computer has", 70, 90, 0x000000, false));
-						stage.addDrawable(new Header("No Network Connection", 120, 220, 0x000000));
-						stage.addDrawable(new Header("This is usually the result of a disconnected cable.", 50, 900, 0xff0000));
-						stage.addDrawable(new Header("Please report that this workstation (" + System.getenv("computerName") + ")", 30, 975, 0xff0000, false));
-						stage.addDrawable(new Header("is not functioning to a CTF volunteer in Burnside 1B19.", 30, 1015, 0xff0000, false));
+						stage.addDrawable(new Header("This computer has", 70, 90, 0x000000, false, "constan.ttf"));
+						stage.addDrawable(new Header("No Network Connection", 120, 220, 0x000000, true, "constanb.ttf"));
+						stage.addDrawable(new Header("This is usually the result of a disconnected cable.", 50, 900, 0xff0000, true, "constanb.ttf"));
+						stage.addDrawable(new Header("Please report that this workstation (" + System.getenv("computerName") + ")", 30, 975, 0xff0000, false, "constan.ttf"));
+						stage.addDrawable(new Header("is not functioning to a CTF volunteer in Burnside 1B19.", 30, 1015, 0xff0000, false, "constan.ttf"));
 					}
 					stage.safeRepaint();
 				}
