@@ -8,7 +8,7 @@ public class ScreensaverSecondaryDisplay extends BlurredScreensaverFrame {
 
 	public ScreensaverSecondaryDisplay(int display) {
 		super(display);
-		this.stage.addDrawable(new UpcomingEvents(100, Main.TEXT_COLOR));
+		this.stage.addDrawable(new UpcomingEvents(120, Main.TEXT_COLOR));
 		this.stage.addDrawable(new Logo(15));
 	}
 
