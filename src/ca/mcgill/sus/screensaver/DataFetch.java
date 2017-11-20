@@ -34,6 +34,7 @@ import biweekly.io.TimezoneAssignment;
 import biweekly.io.TimezoneInfo;
 import biweekly.property.DateStart;
 import biweekly.util.com.google.ical.compat.javautil.DateIterator;
+import ca.mcgill.sus.screensaver.io.Destination;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 import ca.mcgill.sus.screensaver.io.PrintJob;
 
@@ -67,6 +68,7 @@ public class DataFetch extends Thread {
 	
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
+	public final Map<String, Destination> destinations = new ConcurrentHashMap<>();
 	public final Map<String, List<PrintJob>> jobData = new ConcurrentHashMap<>();
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
@@ -78,6 +80,7 @@ public class DataFetch extends Thread {
 			boolean fail = true;
 			long startTime = System.currentTimeMillis();
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
+			Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
 			boolean pullEvents = (Main.OFFICE_COMPUTER && iterations++ * interval % icalInterval == 0) || !networkUp; 
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
@@ -91,6 +94,11 @@ public class DataFetch extends Thread {
 				Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
 				printerStatus.clear();
 				printerStatus.putAll(newStatus);
+				
+				//update destinations
+				Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
+				destinations.clear();
+				destinations.putAll(newDestinations);
 				
 				//process and update printer queues
 				Calendar calendar = GregorianCalendar.getInstance(); 
