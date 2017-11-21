@@ -15,9 +15,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.Stage;
+import ca.mcgill.sus.screensaver.io.UserInfo;
 
 public class UserInfoBar extends Header {
 
@@ -35,14 +37,14 @@ private Stage parent;
 			@Override
 			public void run() {
 				try {
-					Map<String, String> userInfo = dsGet(getFQDN(), "-fn", "-ln", "-display");
-					if (userInfo.size() == 0) {
+					UserInfo userInfo = DataFetch.getInstance().userInfo.peek();
+					if (userInfo == null) {
 						displayName = System.getenv("username");
 					} else {
 						if (Main.OFFICE_COMPUTER) {
-							displayName = userInfo.get("fn");
+							displayName = userInfo.givenName;
 						} else {
-							displayName = String.format("%s. %s", userInfo.get("fn").charAt(0), userInfo.get("ln"));
+							displayName = String.format("%s. %s", userInfo.givenName.charAt(0), userInfo.lastName);
 						}
 					}
 				} catch (Exception e) {
@@ -134,35 +136,6 @@ private Stage parent;
 		return out;
 	}
 	
-	public static String dsQuery(String user, String... args) {
-		try (Scanner s = new Scanner(Runtime.getRuntime().exec(concat(new String[]{"dsquery", "user", "-samid", user}, args)).getInputStream(), "Cp850")) {
-			s.useDelimiter("\r\n");
-			while (s.hasNext()) {
-				String line = s.next().trim();
-				if (!line.isEmpty()) {
-					return line;
-				}
-			}
-		} catch (IOException | ArrayIndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public static String getFQDN() {
-		try (Scanner s = new Scanner(Runtime.getRuntime().exec(new String[]{"whoami", "/fqdn"}).getInputStream())) {
-			s.useDelimiter("\r\n");
-			while (s.hasNext()) {
-				String line = s.next().trim();
-				if (!line.isEmpty()) {
-					return line;
-				}
-			}
-		} catch (IOException | ArrayIndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 	public static <T> T[] concat(T[] a1, T[] a2) {
 		T[] out = Arrays.copyOf(a1, a1.length + a2.length);

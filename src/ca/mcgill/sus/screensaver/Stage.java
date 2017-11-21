@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -34,9 +33,10 @@ public class Stage extends JPanel {
 		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
 		scaledHeight = (int) (this.getHeight() / scaleFactor);
 		if (background != null) {
-			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+//			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			g.drawImage(background, 0, 0, getWidth(), getHeight(), null);
-			g.setTransform(AffineTransform.getScaleInstance(scaleFactor, scaleFactor));
+			g.scale(scaleFactor, scaleFactor);
 			if (!drawables.isEmpty()) {
 				BufferedImage fg = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
 				g = fg.createGraphics();

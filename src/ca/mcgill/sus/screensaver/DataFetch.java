@@ -37,6 +37,7 @@ import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.sus.screensaver.io.Destination;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 import ca.mcgill.sus.screensaver.io.PrintJob;
+import ca.mcgill.sus.screensaver.io.UserInfo;
 
 public class DataFetch extends Thread {
 	
@@ -72,6 +73,7 @@ public class DataFetch extends Thread {
 	public final Map<String, List<PrintJob>> jobData = new ConcurrentHashMap<>();
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
+	public final Queue<UserInfo> userInfo = new ConcurrentLinkedQueue<>();
 	
 	@Override
 	public void run() {
@@ -82,6 +84,7 @@ public class DataFetch extends Thread {
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 			Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
+			Future<UserInfo> futureUserInfo = tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class);
 			boolean pullEvents = (Main.OFFICE_COMPUTER && iterations++ * interval % icalInterval == 0) || !networkUp; 
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
@@ -99,6 +102,15 @@ public class DataFetch extends Thread {
 				Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
 				destinations.clear();
 				destinations.putAll(newDestinations);
+				
+				//update user info
+				try {
+					UserInfo newUserInfo = futureUserInfo.get(interval, TimeUnit.SECONDS);
+					userInfo.clear();
+					userInfo.add(newUserInfo);
+				} catch (Exception e) {
+					System.err.println("Could not fetch user info");
+				}
 				
 				//process and update printer queues
 				Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
