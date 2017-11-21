@@ -38,8 +38,8 @@ public class JobList implements Drawable {
 	private Stage parent;
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
 								 pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
-	private static final Color clrDown = new Color(0xccdc241f, true);
-	private static final Color clrEmpty = new Color (0xcc50c954, true);
+	private static final Color clrDown = new Color(Main.COLOR_DOWN, true);
+	private static final Color clrEmpty = new Color (Main.COLOR_UP, true);
 	
 	/**Constructor
 	 * @param y	The Y position
@@ -67,12 +67,17 @@ public class JobList implements Drawable {
 				}
 			});
 			for (Entry<String, List<PrintJob>> jobs : queues) {
-				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, statuses.get(jobs.getKey()));
-				int space = canvasHeight - y - 10, tableY = y + 10 + space / 2 - table.getHeight() / 2;
-				g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont(24f));
-				g.setColor(new Color(Main.TEXT_COLOR, true));
-				g.drawString(jobs.getKey(), x * tableWidth + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, tableY - 20);
-				g.drawImage(table, 8 + x++ * tableWidth, tableY, null);
+				boolean up = statuses.get(jobs.getKey());
+				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, up),
+				icon = SpriteManager.getInstance().getColoredSprite("printer.png", up ? Main.COLOR_UP : Main.COLOR_DOWN);
+				g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(28f));
+				g.setColor(new Color(up ? Main.COLOR_UP : Main.COLOR_DOWN, true));
+				int tableX = 8 + x * tableWidth,
+				iconWidth = icon.getWidth();
+				g.drawString(jobs.getKey(), tableX + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, y + 155);
+				g.drawImage(icon, tableX + tableWidth / 2 - iconWidth / 2, y + 10, iconWidth, iconWidth, null);
+				g.drawImage(table, tableX, y + 170, null);
+				x++;
 			}
 		}
 	}
@@ -86,24 +91,18 @@ public class JobList implements Drawable {
 	public BufferedImage renderTable(List<PrintJob> list, int width, boolean status) {
 		int fontPx = 16, padding = 10;
 		BufferedImage out;
-		out = new BufferedImage(width, 425, BufferedImage.TYPE_INT_ARGB);
-		
+		out = new BufferedImage(width, 400, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
-		
 		if (list.isEmpty()) {
-			if (status == false)
-			{
+			if (status == false) {
 				g.setColor(clrDown);
 				g.fillRect(0, 0, out.getWidth(), out.getHeight());
-			}
-			else
-			{
+			} else {
 				g.setColor(clrEmpty);
 				g.fillRect(0, 0, out.getWidth(), out.getHeight());
 			}
 		}
 		Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
-		
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		//writes the table headers
 		g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));

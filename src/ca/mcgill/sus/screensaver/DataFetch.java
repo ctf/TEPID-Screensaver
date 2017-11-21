@@ -111,7 +111,7 @@ public class DataFetch extends Thread {
 					if (printerStatus.get(q.getKey())) {						
 						futureJobs.put(q.getKey(), tepidServer
 										.path("queues").path(q.getKey())  	//path to specific queue
-										.queryParam("limit", 13)		//will return the last 13 print jobs, which is what we had before
+										.queryParam("limit", 10)		
 										.queryParam("from", calendar.getTimeInMillis())
 										.request(MediaType.APPLICATION_JSON).async()
 										.get(new GenericType <List<PrintJob>>(){}));

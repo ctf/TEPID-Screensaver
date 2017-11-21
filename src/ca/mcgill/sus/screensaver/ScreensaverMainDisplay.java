@@ -5,7 +5,6 @@ import ca.mcgill.sus.screensaver.drawables.Error;
 import ca.mcgill.sus.screensaver.drawables.Header;
 import ca.mcgill.sus.screensaver.drawables.JobList;
 import ca.mcgill.sus.screensaver.drawables.Marquee;
-import ca.mcgill.sus.screensaver.drawables.PrinterStatus;
 import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
 
 public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
@@ -23,8 +22,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 					stage.clear();
 					if (networkUp) {
 						//if network is up use regular set of widgets
-						stage.addDrawable(new PrinterStatus(60, 50));
-						stage.addDrawable(new JobList(550));
+						stage.addDrawable(new JobList(500));
 						stage.addDrawable(new Clock("hh:mm a", Main.TEXT_COLOR));
 						stage.addDrawable(new Header(System.getenv("computerName"), 16, 22, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_RIGHT));
 						UserInfoBar userInfo = new UserInfoBar(48, 450);
