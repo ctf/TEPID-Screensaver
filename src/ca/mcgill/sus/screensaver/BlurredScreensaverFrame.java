@@ -44,6 +44,8 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 		if (visible && Main.LOGGED_IN && !alreadyVisible) {
 			alreadyVisible = true;
 			final int maxBlur = 32, frameCount = 8;
+			final double ms = 3000;
+			final CubicBezier easeInOut = CubicBezier.create(0.42, 0, 0.58, 1.0, (1000.0 / 60.0 / ms) / 4.0);
 			final BlockingQueue<BufferedImage> frames = new LinkedBlockingQueue<>();
 			final BufferedImage bg = background;
 			new Thread("Blurify") {
@@ -56,20 +58,26 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 			new Thread("Fadeify") {
 				public void run() {
 					try {
-						while (!DataFetch.getInstance().isLoaded()) Thread.sleep(400);
+						while (!DataFetch.getInstance().isLoaded() || frames.isEmpty()) Thread.sleep(400);
 					} catch (InterruptedException e) {
 					}
 					BufferedImage b1 = background, b2 = background;
 					int maxFrost = 0x77;
-					for (int i = 0; i < maxBlur; i++) {
-						if (i % frameCount == 0) {
+					long start = System.nanoTime();
+					for (int i = 0, f = 0, lastF = -1; i < maxBlur;) {
+						long t = (System.nanoTime() - start) / 1000000;
+						double progress = Math.min(1, easeInOut.calc((double) t / ms));
+						i = (int) (progress * maxBlur);
+						f = i / frameCount;
+						if (f > lastF) {
 							b1 = b2;
 							try {
-								b2 = frames.poll(10, TimeUnit.SECONDS);
+								for (int b = 0; b < f - lastF; b++) b2 = frames.poll((long) (ms - t), TimeUnit.MILLISECONDS);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 						}
+						lastF = f;
 						BufferedImage composite = new BufferedImage(b1.getWidth(), b2.getHeight(), BufferedImage.TYPE_INT_RGB);
 						Graphics2D g = composite.createGraphics();
 						g.drawImage(b1, 0, 0, null);
