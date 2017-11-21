@@ -101,9 +101,6 @@ public class DataFetch extends Thread {
 				destinations.putAll(newDestinations);
 				
 				//process and update printer queues
-				Calendar calendar = GregorianCalendar.getInstance(); 
-				calendar.setTime(new Date());
-				calendar.set(Calendar.HOUR, 0); calendar.set(Calendar.MINUTE, 0); calendar.set(Calendar.SECOND, 0); calendar.set(Calendar.MILLISECOND, 0); //sets the calendar to the start of the day
 				Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
 				Map<String, List<PrintJob>> newJobs = new HashMap<>();
 				//iterates over each queue and gets a list of jobs sent to them
@@ -112,7 +109,7 @@ public class DataFetch extends Thread {
 						futureJobs.put(q.getKey(), tepidServer
 										.path("queues").path(q.getKey())  	//path to specific queue
 										.queryParam("limit", 10)		
-										.queryParam("from", calendar.getTimeInMillis())
+										.queryParam("from", System.currentTimeMillis() - (60 * 60 * 1000)) //only get jobs from the last hour
 										.request(MediaType.APPLICATION_JSON).async()
 										.get(new GenericType <List<PrintJob>>(){}));
 						
