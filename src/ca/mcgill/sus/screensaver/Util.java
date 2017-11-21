@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -244,5 +246,28 @@ public class Util {
 			throw new RuntimeException("Could not load background image...", e);
 		}
 		return background;
+	}
+	
+	public static List<BufferedImage> loadSlides() {
+		List<BufferedImage> slides = new ArrayList<>();
+		try {
+			for (File f : new File("C:\\Screensaver Slides").listFiles()) {
+				try {
+					slides.add(ImageIO.read(f));
+				} catch (Exception e) {}
+			}
+		} catch (Exception e) {}
+		return slides;
+	}
+	
+	/**A function which causes the thread to wait for a time 
+	 * @param ms	The time for which the thread should do nothing
+	 */
+	public static void sleep(long ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,8 +1,10 @@
 package ca.mcgill.sus.screensaver;
 
+import ca.mcgill.sus.screensaver.drawables.Clock;
 import ca.mcgill.sus.screensaver.drawables.Error;
 import ca.mcgill.sus.screensaver.drawables.Header;
 import ca.mcgill.sus.screensaver.drawables.JobList;
+import ca.mcgill.sus.screensaver.drawables.Slideshow;
 import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
 
 public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
@@ -21,10 +23,10 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 					if (networkUp) {
 						//if network is up use regular set of widgets
 						stage.addDrawable(new JobList(500));
-//						stage.addDrawable(new Clock("hh:mm a", Main.TEXT_COLOR));
+						stage.addDrawable(new Clock("hh:mm a", Main.TEXT_COLOR));
+						stage.addDrawable(new Slideshow(3000, 1000, 420));
 						stage.addDrawable(new Header(System.getenv("computerName"), 16, 22, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_RIGHT));
-						UserInfoBar userInfo = new UserInfoBar(48, 450);
-						stage.addDrawable(userInfo);
+						stage.addDrawable(new UserInfoBar(48, 450));
 //						stage.addDrawable(new Marquee(350, Main.TEXT_COLOR));
 					} else {
 						//if network is down display special error screen

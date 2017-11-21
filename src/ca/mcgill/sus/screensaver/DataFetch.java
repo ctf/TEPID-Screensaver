@@ -1,5 +1,6 @@
 package ca.mcgill.sus.screensaver;
 
+import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +75,7 @@ public class DataFetch extends Thread {
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
 	public final Queue<UserInfo> userInfo = new ConcurrentLinkedQueue<>();
+	public final Queue<BufferedImage> slides = new ConcurrentLinkedQueue<>();
 	
 	@Override
 	public void run() {
@@ -134,6 +136,11 @@ public class DataFetch extends Thread {
 				}
 				jobData.clear();
 				jobData.putAll(newJobs);
+				
+				//load slide images
+				List<BufferedImage> newSlides = Util.loadSlides();
+				slides.clear();
+				slides.addAll(newSlides);
 				fail = false;
 			} catch (Exception e) {
 //				e.printStackTrace();
