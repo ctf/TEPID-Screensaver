@@ -18,10 +18,40 @@ public class Stage extends JPanel {
 	private final Queue<Drawable> drawables = new ConcurrentLinkedQueue<Drawable>();
 	private BufferedImage background;
 	private float drawableOpacity = 1f;
+	private final int fps;
+	private boolean dirty;
 
-	public Stage() {
+	public Stage(int fps) {
 		super(true);
+		this.fps = fps;
 		this.setBackground(new Color(0x292929));
+		new Thread("Draw") {
+			public void run() {
+				while (!Thread.interrupted()) {
+					for (Drawable d : drawables) {
+						if (d.isDirty()) dirty = true;
+					}
+					long startTime = System.nanoTime();
+					if (dirty) safeRepaint();
+					dirty = false;
+					long t = (System.nanoTime() - startTime) / 1000000;
+					Util.sleep(1000 / Stage.this.fps - t);
+				}
+			}
+		}.start();
+		new Thread("Compute") {
+			public void run() {
+				while (!Thread.interrupted()) {
+					for (Drawable d : drawables) {
+						if (d.isDirty()) dirty = true;
+					}
+					long startTime = System.nanoTime();
+					for (Drawable d : drawables) d.step(System.nanoTime() / 1000000);
+					long t = (System.nanoTime() - startTime) / 1000000;
+					Util.sleep(1000 / Stage.this.fps - t);
+				}
+			}
+		}.start();
 	}
 
 	@Override
@@ -42,6 +72,7 @@ public class Stage extends JPanel {
 				g = fg.createGraphics();
 				for (Drawable d : drawables) {
 					d.draw(g, scaledWidth, scaledHeight);
+					d.setDirty(false);
 				}
 				g.dispose();
 				g = (Graphics2D) graphics;
@@ -60,7 +91,7 @@ public class Stage extends JPanel {
 		this.background = bg;
 	}
 	
-	public void safeRepaint() {
+	private void safeRepaint() {
 		if (SwingUtilities.isEventDispatchThread()) {
 			Stage.this.repaint();
 		} else {
@@ -74,7 +105,6 @@ public class Stage extends JPanel {
 	}
 	
 	public void addDrawable(Drawable d) {
-		d.setParent(this);
 		this.drawables.add(d);
 	}
 
@@ -88,6 +118,11 @@ public class Stage extends JPanel {
 
 	public void clear() {
 		this.drawables.clear();
+	}
+
+	public void setDirty(boolean b) {
+		this.dirty = true;
+		
 	}
 
 }

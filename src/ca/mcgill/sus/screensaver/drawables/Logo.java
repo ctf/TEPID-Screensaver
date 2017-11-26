@@ -4,31 +4,21 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.SpriteManager;
-import ca.mcgill.sus.screensaver.Stage;
 
 public class Logo implements Drawable {
 	
 	private int x, y, w = 1024, h = 768;
 	private final BufferedImage logo = SpriteManager.getInstance().getSprite("logo_nice.png");
-	private Stage parent;
+	private final int interval;
+	private final Random random = new Random();
+	private long lastUpdate;
+	private boolean dirty;
 	
 	public Logo(int interval) {
-		Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
-			private final Random random = new Random();
-			@Override
-			public void run() {
-				if (w > 0 && h > 0) {
-					x = random.nextInt(w - logo.getWidth());
-					y = random.nextInt(h - logo.getHeight() - 200) + 200;
-					if (parent != null) parent.safeRepaint();
-				}
-			}
-		}, 0, interval, TimeUnit.SECONDS);
+		this.interval = interval;
 	}
 
 	@Override
@@ -41,7 +31,24 @@ public class Logo implements Drawable {
 	}
 
 	@Override
-	public void setParent(Stage parent) {
-		this.parent = parent;
+	public void step(long timestamp) {
+		if (timestamp - lastUpdate < interval * 1000) return;
+		lastUpdate = timestamp;
+		if (w > 0 && h > 0) {
+			x = random.nextInt(w - logo.getWidth());
+			y = random.nextInt(h - logo.getHeight() - 200) + 200;
+			this.setDirty(true);
+		}
+		
+	}
+
+	@Override
+	public boolean isDirty() {
+		return this.dirty;
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 }

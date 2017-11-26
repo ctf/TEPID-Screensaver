@@ -1,11 +1,15 @@
 package ca.mcgill.sus.screensaver;
 
 import java.awt.AWTException;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.font.GlyphVector;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
@@ -13,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -269,5 +274,22 @@ public class Util {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static Rectangle getRealStringBounds(GlyphVector v) {
+		Rectangle2D rect = v.getVisualBounds();
+		return new Rectangle((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
+	}
+
+	public static GlyphVector getStringVector(Graphics2D g, String text) {
+		Font font = g.getFont();
+		FontMetrics fontMetrics = g.getFontMetrics();
+		return font.createGlyphVector(fontMetrics.getFontRenderContext(), text);
+	}
+
+	public static <T> T[] concat(T[] a1, T[] a2) {
+		T[] out = Arrays.copyOf(a1, a1.length + a2.length);
+		System.arraycopy(a2, 0, out, a1.length, a2.length);
+		return out;
 	}
 }

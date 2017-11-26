@@ -24,7 +24,6 @@ import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
-import ca.mcgill.sus.screensaver.Stage;
 import ca.mcgill.sus.screensaver.io.PrintJob;
 
 public class JobList implements Drawable {
@@ -35,7 +34,7 @@ public class JobList implements Drawable {
 	private final Map<String, Boolean> statuses = DataFetch.getInstance().printerStatus;
 	
 	public final int y;
-	private Stage parent;
+	private boolean dirty;
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
 								 pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
 	private static final Color clrDown = new Color(Main.COLOR_DOWN, true);
@@ -48,7 +47,7 @@ public class JobList implements Drawable {
 		this.y = y;
 		DataFetch.getInstance().addChangeListener(new Runnable() {
 			public void run() {
-				if (parent != null) parent.safeRepaint();
+				dirty = true;
 			}
 		});
 	}
@@ -156,11 +155,25 @@ public class JobList implements Drawable {
 		g.dispose();
 		return out;
 	}
+
 	@Override
-	public void setParent(Stage r) {
-		this.parent = r;
-		this.pusheenSad.setParent(r);
-		this.pusheenPopcorn.setParent(r);
+	public void step(long timestamp) {
+		pusheenPopcorn.step(timestamp);
+		pusheenSad.step(timestamp);
+	}
+
+	@Override
+	public boolean isDirty() {
+		if (pusheenPopcorn.isDirty()) return true;
+		if (pusheenSad.isDirty()) return true;
+		return this.dirty;
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		if (!dirty) pusheenPopcorn.setDirty(false);
+		if (!dirty) pusheenSad.setDirty(false);
+		this.dirty = dirty;
 	}
 
 }

@@ -7,7 +7,6 @@ import java.util.Date;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
-import ca.mcgill.sus.screensaver.Stage;
 
 /**The big clock in the corner
  * 
@@ -17,7 +16,8 @@ public class Clock implements Drawable {
 	private final SimpleDateFormat format;
 	public String time = "";
 	private final Color color;
-	private Stage parent;
+	private long lastUpdate;
+	private boolean dirty;
 	
 	/**Constructor
 	 * @param format	the format for the time
@@ -30,23 +30,6 @@ public class Clock implements Drawable {
 			this.color = new Color(color);
 		}
 		this.format = new SimpleDateFormat(format == null ? "h:mm a" : format); //will provide a default format
-		new Thread("Time Update"){
-			@Override
-			public void run() {
-				for (;;) {
-					String oldTime = time;
-					time = Clock.this.format.format(new Date());
-					if (!oldTime.equals(time)) {
-						if (parent != null) parent.safeRepaint();
-					}
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-					}
-				}
-			}
-		}.start();
-		if (parent != null) parent.safeRepaint();
 	}
 	
 	public Clock() {
@@ -61,9 +44,27 @@ public class Clock implements Drawable {
 		g.drawString(time, x, 100);
 	}
 
+
 	@Override
-	public void setParent(Stage parent) {
-		this.parent = parent;
+	public void step(long timestamp) {
+		if (timestamp - lastUpdate < 1000) return;
+		lastUpdate = timestamp;
+		String oldTime = time;
+		time = this.format.format(new Date());
+		if (!oldTime.equals(time)) {
+			this.setDirty(true);
+		}
+		
+	}
+
+	@Override
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;		
 	}
 
 }

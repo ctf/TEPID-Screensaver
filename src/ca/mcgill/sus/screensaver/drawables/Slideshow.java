@@ -9,20 +9,18 @@ import java.util.Queue;
 import ca.mcgill.sus.screensaver.CubicBezier;
 import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
-import ca.mcgill.sus.screensaver.Stage;
-import ca.mcgill.sus.screensaver.Util;
 
 public class Slideshow implements Drawable {
 	
 	private int w, h;
 	private long startTime;
-	private Stage parent;
 	private final int interval, transition;
 	private final CubicBezier easeInOut;
 	private final Queue<BufferedImage> slides = DataFetch.getInstance().slides;
 	private Iterator<BufferedImage> sliderator = slides.iterator();
-	private double lastProgress;
+	private double progress;
 	private BufferedImage slide, nextSlide;
+	private boolean dirty;
 	
 	
 	public Slideshow(int interval, int transition, int height) {
@@ -30,33 +28,12 @@ public class Slideshow implements Drawable {
 		this.interval = interval;
 		this.transition = transition;
 		easeInOut = CubicBezier.create(0.42, 0, 0.58, 1.0, (1000.0 / 60.0 / transition) / 4.0);
-		new Thread("Repaint Slideshow") {
-			public void run() {
-				while (!Thread.interrupted()) {
-					if (parent != null && !slides.isEmpty()) parent.safeRepaint();
-					Util.sleep(16);
-				}
-			}
-		}.start();
 	}
 
 	@Override
 	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+		if (slide == null) return;
 		w = canvasWidth;
-		if (startTime == 0) startTime = System.nanoTime();
-		long t = (System.nanoTime() - startTime) / 1000000;
-		int totalDuration = interval + transition;
-		double progress = 0;
-		if (t % totalDuration >= interval) {
-			progress = easeInOut.calc(((double) (t % totalDuration) - interval) / transition);
-		}
-		if (slides.isEmpty()) return;
-		if (progress < lastProgress || slide == null) {
-			if (nextSlide == null) nextSlide = getNextSlide();
-			slide = nextSlide;
-			nextSlide = getNextSlide();
-		}
-		lastProgress = progress;
 		int nextSlideX = (int) ((1 - progress) * w);
 		drawCropped(g, slide, nextSlideX - w, 0, w, h);
 		if (nextSlideX != w) {
@@ -84,7 +61,31 @@ public class Slideshow implements Drawable {
 	}
 
 	@Override
-	public void setParent(Stage parent) {
-		this.parent = parent;
+	public void step(long timestamp) {
+		if (startTime == 0) startTime = timestamp;
+		long t = timestamp - startTime;
+		int totalDuration = interval + transition;
+		double p = 0;
+		if (t % totalDuration >= interval) {
+			p = easeInOut.calc(((double) (t % totalDuration) - interval) / transition);
+		}
+		if (slides.isEmpty()) return;
+		if (p < progress || slide == null) {
+			if (nextSlide == null) nextSlide = getNextSlide();
+			slide = nextSlide;
+			nextSlide = getNextSlide();
+		}
+		if (p != progress || t == 0) this.setDirty(true);
+		progress = p;
+	}
+
+	@Override
+	public boolean isDirty() {
+		return this.dirty;
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		this.dirty = true;
 	}
 }

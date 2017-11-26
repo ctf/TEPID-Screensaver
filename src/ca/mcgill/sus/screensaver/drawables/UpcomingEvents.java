@@ -11,26 +11,26 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
+import ca.mcgill.sus.screensaver.CubicBezier;
 import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
-import ca.mcgill.sus.screensaver.Stage;
 
 public class UpcomingEvents implements Drawable {
 
 	private final Queue<String> entries = DataFetch.getInstance().upcomingEvents;
-	private ScheduledFuture<?> marqueeHandle;
 	public final int y;
 	private int alphaEntry = 0;
-	private String currentEntry = "";
+	private String currentEntry, currentTitle;
 	private final static String[] titles = {"upcoming", "stay in the know", "don\u2019t be lazy", "good CTFers are informed CTFers"};
 	private final int color, maxAlpha;	//maximum alpha value for the marquee during fadein
-	private Stage parent;
-
+	private final int transition = 800, interval = 5000;
+	private final CubicBezier easeInOut = CubicBezier.create(0.42, 0, 0.58, 1.0, (1000.0 / 60.0 / transition) / 4.0);
+	private long startTime;
+	private double progress;
+	private boolean dirty;
+	private Iterator<String> entrierator = entries.iterator();
 
 	/**Constructor
 	 * @param y		//the y position
@@ -45,28 +45,15 @@ public class UpcomingEvents implements Drawable {
 			{maxAlpha = (color >> 24) & 0xff;}
 		else
 			{maxAlpha = 0xff;}
-		if (marqueeHandle == null && !entries.isEmpty()) startMarquee();
-		DataFetch.getInstance().addChangeListener(new Runnable() {
-			public void run() {
-				if (marqueeHandle == null) startMarquee();
-			}
-		});
 	}
 
-	/* (non-Javadoc)
-	 *
-	 * @see ca.mcgill.sus.screensaver.Drawable#draw(java.awt.Graphics2D, int, int)
-	 */
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight)
-	{
+	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+		if (currentEntry == null) return;
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		//draws the "CURRENT VOLUNTEERS ON DUTY"
 		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(64f));
 		g.setColor(new Color((maxAlpha << 24) | color, true));
-		String title = getTitle();
-		g.drawString(title, canvasWidth / 2 - g.getFontMetrics().stringWidth(title) / 2, y);
-		//draws the person logged in
+		g.drawString(currentTitle, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentTitle) / 2, y);
 		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(48f));
 		g.setColor(new Color((alphaEntry << 24) | color, true));
 		synchronized(currentEntry)
@@ -74,74 +61,6 @@ public class UpcomingEvents implements Drawable {
 			g.setColor(new Color((alphaEntry << 24) | color, true));	//sets the colour for the font
 			g.drawString(currentEntry, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentEntry) / 2, y + 80); //draws the font
 		}
-	}
-	/**Changes from one entry to another, with a fadeout/fadein effect
-	 * @param entry	The thing to fade
-	 *
-	 */
-	public void changeEntry(final String entry)
-	{
-		new Thread("Change Entry")
-		{
-			@Override
-			public void run()
-			{
-				final int fadeInMs = 1400, fadeOutMs = 800;
-				while (alphaEntry > 0)
-				{
-					alphaEntry--;
-					if (parent != null) parent.safeRepaint();
-					UpcomingEvents.sleep(fadeInMs / maxAlpha);
-				}
-				synchronized(UpcomingEvents.this.currentEntry)
-				{
-					UpcomingEvents.this.currentEntry = entry;
-				}
-				while (alphaEntry < maxAlpha)
-				{
-					alphaEntry++;
-					if (parent != null) parent.safeRepaint();
-					UpcomingEvents.sleep(fadeOutMs / maxAlpha);
-				}
-			}
-		}.start();
-	}
-
-	/**A function which causes the thread to wait for a time
-	 * @param ms	The time for which the thread should do nothing
-	 */
-	public static void sleep(long ms) {
-		try {
-			Thread.sleep(ms);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**Starts the Marquee and iterates through all of the items
-	 *
-	 */
-	public void startMarquee() {
-		final Runnable marquee = new Runnable() {
-			Iterator<String> iterNames = entries.iterator();
-			public void run() {
-				try {
-					if (!iterNames.hasNext())
-						{iterNames = entries.iterator();}
-					if (iterNames.hasNext())
-						{changeEntry(iterNames.next());}
-					if (parent != null) parent.safeRepaint();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		if (marqueeHandle != null) marqueeHandle.cancel(false);
-		marqueeHandle = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(marquee, 0, 5, TimeUnit.SECONDS);
-	}
-
-	public void stopMarquee() {
-		if (marqueeHandle != null) marqueeHandle.cancel(false);
 	}
 
 	public static String getTitle() {
@@ -157,8 +76,38 @@ public class UpcomingEvents implements Drawable {
 	}
 
 	@Override
-	public void setParent(Stage parent) {
-		this.parent = parent;
+	public void step(long timestamp) {
+		if (startTime == 0) startTime = timestamp;
+		long t = timestamp - startTime;
+		int totalDuration = interval + transition;
+		double p = 0;
+		if (t % totalDuration >= interval) {
+			p = easeInOut.calc(((double) (t % totalDuration) - interval) / transition);
+		}
+		if (entries.isEmpty()) return;
+		if ((p >= 0.5 && progress < 0.5) || currentEntry == null) {
+			currentEntry = getNextEntry();
+		}
+		if (p != progress || t == 0) this.setDirty(true);
+		progress = p;
+		this.alphaEntry = (int) (p < 0.5 ? 1 - (p * maxAlpha * 2) : (p - 0.5) * maxAlpha * 2);
+		this.currentTitle = getTitle();
+	}
+	
+	private String getNextEntry() {
+		if (entries.isEmpty()) return null;
+		if (!entrierator.hasNext()) entrierator = entries.iterator();
+		return entrierator.next();
+	}
+
+	@Override
+	public boolean isDirty() {
+		return this.dirty;
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 
 }

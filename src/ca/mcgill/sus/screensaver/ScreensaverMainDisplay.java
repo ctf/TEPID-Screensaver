@@ -37,7 +37,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 						stage.addDrawable(new Header("Please report that this workstation (" + System.getenv("computerName") + ")", 30, 975, 0xff0000, false, "constan.ttf"));
 						stage.addDrawable(new Header("is not functioning to a CTF volunteer in Burnside 1B19.", 30, 1015, 0xff0000, false, "constan.ttf"));
 					}
-					stage.safeRepaint();
+					stage.setDirty(true);
 				}
 			}
 		};

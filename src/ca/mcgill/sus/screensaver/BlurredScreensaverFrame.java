@@ -19,7 +19,7 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 
 	public BlurredScreensaverFrame(int display) {
 		super(display, false);
-		stage = new Stage();
+		stage = new Stage(60);
 		if (Main.LOGGED_IN) stage.setDrawableOpacity(0);
 		this.add(stage);
 		if (Main.LOGGED_IN) {
@@ -90,7 +90,7 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 						g.fillRect(0, 0, getWidth(), getHeight()); 
 						g.dispose();
 						stage.setBackground(composite);
-						stage.safeRepaint();
+						stage.setDirty(true);
 					}
 				};
 			}.start();

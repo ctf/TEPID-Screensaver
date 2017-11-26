@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.SpriteManager;
-import ca.mcgill.sus.screensaver.Stage;
 
 /**Used to draw the error sprite if something has gone wrong with the computer
  * 
@@ -14,6 +13,7 @@ import ca.mcgill.sus.screensaver.Stage;
 public class Error implements Drawable {
 
 	private final BufferedImage error = SpriteManager.getInstance().getSprite("error.png");
+	private boolean dirty = true;
 	
 	public Error() {
 	}
@@ -27,7 +27,18 @@ public class Error implements Drawable {
 	}
 
 	@Override
-	public void setParent(Stage s) {		
+	public void step(long timestamp) {
+		
+	}
+
+	@Override
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	@Override
+	public void setDirty(boolean dirty) {
+		this.dirty  = dirty;
 	}
 	
 

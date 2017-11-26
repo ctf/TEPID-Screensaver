@@ -7,38 +7,23 @@ public class AnimatedSprite {
 	
 	private final BufferedImage[] frames;
 	private int frame, speedMs = 100;
-	private Stage parent;
+	private boolean dirty = false;
+	private long lastDirty;
 	
 	public AnimatedSprite(BufferedImage[] frames) {
 		this.frames = frames;
-		new Thread("Sprite Animation") {
-			@Override
-			public void run() {
-				for (;;) {
-					frame = (frame + 1) % AnimatedSprite.this.frames.length;
-					onChange();
-					try {
-						Thread.sleep(speedMs);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			}
-		}.start();
+	}
+	
+	public void step(long timestamp) {
+		if (timestamp - lastDirty >= speedMs) {
+			frame = (frame + 1) % AnimatedSprite.this.frames.length;
+			this.setDirty(true);
+			lastDirty = timestamp;
+		}
 	}
 	
 	public void draw(Graphics2D g, int x, int y) {
 		g.drawImage(frames[frame], x, y, null);
-	}
-	
-	public void setParent(Stage parent) {
-		this.parent = parent;
-	}
-	
-	private void onChange() {
-		if (parent != null) {
-			if (parent != null) parent.safeRepaint();
-		}
 	}
 
 	public int getSpeedMs() {
@@ -57,5 +42,13 @@ public class AnimatedSprite {
 	
 	public int getHeight() {
 		return frames[0].getHeight();
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 }
