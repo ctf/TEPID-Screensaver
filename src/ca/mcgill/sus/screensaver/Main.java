@@ -12,7 +12,8 @@ public class Main {
 	public static final boolean LOGGED_IN = !System.getenv("username").equals("SYSTEM");
 	public final static boolean OFFICE_COMPUTER = System.getenv("computerName").matches(***REMOVED***);
 //	public static final boolean LOGGED_IN = false;
-	public static final int COLOR_DOWN = LOGGED_IN ? 0xbbdc241f : 0xaaf11700, COLOR_UP = LOGGED_IN ? 0xcc50c954 : 0xaaaad400, TEXT_COLOR = LOGGED_IN ? 0xbb000000 : 0xddffffff;
+	public static final int COLOR_DOWN = LOGGED_IN ? 0xbbdc241f : 0xaaf11700, COLOR_UP = LOGGED_IN ? 0xcc50c954 : 0xaaaad400, 
+	TEXT_COLOR = LOGGED_IN ? 0xbb000000 : 0xddffffff;
 	
 //	public final static String serverUrl = ***REMOVED***; 	//real tepid url
 	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";				//debugging url

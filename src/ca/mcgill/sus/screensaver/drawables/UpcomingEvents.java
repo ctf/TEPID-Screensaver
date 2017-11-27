@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -49,7 +50,7 @@ public class UpcomingEvents implements Drawable {
 	}
 
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		if (currentEntry == null) return;
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(64f));

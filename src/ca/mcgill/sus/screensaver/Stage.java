@@ -66,25 +66,27 @@ public class Stage extends JPanel {
 		if (background != null) {
 //			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-			g.drawImage(background, 0, 0, getWidth(), getHeight(), null);
 			g.scale(scaleFactor, scaleFactor);
+			BufferedImage buffer = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+			g = buffer.createGraphics();
+			g.drawImage(background, 0, 0, getWidth(), getHeight(), null);
 			if (!drawables.isEmpty()) {
-				BufferedImage fg = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
-				g = fg.createGraphics();
-				for (Drawable d : drawables) {
-					d.draw(g, scaledWidth, scaledHeight);
-					d.setDirty(false);
-				}
-				g.dispose();
-				g = (Graphics2D) graphics;
 				if (drawableOpacity != 1f) {
 					g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, drawableOpacity));
 				}
-				g.drawImage(fg, 0, 0, null);
+				for (Drawable d : drawables) {
+					d.draw(g, buffer, scaledWidth, scaledHeight);
+					d.setDirty(false);
+				}
 				if (drawableOpacity != 1f) {
 					g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 				}
+
+
 			}
+			g.dispose();
+			g = (Graphics2D) graphics;
+			g.drawImage(buffer, 0, 0, null);
 		}
 	}
 	

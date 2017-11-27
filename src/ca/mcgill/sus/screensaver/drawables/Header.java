@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.Drawable;
@@ -43,7 +44,7 @@ public class Header implements Drawable {
 	}
 	
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont(this.font).deriveFont((float) size));
 		g.setColor(color);

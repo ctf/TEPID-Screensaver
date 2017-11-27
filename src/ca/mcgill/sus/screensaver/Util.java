@@ -293,4 +293,11 @@ public class Util {
 		System.arraycopy(a2, 0, out, a1.length, a2.length);
 		return out;
 	}
+	
+	public static double luminance(int argb) {
+		double r = (double) ((argb >> 16) & 0xff) / 0xff,
+		g = (double) ((argb >> 8) & 0xff) / 0xff,
+		b = (double) (argb & 0xff) / 0xff;
+		return Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
+	}
 }

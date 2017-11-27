@@ -20,7 +20,7 @@ public class Error implements Drawable {
 	}
 
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, canvasWidth, canvasHeight);
 		int x = canvasWidth / 2, y = canvasHeight / 2;

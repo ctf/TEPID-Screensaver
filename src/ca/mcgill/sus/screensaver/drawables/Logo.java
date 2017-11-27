@@ -23,7 +23,7 @@ public class Logo implements Drawable {
 	}
 
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		w = canvasWidth;
 		h = canvasHeight;
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));

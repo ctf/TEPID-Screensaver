@@ -54,7 +54,7 @@ public class JobList implements Drawable {
 	}
 
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		if (!jobData.isEmpty()) {
 			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			int x = 0, tableWidth = canvasWidth / jobData.size();

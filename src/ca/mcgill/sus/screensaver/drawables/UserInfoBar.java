@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.font.GlyphVector;
+import java.awt.image.BufferedImage;
 
 import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.FontManager;
@@ -47,7 +48,7 @@ public class UserInfoBar extends Header {
 	}
 	
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		//time away from machine rounded to 5 minute intervals
 		int timeAway = (int) (((System.currentTimeMillis() - this.startTime) / 1000 / 60 / 5) * 5);
 		String text;

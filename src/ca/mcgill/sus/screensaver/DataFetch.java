@@ -86,7 +86,7 @@ public class DataFetch extends Thread {
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 			Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
-			Future<UserInfo> futureUserInfo = tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class);
+			Future<UserInfo> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class) : null;
 			boolean pullEvents = (Main.OFFICE_COMPUTER && iterations++ * interval % icalInterval == 0) || !networkUp; 
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
@@ -106,7 +106,7 @@ public class DataFetch extends Thread {
 				destinations.putAll(newDestinations);
 				
 				//update user info
-				try {
+				if (futureUserInfo != null) try {
 					UserInfo newUserInfo = futureUserInfo.get(interval, TimeUnit.SECONDS);
 					userInfo.clear();
 					userInfo.add(newUserInfo);

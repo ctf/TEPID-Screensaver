@@ -32,7 +32,7 @@ public class Slideshow implements Drawable {
 	}
 
 	@Override
-	public void draw(Graphics2D g, int canvasWidth, int canvasHeight) {
+	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		if (slide == null) return;
 		w = canvasWidth;
 		int nextSlideX = (int) ((1 - progress) * w);
