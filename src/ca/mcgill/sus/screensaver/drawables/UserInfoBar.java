@@ -89,7 +89,7 @@ public class UserInfoBar extends Header {
 		g.setColor(textColor);
 	    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-		g.fill(v.getOutline(x, buffer.getHeight() / 2 + sb.height / 2 - pad / 2));
+		g.fill(v.getOutline(x, 0 - sb.y + pad));
 	    g.dispose();
 		g = graphics;
 		g.drawImage(buffer, 0, y, null);
