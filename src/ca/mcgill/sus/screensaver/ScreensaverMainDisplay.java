@@ -26,7 +26,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 						stage.addDrawable(new Slideshow(3000, 1000, 420));
 						stage.addDrawable(new Clock("hh:mm a", Main.TEXT_COLOR & 0x88000000, 65));
 						stage.addDrawable(new Header(System.getenv("computerName"), 18, 20, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_LEFT));
-						stage.addDrawable(new UserInfoBar(48, 450));
+						stage.addDrawable(new UserInfoBar(48, 420));
 //						stage.addDrawable(new Marquee(350, Main.TEXT_COLOR));
 					} else {
 						//if network is down display special error screen

@@ -78,19 +78,21 @@ public class UserInfoBar extends Header {
 			x = canvasWidth / 2 - g.getFontMetrics().stringWidth(text) / 2;
 			break;
 		}
-		g.setColor(color);
 		GlyphVector v = Util.getStringVector(g, text);
 		Rectangle sb = Util.getRealStringBounds(v);
 		int pad = 14;
-		g.fillRect(0, y - sb.height / 2 - pad, canvasWidth, sb.height + pad * 2);
+		Graphics2D graphics = g;
+		BufferedImage buffer = new BufferedImage(canvasWidth, sb.height + pad * 2, BufferedImage.TYPE_INT_ARGB);
+		g = buffer.createGraphics();
+		g.setColor(color);
+		g.fillRect(0,0, buffer.getWidth(), buffer.getHeight());
 		g.setColor(textColor);
-//		g.drawString(text, x, y);
 	    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-		g.fill(v.getOutline(x, y + pad));
-	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
-		if (!Main.LOGGED_IN) g.setColor(new Color(0x20000000,true));
-		g.fill(v.getOutline(x, y + pad));
+		g.fill(v.getOutline(x, buffer.getHeight() / 2 + sb.height / 2 - pad / 2));
+	    g.dispose();
+		g = graphics;
+		g.drawImage(buffer, 0, y, null);
 	}
 	
 	@Override
