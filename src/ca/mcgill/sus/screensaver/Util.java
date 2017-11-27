@@ -269,6 +269,7 @@ public class Util {
 	 * @param ms	The time for which the thread should do nothing
 	 */
 	public static void sleep(long ms) {
+		if (ms < 0) return;
 		try {
 			Thread.sleep(ms);
 		} catch (InterruptedException e) {

@@ -8,6 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -19,7 +20,7 @@ public class Stage extends JPanel {
 	private BufferedImage background;
 	private float drawableOpacity = 1f;
 	private final int fps;
-	private boolean dirty;
+	private final AtomicBoolean dirty = new AtomicBoolean();
 
 	public Stage(int fps) {
 		super(true);
@@ -29,11 +30,11 @@ public class Stage extends JPanel {
 			public void run() {
 				while (!Thread.interrupted()) {
 					for (Drawable d : drawables) {
-						if (d.isDirty()) dirty = true;
+						if (d.isDirty()) dirty.set(true);
 					}
 					long startTime = System.nanoTime();
-					if (dirty) safeRepaint();
-					dirty = false;
+					if (dirty.get()) safeRepaint();
+					dirty.set(false);
 					long t = (System.nanoTime() - startTime) / 1000000;
 					Util.sleep(1000 / Stage.this.fps - t);
 				}
@@ -43,7 +44,7 @@ public class Stage extends JPanel {
 			public void run() {
 				while (!Thread.interrupted()) {
 					for (Drawable d : drawables) {
-						if (d.isDirty()) dirty = true;
+						if (d.isDirty()) dirty.set(true);;
 					}
 					long startTime = System.nanoTime();
 					for (Drawable d : drawables) d.step(System.nanoTime() / 1000000);
@@ -120,8 +121,8 @@ public class Stage extends JPanel {
 		this.drawables.clear();
 	}
 
-	public void setDirty(boolean b) {
-		this.dirty = true;
+	public void setDirty(boolean dirty) {
+		this.dirty.set(dirty);
 		
 	}
 

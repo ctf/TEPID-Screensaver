@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
@@ -17,7 +18,7 @@ public class Clock implements Drawable {
 	public String time = "";
 	private final Color color;
 	private long lastUpdate;
-	private boolean dirty;
+	private final AtomicBoolean dirty = new AtomicBoolean();
 	
 	/**Constructor
 	 * @param format	the format for the time
@@ -59,12 +60,12 @@ public class Clock implements Drawable {
 
 	@Override
 	public boolean isDirty() {
-		return dirty;
+		return dirty.get();
 	}
 
 	@Override
 	public void setDirty(boolean dirty) {
-		this.dirty = dirty;		
+		this.dirty.set(dirty);	
 	}
 
 }

@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
@@ -17,7 +18,7 @@ public class Header implements Drawable {
 	public final Color color;
 	protected int alignment = ALIGN_CENTER;
 	protected final boolean bold;
-	private boolean dirty = true;
+	private final AtomicBoolean dirty = new AtomicBoolean(true);
 
 	public Header(String text, int size, int y, int color) {
 		this(text, size, y, color, true);
@@ -78,12 +79,12 @@ public class Header implements Drawable {
 
 	@Override
 	public boolean isDirty() {
-		return dirty;
+		return dirty.get();
 	}
 
 	@Override
 	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
+		this.dirty.set(dirty);
 	}
 
 }

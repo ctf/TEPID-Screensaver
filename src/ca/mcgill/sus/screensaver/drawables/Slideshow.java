@@ -5,6 +5,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.CubicBezier;
 import ca.mcgill.sus.screensaver.DataFetch;
@@ -20,7 +21,7 @@ public class Slideshow implements Drawable {
 	private Iterator<BufferedImage> sliderator = slides.iterator();
 	private double progress;
 	private BufferedImage slide, nextSlide;
-	private boolean dirty;
+	private final AtomicBoolean dirty = new AtomicBoolean();
 	
 	
 	public Slideshow(int interval, int transition, int height) {
@@ -81,11 +82,11 @@ public class Slideshow implements Drawable {
 
 	@Override
 	public boolean isDirty() {
-		return this.dirty;
+		return this.dirty.get();
 	}
 
 	@Override
 	public void setDirty(boolean dirty) {
-		this.dirty = true;
+		this.dirty.set(dirty);
 	}
 }

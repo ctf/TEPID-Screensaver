@@ -2,12 +2,13 @@ package ca.mcgill.sus.screensaver;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AnimatedSprite {
 	
 	private final BufferedImage[] frames;
 	private int frame, speedMs = 100;
-	private boolean dirty = false;
+	private final AtomicBoolean dirty = new AtomicBoolean();
 	private long lastDirty;
 	
 	public AnimatedSprite(BufferedImage[] frames) {
@@ -45,10 +46,10 @@ public class AnimatedSprite {
 	}
 
 	public boolean isDirty() {
-		return dirty;
+		return dirty.get();
 	}
 
 	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
+		this.dirty.set(dirty);
 	}
 }

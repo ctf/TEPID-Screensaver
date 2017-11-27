@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.CubicBezier;
 import ca.mcgill.sus.screensaver.DataFetch;
@@ -29,7 +30,7 @@ public class UpcomingEvents implements Drawable {
 	private final CubicBezier easeInOut = CubicBezier.create(0.42, 0, 0.58, 1.0, (1000.0 / 60.0 / transition) / 4.0);
 	private long startTime;
 	private double progress;
-	private boolean dirty;
+	private final AtomicBoolean dirty = new AtomicBoolean();
 	private Iterator<String> entrierator = entries.iterator();
 
 	/**Constructor
@@ -102,12 +103,12 @@ public class UpcomingEvents implements Drawable {
 
 	@Override
 	public boolean isDirty() {
-		return this.dirty;
+		return this.dirty.get();
 	}
 
 	@Override
 	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
+		this.dirty.set(dirty);
 	}
 
 }

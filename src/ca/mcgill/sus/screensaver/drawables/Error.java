@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.SpriteManager;
@@ -13,7 +14,7 @@ import ca.mcgill.sus.screensaver.SpriteManager;
 public class Error implements Drawable {
 
 	private final BufferedImage error = SpriteManager.getInstance().getSprite("error.png");
-	private boolean dirty = true;
+	private final AtomicBoolean dirty = new AtomicBoolean(true);
 	
 	public Error() {
 	}
@@ -33,12 +34,12 @@ public class Error implements Drawable {
 
 	@Override
 	public boolean isDirty() {
-		return dirty;
+		return dirty.get();
 	}
 
 	@Override
 	public void setDirty(boolean dirty) {
-		this.dirty  = dirty;
+		this.dirty.set(dirty);
 	}
 	
 

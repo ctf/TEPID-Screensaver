@@ -18,10 +18,13 @@ public class UserInfoBar extends Header {
 	public String displayName = "";
 	private final long startTime = System.currentTimeMillis();
 	private final Color textColor = new Color(0x44ffffff, true);
+	private final Runnable update;
+	private long lastUpdate;
+	private int interval = 500;
 	
 	public UserInfoBar(int size, int y) {
 		super(null, size, y, !Main.LOGGED_IN ? Main.COLOR_UP : Main.COLOR_DOWN);
-		DataFetch.getInstance().addChangeListener(new Runnable() {
+		update = new Runnable() {
 			public void run() {
 				try {
 					UserInfo userInfo = DataFetch.getInstance().userInfo.peek();
@@ -39,7 +42,8 @@ public class UserInfoBar extends Header {
 				}
 				setDirty(true);
 			}
-		});
+		};
+		DataFetch.getInstance().addChangeListener(update);
 	}
 	
 	@Override
@@ -86,6 +90,14 @@ public class UserInfoBar extends Header {
 	    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
 		if (!Main.LOGGED_IN) g.setColor(new Color(0x20000000,true));
 		g.fill(v.getOutline(x, y + pad));
+	}
+	
+	@Override
+	public void step(long timestamp) {
+		if (timestamp - lastUpdate >= interval) {
+			lastUpdate = timestamp;
+			update.run();
+		}
 	}
 
 }

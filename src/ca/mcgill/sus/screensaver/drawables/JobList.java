@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -34,7 +35,7 @@ public class JobList implements Drawable {
 	private final Map<String, Boolean> statuses = DataFetch.getInstance().printerStatus;
 	
 	public final int y;
-	private boolean dirty;
+	private final AtomicBoolean dirty = new AtomicBoolean();
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
 								 pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
 	private static final Color clrDown = new Color(Main.COLOR_DOWN, true);
@@ -47,7 +48,7 @@ public class JobList implements Drawable {
 		this.y = y;
 		DataFetch.getInstance().addChangeListener(new Runnable() {
 			public void run() {
-				dirty = true;
+				dirty.set(true);
 			}
 		});
 	}
@@ -166,14 +167,14 @@ public class JobList implements Drawable {
 	public boolean isDirty() {
 		if (pusheenPopcorn.isDirty()) return true;
 		if (pusheenSad.isDirty()) return true;
-		return this.dirty;
+		return this.dirty.get();
 	}
 
 	@Override
 	public void setDirty(boolean dirty) {
 		if (!dirty) pusheenPopcorn.setDirty(false);
 		if (!dirty) pusheenSad.setDirty(false);
-		this.dirty = dirty;
+		this.dirty.set(dirty);
 	}
 
 }
