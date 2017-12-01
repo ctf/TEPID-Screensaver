@@ -1,8 +1,10 @@
 package ca.mcgill.sus.screensaver;
 
+import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -14,25 +16,26 @@ import javax.swing.JFrame;
 public class ScreensaverFrame extends JFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
 	protected final int display;
+	public final boolean window;
 	
-	//use kiosk mode to disable close on mouse move and only close on escape key
-	public ScreensaverFrame(int display, final boolean kiosk) {
+	public ScreensaverFrame(int display, final boolean window) {
 		super("CTF Screensaver");
 		this.display = display;
+		this.window = window;
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		this.setAlwaysOnTop(true);
-		this.setUndecorated(true);
+		if (!window) this.setAlwaysOnTop(true);
+		if (!window) this.setUndecorated(true);
 		this.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				super.keyReleased(e);
-				if (!kiosk || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+				if (!window || e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 					ScreensaverFrame.this.dispose();
 					System.exit(0);
 				}
 			}
 		});
-		if (!kiosk) {
+		if (!window) {
 			this.hideMouse();
 			this.addMouseListener(new MouseAdapter() {
 				@Override
@@ -68,10 +71,16 @@ public class ScreensaverFrame extends JFrame {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
 			if (this.display >= 0 && this.display < gd.length) {
-				this.setBounds(gd[this.display].getDefaultConfiguration().getBounds());
+				Rectangle bounds = gd[this.display].getDefaultConfiguration().getBounds();
+				if (window) {
+					bounds.width = 1920;
+					bounds.height = 1080;
+				}
+//				this.setBounds(bounds);
+//				System.out.println(this.getBounds());
 				this.setResizable(true);
-				this.setExtendedState(MAXIMIZED_BOTH);
-				if (!System.getProperty("os.name").startsWith("Windows") && gd[this.display].isFullScreenSupported()) {
+				if (!window) this.setExtendedState(MAXIMIZED_BOTH);
+				if (!window && !System.getProperty("os.name").startsWith("Windows") && gd[this.display].isFullScreenSupported()) {
 					gd[this.display].setFullScreenWindow(this);
 				}
 			} else {

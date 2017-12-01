@@ -18,8 +18,8 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 	private boolean alreadyVisible = false;
 
 	public BlurredScreensaverFrame(int display) {
-		super(display, false);
-		stage = new Stage(60);
+		super(display, Main.flags.contains("/w"));
+		stage = new Stage(30);
 		if (Main.LOGGED_IN) stage.setDrawableOpacity(0);
 		this.add(stage);
 		if (Main.LOGGED_IN) {
