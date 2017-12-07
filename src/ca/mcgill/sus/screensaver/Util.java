@@ -19,15 +19,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
 public class Util {
-	
-	public static BufferedImage addDropShadow() {
-		return null;
-	}
 	
 	public static BufferedImage convert(BufferedImage image, int type) {
 		BufferedImage out = new BufferedImage(image.getWidth(), image.getHeight(), type);
@@ -52,9 +47,6 @@ public class Util {
 			pix[i] = (alpha << 24) | color;
 		}
 		return image;
-	}
-	public static String newId() {
-		return UUID.randomUUID().toString().replace("-", "");
 	}
 
 	public static BufferedImage blur(int radius, BufferedImage original) {
@@ -299,5 +291,21 @@ public class Util {
 		g = (double) ((argb >> 8) & 0xff) / 0xff,
 		b = (double) (argb & 0xff) / 0xff;
 		return Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
+	}
+	
+	public static double luminanceAvg(BufferedImage img, int x, int y, int w, int h) {
+		if (img.getType() != BufferedImage.TYPE_INT_ARGB && img.getType() != BufferedImage.TYPE_INT_RGB) throw new RuntimeException("Non-int image types not supported");
+		x = Math.max(0, Math.min(x, img.getWidth()));
+		y = Math.max(0, Math.min(y, img.getHeight()));
+		w = Math.max(0, Math.min(w, img.getWidth() - x));
+		h = Math.max(0, Math.min(h, img.getHeight() - y));
+		int[] pixels = ((DataBufferInt) img.getRaster().getDataBuffer()).getData();
+		double lum = 0;
+		for (int i = y; i < y + h; i++) {
+			for (int j = x; j < x + w; j++) {
+				lum += luminance(pixels[i * img.getWidth() + j]);
+			}
+		}
+		return lum / (w * h);
 	}
 }
