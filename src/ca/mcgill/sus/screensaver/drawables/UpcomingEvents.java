@@ -24,10 +24,10 @@ public class UpcomingEvents implements Drawable {
 	private final Queue<String> entries = DataFetch.getInstance().upcomingEvents;
 	public final int y;
 	private int alphaEntry = 0;
-	private String currentEntry, currentTitle;
+	private String currentEntry = "", currentTitle = "";
 	private final static String[] titles = {"upcoming", "stay in the know", "don\u2019t be lazy", "good CTFers are informed CTFers"};
 	private final int color, maxAlpha;	//maximum alpha value for the marquee during fadein
-	private final int transition = 800, interval = 5000;
+	private final int transition = 2000, interval = 7000;
 	private final CubicBezier easeInOut = CubicBezier.create(0.42, 0, 0.58, 1.0, (1000.0 / 60.0 / transition) / 4.0);
 	private long startTime;
 	private double progress;
@@ -43,10 +43,11 @@ public class UpcomingEvents implements Drawable {
 		this.y = y;		//y position
 		//handles the colour. calibrates the maximum alpha to not excede the alpha specified
 		this.color = 0xffffff & color; //the text colour
-		if (((color >> 24) & 0xff) > 0)
-			{maxAlpha = (color >> 24) & 0xff;}
-		else
-			{maxAlpha = 0xff;}
+		if (((color >> 24) & 0xff) > 0) {
+			maxAlpha = (color >> 24) & 0xff;
+		} else {
+			maxAlpha = 0xff;
+		}
 	}
 
 	@Override
@@ -86,14 +87,14 @@ public class UpcomingEvents implements Drawable {
 		if (t % totalDuration >= interval) {
 			p = easeInOut.calc(((double) (t % totalDuration) - interval) / transition);
 		}
-		if (entries.isEmpty()) return;
-		if ((p >= 0.5 && progress < 0.5) || currentEntry == null) {
-			currentEntry = getNextEntry();
+		if (this.entries.isEmpty()) return;
+		if ((p >= 0.5 && progress < 0.5) || this.currentEntry == null) {
+			this.currentEntry = getNextEntry();
+			this.currentTitle = getTitle();
 		}
 		if (p != progress || t == 0) this.setDirty(true);
 		progress = p;
-		this.alphaEntry = (int) (p < 0.5 ? 1 - (p * maxAlpha * 2) : (p - 0.5) * maxAlpha * 2);
-		this.currentTitle = getTitle();
+		this.alphaEntry = (int) Math.ceil(p < 0.5 ? (1 - p / 0.5) * maxAlpha : (p - 0.5) * maxAlpha * 2);
 	}
 	
 	private String getNextEntry() {

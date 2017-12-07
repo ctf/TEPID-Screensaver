@@ -149,27 +149,13 @@ public class DataFetch extends Thread {
 				//process upcoming events (if this is an office computer) 
 				if (pullEvents) {
 					ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
-					TimezoneInfo tzInfo = ical.getTimezoneInfo();
 					Date rightNow = new Date();
-					Semester currentSemester = getSemester(rightNow);
-					List<VEvent> rawEvents = ical.getEvents();
-					List<Pair<Date, VEvent>> events = new ArrayList<>();
+					Semester currentSemester = Semester.getSemester(rightNow);
 					//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
-					for (VEvent e : rawEvents) {
-						Date soonest = null;
-						for (DateIterator iter = e.getDateIterator(getTimezone(tzInfo, e)); iter.hasNext();) {
-							Date d = iter.next();
-							if (d.before(rightNow) || getSemester(d) != currentSemester) continue;
-							if (soonest == null || d.before(soonest)) soonest = d;
-						}
-						if (soonest != null) events.add(new Pair<Date, VEvent>(soonest, e));
-					}
-					Collections.sort(events, new Comparator<Pair<Date, VEvent>>() {
-						@Override
-						public int compare(Pair<Date, VEvent> e1, Pair<Date, VEvent> e2) {
-							return e1.getValue0().compareTo(e2.getValue0());
-						}
-					});
+					TimezoneInfo tzInfo = ical.getTimezoneInfo();
+					List<Pair<Date, VEvent>> events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester, tzInfo);
+					//get next semester's events if there are none for this semester left
+					if (events.isEmpty()) events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester.next(), tzInfo);
 					//format into human-friendly strings
 					upcomingEvents.clear();
 					for (Pair<Date, VEvent> event : events) {
@@ -218,16 +204,39 @@ public class DataFetch extends Thread {
 	}
 	
 	private static enum Semester {
-		FALL, WINTER, SPRING
+		FALL, WINTER, SPRING;
+	    public Semester next() {
+	        return values()[(this.ordinal() + 1) % values().length];
+	    }
+		private static Semester getSemester(Date d) {
+			Calendar c = GregorianCalendar.getInstance();
+			c.setTime(d);
+			int month = c.get(Calendar.MONTH);
+			if (month > Calendar.AUGUST) return Semester.FALL;
+			if (month > Calendar.APRIL) return Semester.SPRING;
+			return Semester.WINTER;
+		}
+		private static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date after, Semester s, TimezoneInfo tzInfo) {
+			List<Pair<Date, VEvent>> events = new ArrayList<>();
+			for (VEvent e : rawEvents) {
+				Date soonest = null;
+				for (DateIterator iter = e.getDateIterator(getTimezone(tzInfo, e)); iter.hasNext();) {
+					Date d = iter.next();
+					if (d.before(after) || Semester.getSemester(d) != s) continue;
+					if (soonest == null || d.before(soonest)) soonest = d;
+				}
+				if (soonest != null) events.add(new Pair<Date, VEvent>(soonest, e));
+			}
+			Collections.sort(events, new Comparator<Pair<Date, VEvent>>() {
+				@Override
+				public int compare(Pair<Date, VEvent> e1, Pair<Date, VEvent> e2) {
+					return e1.getValue0().compareTo(e2.getValue0());
+				}
+			});
+			return events;
+		}
 	}
-	private static Semester getSemester(Date d) {
-		Calendar c = GregorianCalendar.getInstance();
-		c.setTime(d);
-		int month = c.get(Calendar.MONTH);
-		if (month > Calendar.AUGUST) return Semester.FALL;
-		if (month > Calendar.APRIL) return Semester.SPRING;
-		return Semester.WINTER;
-	}
+
 	
 	public void addChangeListener(Runnable listener) {
 		listeners.add(listener);

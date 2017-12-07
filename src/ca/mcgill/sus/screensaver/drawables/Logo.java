@@ -1,6 +1,5 @@
 package ca.mcgill.sus.screensaver.drawables;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -12,7 +11,7 @@ import ca.mcgill.sus.screensaver.SpriteManager;
 public class Logo implements Drawable {
 	
 	private int x, y, w = 1024, h = 768;
-	private final BufferedImage logo = SpriteManager.getInstance().getSprite("logo_nice.png");
+	private final BufferedImage logo = SpriteManager.getInstance().getAlphaSprite("logo_nice.png", 0.6f);
 	private final int interval;
 	private final Random random = new Random();
 	private long lastUpdate;
@@ -26,9 +25,7 @@ public class Logo implements Drawable {
 	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		w = canvasWidth;
 		h = canvasHeight;
-		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
 		g.drawImage(logo, x, y, null);
-		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 	}
 
 	@Override

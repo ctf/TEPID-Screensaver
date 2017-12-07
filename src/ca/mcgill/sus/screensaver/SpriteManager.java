@@ -1,5 +1,7 @@
 package ca.mcgill.sus.screensaver;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.Map;
@@ -45,6 +47,21 @@ public class SpriteManager {
 		}
 		sprite = Util.color(getSprite(name), color);
 		cache.put(name + Integer.toHexString(color), sprite);
+		return sprite;
+	}
+	
+	public BufferedImage getAlphaSprite(String name, float alpha) {
+		BufferedImage sprite = cache.get(name + alpha);
+		if (sprite != null) {
+			return sprite;
+		}
+		BufferedImage baseSprite = getSprite(name);
+		sprite = new BufferedImage(baseSprite.getWidth(), baseSprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = sprite.createGraphics();
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+		g.drawImage(baseSprite, 0, 0, null);
+		g.dispose();
+		cache.put(name + alpha, sprite);
 		return sprite;
 	}
 	

@@ -32,9 +32,9 @@ public class Main {
 			for (int i = 0; i < gd.length; i++) {
 				final ScreensaverFrame screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {
-					screensaver = new ScreensaverMainDisplay(i);
-				} else {
 					screensaver = new ScreensaverSecondaryDisplay(i);
+				} else {
+					screensaver = new ScreensaverMainDisplay(i);
 				}
 				screensavers.add(screensaver);
 				Thread displayThread = new Thread("Screensaver Display " + i) {

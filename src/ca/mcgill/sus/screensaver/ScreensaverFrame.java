@@ -1,6 +1,5 @@
 package ca.mcgill.sus.screensaver;
 
-import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;

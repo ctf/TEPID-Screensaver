@@ -20,9 +20,9 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 	public BlurredScreensaverFrame(int display) {
 		super(display, Main.flags.contains("/w"));
 		stage = new Stage(30);
-		if (Main.LOGGED_IN) stage.setDrawableOpacity(0);
 		this.add(stage);
 		if (Main.LOGGED_IN) {
+			stage.setDrawableOpacity(0);
 			background = Util.screenshot(display);
 		} else {
 			Rectangle bounds;
