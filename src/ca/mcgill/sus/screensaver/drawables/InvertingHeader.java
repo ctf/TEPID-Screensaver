@@ -49,6 +49,7 @@ public class InvertingHeader extends Header {
 		}
 		Rectangle bounds = g.getFontMetrics().getStringBounds(this.text, g).getBounds();
 		boolean invert = Util.luminanceAvg(canvas, x + bounds.x, y + bounds.y, bounds.width, bounds.height) < 0.4;
+		if (Util.luminance(color.getRGB()) > 0.5) invert = !invert;
 		g.setColor(invert ? invertedColor : color);
 		g.drawString(this.text, x, y);
 	}
