@@ -31,12 +31,13 @@ public class Clock implements Drawable {
 	 */
 	public Clock(String format, int color, int y) {
 		this.y = y;
-		if (((color >> 24) & 0xff) > 0) { 
+		int a = (color >> 24) & 0xff;
+		if (a > 0) { 
 			this.color = new Color(color, true);
 		} else {
 			this.color = new Color(color);
 		}
-		this.invertedColor = new Color((this.color.getRGB() & 0xff000000) | (0xffffff - (0xffffff & this.color.getRGB())), true);
+		this.invertedColor = new Color((a << 24) | (0xffffff - (0xffffff & color)), true);
 		this.format = new SimpleDateFormat(format == null ? "h:mm a" : format); //will provide a default format
 	}
 	

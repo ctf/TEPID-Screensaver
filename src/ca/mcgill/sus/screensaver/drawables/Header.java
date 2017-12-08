@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 
-/** Used to display the computer name
+/** Displays one line of text on the screen with the specified font, colour, and alignment
  */
 public class Header implements Drawable {
 	

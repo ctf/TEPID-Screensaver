@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver;
 import ca.mcgill.sus.screensaver.drawables.Clock;
 import ca.mcgill.sus.screensaver.drawables.Error;
 import ca.mcgill.sus.screensaver.drawables.Header;
+import ca.mcgill.sus.screensaver.drawables.InvertingHeader;
 import ca.mcgill.sus.screensaver.drawables.JobList;
 import ca.mcgill.sus.screensaver.drawables.Slideshow;
 import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
@@ -25,7 +26,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 						stage.addDrawable(new JobList(500));
 						stage.addDrawable(new Slideshow(3000, 1000, 420));
 						stage.addDrawable(new Clock("hh:mm a", Main.TEXT_COLOR & 0x88000000, 65));
-						stage.addDrawable(new Header(System.getenv("computerName"), 18, 20, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_LEFT));
+						stage.addDrawable(new InvertingHeader(System.getenv("computerName"), 18, 20, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_LEFT));
 						stage.addDrawable(new UserInfoBar(48, 420));
 //						stage.addDrawable(new Marquee(350, Main.TEXT_COLOR));
 					} else {
