@@ -268,7 +268,12 @@ public class Util {
 			if (light) slides.get(name).light = e.getValue();
 			else slides.get(name).dark = e.getValue();
 		}
-		return new ArrayList<>(slides.values());
+		List<Slide> out = new ArrayList<>(slides.values());
+		for (Slide s : out) {
+			if (s.light == null) s.light = s.dark;
+			if (s.dark == null) s.dark = s.light;
+		}
+		return out;
 	}
 	
 	/**A function which causes the thread to wait for a time 
