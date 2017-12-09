@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import ca.mcgill.sus.screensaver.CubicBezier;
 import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
+import ca.mcgill.sus.screensaver.Util;
+import ca.mcgill.sus.screensaver.io.Slide;
 
 public class Slideshow implements Drawable {
 	
@@ -17,10 +19,10 @@ public class Slideshow implements Drawable {
 	private long startTime;
 	private final int interval, transition;
 	private final CubicBezier easeInOut;
-	private final Queue<BufferedImage> slides = DataFetch.getInstance().slides;
-	private Iterator<BufferedImage> sliderator = slides.iterator();
+	private final Queue<Slide> slides = DataFetch.getInstance().slides;
+	private Iterator<Slide> sliderator = slides.iterator();
 	private double progress;
-	private BufferedImage slide, nextSlide;
+	private Slide slide, nextSlide;
 	private final AtomicBoolean dirty = new AtomicBoolean();
 	
 	
@@ -35,10 +37,11 @@ public class Slideshow implements Drawable {
 	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		if (slide == null) return;
 		w = canvasWidth;
+		boolean invert = Util.luminanceAvg(canvas, 0, 0, w, h) < 0.4;
 		int nextSlideX = (int) ((1 - progress) * w);
-		drawCropped(g, slide, nextSlideX - w, 0, w, h);
+		drawCropped(g, invert ? slide.light : slide.dark, nextSlideX - w, 0, w, h);
 		if (nextSlideX != w) {
-			drawCropped(g, nextSlide, nextSlideX, 0, w, h);
+			drawCropped(g, invert ? nextSlide.light : nextSlide.dark, nextSlideX, 0, w, h);
 		}
 	}
 	
@@ -55,7 +58,7 @@ public class Slideshow implements Drawable {
 		g.drawImage(img, x, y, w, h, null);
 	}
 	
-	private BufferedImage getNextSlide() {
+	private Slide getNextSlide() {
 		if (slides.isEmpty()) return null;
 		if (!sliderator.hasNext()) sliderator = slides.iterator();
 		return sliderator.next();

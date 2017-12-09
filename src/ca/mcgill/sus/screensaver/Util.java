@@ -18,9 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
+
+import ca.mcgill.sus.screensaver.io.Slide;
 
 public class Util {
 	
@@ -245,16 +250,25 @@ public class Util {
 		return background;
 	}
 	
-	public static List<BufferedImage> loadSlides() {
-		List<BufferedImage> slides = new ArrayList<>();
+	public static List<Slide> loadSlides() {
+		Map<String, BufferedImage> images = new HashMap<>();
 		try {
 			for (File f : new File("C:\\Screensaver Slides").listFiles()) {
 				try {
-					slides.add(ImageIO.read(f));
+					images.put(f.getName(), ImageIO.read(f));
 				} catch (Exception e) {}
 			}
 		} catch (Exception e) {}
-		return slides;
+		Map<String, Slide> slides = new HashMap<>();
+		for (Entry<String, BufferedImage> e : images.entrySet()) {
+			String name = (e.getKey().contains(".") ? e.getKey().substring(0, e.getKey().indexOf(".")): e.getKey()).toLowerCase();
+			boolean light = name.endsWith("_light");
+			if (light) name = name.substring(0, name.indexOf("_light"));
+			if (!slides.containsKey(name)) slides.put(name, new Slide());
+			if (light) slides.get(name).light = e.getValue();
+			else slides.get(name).dark = e.getValue();
+		}
+		return new ArrayList<>(slides.values());
 	}
 	
 	/**A function which causes the thread to wait for a time 

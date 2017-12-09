@@ -1,6 +1,5 @@
 package ca.mcgill.sus.screensaver;
 
-import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +37,7 @@ import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.sus.screensaver.io.Destination;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 import ca.mcgill.sus.screensaver.io.PrintJob;
+import ca.mcgill.sus.screensaver.io.Slide;
 import ca.mcgill.sus.screensaver.io.UserInfo;
 
 public class DataFetch extends Thread {
@@ -75,7 +75,7 @@ public class DataFetch extends Thread {
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
 	public final Queue<UserInfo> userInfo = new ConcurrentLinkedQueue<>();
-	public final Queue<BufferedImage> slides = new ConcurrentLinkedQueue<>();
+	public final Queue<Slide> slides = new ConcurrentLinkedQueue<>();
 	
 	@Override
 	public void run() {
@@ -138,7 +138,7 @@ public class DataFetch extends Thread {
 				jobData.putAll(newJobs);
 				
 				//load slide images
-				List<BufferedImage> newSlides = Util.loadSlides();
+				List<Slide> newSlides = Util.loadSlides();
 				slides.clear();
 				slides.addAll(newSlides);
 				fail = false;
