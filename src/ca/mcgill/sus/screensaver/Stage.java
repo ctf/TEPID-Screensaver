@@ -65,11 +65,11 @@ public class Stage extends JPanel {
 		scaledHeight = (int) (this.getHeight() / scaleFactor);
 		if (background != null) {
 //			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+//			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 //			g.scale(scaleFactor, scaleFactor);
 			BufferedImage buffer = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
 			g = buffer.createGraphics();
-			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+//			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			g.drawImage(background, 0, 0, buffer.getWidth(), buffer.getHeight(), null);
 			if (!drawables.isEmpty()) {
 				if (drawableOpacity != 1f) {
