@@ -4,7 +4,6 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -58,9 +57,9 @@ public class Stage extends JPanel {
 	@Override
 	public void paint(Graphics graphics) {
 		Graphics2D g = (Graphics2D) graphics;
-		int shortSide = this.getHeight() < this.getWidth() ? this.getHeight() : this.getWidth();
-		double scaleFactor = shortSide != 1080 ? shortSide / 1080.0 : 1080;
-//		double scaleFactor = 1;
+//		int shortSide = this.getHeight() < this.getWidth() ? this.getHeight() : this.getWidth();
+//		double scaleFactor = shortSide != 1080 ? shortSide / 1080.0 : 1080;
+		double scaleFactor = 1;
 		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
 		scaledHeight = (int) (this.getHeight() / scaleFactor);
 		if (background != null) {
