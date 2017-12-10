@@ -24,7 +24,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 					if (networkUp) {
 						//if network is up use regular set of widgets
 						stage.addDrawable(new JobList(500));
-						stage.addDrawable(new Slideshow(3000, 1000, 420));
+						stage.addDrawable(new Slideshow(10_000, 1000, 420));
 						stage.addDrawable(new Clock("hh:mm a", Main.TEXT_COLOR & 0x88000000, 65));
 						stage.addDrawable(new InvertingHeader(System.getenv("computerName"), 18, 20, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_LEFT));
 						stage.addDrawable(new UserInfoBar(48, 420));

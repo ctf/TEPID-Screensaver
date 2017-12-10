@@ -18,8 +18,8 @@ public class Main {
 	TEXT_COLOR = LOGGED_IN ? 0xbb000000 : 0xddffffff;
 	public static final Set<String> flags = new HashSet<>();
 	
-//	public final static String serverUrl = ***REMOVED***; 	//real tepid url
-	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";				//debugging url
+	public final static String serverUrl = ***REMOVED***; 	//real tepid url
+//	public final static String serverUrl = "http://localhost:8080/tepid/screensaver";				//debugging url
 	
 	public static void main(String[] args) {
 		for (String arg : args) flags.add(arg.toLowerCase());
