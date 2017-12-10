@@ -33,7 +33,7 @@ public class UserInfoBar extends Header {
 						displayName = System.getenv("username");
 					} else {
 						if (Main.OFFICE_COMPUTER) {
-							displayName = userInfo.givenName;
+							displayName = userInfo.salutation;
 						} else {
 							displayName = String.format("%s. %s", userInfo.givenName.charAt(0), userInfo.lastName);
 						}
