@@ -54,10 +54,10 @@ public class UpcomingEvents implements Drawable {
 	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
 		if (currentEntry == null) return;
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(64f));
+		g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(48f));
 		g.setColor(new Color((maxAlpha << 24) | color, true));
 		g.drawString(currentTitle, canvasWidth / 2 - g.getFontMetrics().stringWidth(currentTitle) / 2, y);
-		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(48f));
+		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(38f));
 		g.setColor(new Color((alphaEntry << 24) | color, true));
 		synchronized(currentEntry)
 		{

@@ -27,8 +27,9 @@ public class Main {
 		else if (flags.contains("/s") || flags.contains("/w")) {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] gd = ge.getScreenDevices();
-			final List<ScreensaverFrame> screensavers = new ArrayList<>(6);
-			final List<Thread> screensaverThreads = new ArrayList<>(6);
+			System.out.println(gd.length);
+			final List<ScreensaverFrame> screensavers = new ArrayList<>(gd.length);
+			final List<Thread> screensaverThreads = new ArrayList<>(gd.length);
 			for (int i = 0; i < gd.length; i++) {
 				final ScreensaverFrame screensaver;
 				if (gd[i] == ge.getDefaultScreenDevice()) {

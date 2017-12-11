@@ -75,7 +75,7 @@ public class ScreensaverFrame extends JFrame {
 					bounds.width = 1920;
 					bounds.height = 1080;
 				}
-//				this.setBounds(bounds);
+				this.setBounds(bounds);
 //				System.out.println(this.getBounds());
 				this.setResizable(true);
 				if (!window) this.setExtendedState(MAXIMIZED_BOTH);
