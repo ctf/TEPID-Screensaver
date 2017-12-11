@@ -133,25 +133,24 @@ public class JobList implements Drawable {
 				g.drawString(job.getUserIdentification(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
 				if(job.getDestination() != null) g.drawString(DataFetch.getInstance().destinations.get(job.getDestination()).name, width / 4, i * (fontPx + padding * 2) - padding - 2);
-				if(job.getPrinted() != null) g.drawString("Printed  " + dateFormat.format(job.getPrinted()), width / 2, i * (fontPx + padding * 2) - padding - 2);
-				else if(job.getError() != null) g.drawString(job.getError(), width / 2, i * (fontPx + padding * 2) - padding - 2);
-				else if(job.getReceived() != null) g.drawString("Received  " + dateFormat.format(job.getReceived()), width / 2, i * (fontPx + padding * 2) - padding - 2);
+				String jobStatus = "Uploading...";
+				if(job.getPrinted() != null) jobStatus = ("Printed  " + dateFormat.format(job.getPrinted()));
+				else if(job.getError() != null) jobStatus = (job.getError());
+				else if(job.getReceived() != null) jobStatus = ("Received  " + dateFormat.format(job.getReceived()));
+				g.drawString(jobStatus, width / 2, i * (fontPx + padding * 2) - padding - 2);
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
 				i++;
 			}
-		} 
-		else //if there are no jobs to print
-		{
-			if (status == false)	//if the printer is down
-			{
+		} else {
+			//there are no jobs to print
+			if (status == false) {
+				//the printer is down
 				pusheenSad.draw(g, width / 2 - pusheenSad.getWidth() / 2, 100); //draws the sad pusheen
-			}
-			else	//if nothing has been printed today
-			{
+			} else {
+				//nothing has been printed lately
 				pusheenPopcorn.draw(g, width / 2 - pusheenPopcorn.getWidth() / 2, 100); //draws the popcorn pusheen
 			}
-			
 		}
 		g.dispose();
 		return out;
