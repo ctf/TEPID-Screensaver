@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -264,7 +265,7 @@ public class Util {
 			String name = (e.getKey().contains(".") ? e.getKey().substring(0, e.getKey().indexOf(".")): e.getKey()).toLowerCase();
 			boolean light = name.endsWith("_light");
 			if (light) name = name.substring(0, name.indexOf("_light"));
-			if (!slides.containsKey(name)) slides.put(name, new Slide());
+			if (!slides.containsKey(name)) slides.put(name, new Slide(name));
 			if (light) slides.get(name).light = e.getValue();
 			else slides.get(name).dark = e.getValue();
 		}
@@ -273,6 +274,11 @@ public class Util {
 			if (s.light == null) s.light = s.dark;
 			if (s.dark == null) s.dark = s.light;
 		}
+		out.sort(new Comparator<Slide>() {
+			public int compare(Slide s1, Slide s2) {
+				return s1.name.compareTo(s2.name);
+			}
+		});
 		return out;
 	}
 	
