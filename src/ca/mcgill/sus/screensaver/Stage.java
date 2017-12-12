@@ -59,10 +59,10 @@ public class Stage extends JPanel {
 		Graphics2D g = (Graphics2D) graphics;
 //		int shortSide = this.getHeight() < this.getWidth() ? this.getHeight() : this.getWidth();
 //		double scaleFactor = shortSide != 1080 ? shortSide / 1080.0 : 1080;
-//		double scaleFactor = 1;
-//		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
-//		scaledHeight = (int) (this.getHeight() / scaleFactor);
-		int scaledWidth = 1920, scaledHeight = 1080;
+		double scaleFactor = 1;
+		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
+		scaledHeight = (int) (this.getHeight() / scaleFactor);
+//		int scaledWidth = 1920, scaledHeight = 1080;
 		if (background != null) {
 //			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 //			g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
