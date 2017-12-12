@@ -87,7 +87,8 @@ public class DataFetch extends Thread {
 			Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
 			Future<UserInfo> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class) : null;
-			boolean pullEvents = (Main.OFFICE_COMPUTER && iterations++ * interval % icalInterval == 0) || !networkUp; 
+			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
+			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp; 
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
 				//update marquee data
@@ -138,9 +139,11 @@ public class DataFetch extends Thread {
 				jobData.putAll(newJobs);
 				
 				//load slide images
-				List<Slide> newSlides = Util.loadSlides();
-				slides.clear();
-				slides.addAll(newSlides);
+				if (slides.isEmpty() || pullSlides) {
+					List<Slide> newSlides = Util.loadSlides();
+					slides.clear();
+					slides.addAll(newSlides);
+				}
 				fail = false;
 			} catch (Exception e) {
 //				e.printStackTrace();
