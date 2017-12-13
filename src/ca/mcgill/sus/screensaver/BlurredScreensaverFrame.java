@@ -65,32 +65,37 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 					int maxFrost = 0x77;
 					long start = System.nanoTime();
 					for (int i = 0, f = 0, lastF = -1; i < maxBlur;) {
-						long t = (System.nanoTime() - start) / 1000000;
-						double progress = Math.min(1, easeInOut.calc((double) t / ms));
-						i = (int) (progress * maxBlur);
-						f = i / frameCount;
-						if (f > lastF) {
-							b1 = b2;
-							try {
-								for (int b = 0; b < f - lastF; b++) b2 = frames.poll((long) (ms - t), TimeUnit.MILLISECONDS);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
+						try {
+							long t = (System.nanoTime() - start) / 1000000;
+							double progress = Math.min(1, easeInOut.calc((double) t / ms));
+							i = (int) (progress * maxBlur);
+							f = i / frameCount;
+							if (f > lastF) {
+								b1 = b2;
+								try {
+									for (int b = 0; b < f - lastF; b++) b2 = frames.poll((long) (ms - t), TimeUnit.MILLISECONDS);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+								if (b2 == null) b2 = b1;
 							}
+							lastF = f;
+							BufferedImage composite = new BufferedImage(b1.getWidth(), b2.getHeight(), BufferedImage.TYPE_INT_RGB);
+							Graphics2D g = composite.createGraphics();
+							g.drawImage(b1, 0, 0, null);
+							g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i % frameCount) / frameCount));
+							stage.setDrawableOpacity(i < maxBlur * 0.2 ? 0 : 1.25f * i / maxBlur - 0.25f);
+							g.drawImage(b2, 0, 0, null);
+							g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+							int alpha = (int) (((double) i / maxBlur) * maxFrost);
+							g.setColor(new Color((alpha << 24) | 0xffffff, true));
+							g.fillRect(0, 0, getWidth(), getHeight()); 
+							g.dispose();
+							stage.setBackground(composite);
+							stage.setDirty(true);
+						} catch (RuntimeException e) {
+							e.printStackTrace();
 						}
-						lastF = f;
-						BufferedImage composite = new BufferedImage(b1.getWidth(), b2.getHeight(), BufferedImage.TYPE_INT_RGB);
-						Graphics2D g = composite.createGraphics();
-						g.drawImage(b1, 0, 0, null);
-						g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i % frameCount) / frameCount));
-						stage.setDrawableOpacity(i < maxBlur * 0.2 ? 0 : 1.25f * i / maxBlur - 0.25f);
-						g.drawImage(b2, 0, 0, null);
-						g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-						int alpha = (int) (((double) i / maxBlur) * maxFrost);
-						g.setColor(new Color((alpha << 24) | 0xffffff, true));
-						g.fillRect(0, 0, getWidth(), getHeight()); 
-						g.dispose();
-						stage.setBackground(composite);
-						stage.setDirty(true);
 					}
 				};
 			}.start();
