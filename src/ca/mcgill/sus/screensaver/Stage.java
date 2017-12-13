@@ -62,6 +62,7 @@ public class Stage extends JPanel {
 		double scaleFactor = 1;
 		int scaledWidth = (int) (this.getWidth() / scaleFactor), 
 		scaledHeight = (int) (this.getHeight() / scaleFactor);
+		//be very careful with indiscriminately overwriting scaledWidth and scaledHeight
 //		int scaledWidth = 1920, scaledHeight = 1080;
 		if (background != null) {
 //			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);

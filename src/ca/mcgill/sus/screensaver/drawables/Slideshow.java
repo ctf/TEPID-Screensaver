@@ -66,7 +66,11 @@ public class Slideshow implements Drawable {
 
 	@Override
 	public void step(long timestamp) {
-		if (startTime == 0) startTime = timestamp;
+		//forcibly sync the starting timestamp to the nearest hour
+		if (startTime == 0) {
+			long sync = System.currentTimeMillis() - (System.currentTimeMillis() / 1000 / 60 / 60) * 1000 * 60 * 60;
+			startTime = timestamp - sync; 
+		}
 		long t = timestamp - startTime;
 		int totalDuration = interval + transition;
 		double p = 0;
