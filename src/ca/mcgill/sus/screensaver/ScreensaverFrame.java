@@ -1,5 +1,6 @@
 package ca.mcgill.sus.screensaver;
 
+import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
@@ -74,8 +75,12 @@ public class ScreensaverFrame extends JFrame {
 				if (window) {
 					bounds.width = 1920;
 					bounds.height = 1080;
+					this.setBounds(bounds);
+					this.getContentPane().setPreferredSize(new Dimension(1920, 1080));
+					this.pack();
+				} else {
+					this.setBounds(bounds);
 				}
-				this.setBounds(bounds);
 				this.setResizable(true);
 				if (!window) this.setExtendedState(MAXIMIZED_BOTH);
 				if (!window && !System.getProperty("os.name").startsWith("Windows") && gd[this.display].isFullScreenSupported()) {
