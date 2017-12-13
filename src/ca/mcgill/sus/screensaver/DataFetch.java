@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -65,8 +66,8 @@ public class DataFetch extends Thread {
 	private final String icsPath = ***REMOVED***;
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
 	
-	private boolean networkUp = true;
-	private boolean loaded = false;
+	private final AtomicBoolean networkUp = new AtomicBoolean(true);
+	private final AtomicBoolean loaded = new AtomicBoolean();
 	
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -88,7 +89,7 @@ public class DataFetch extends Thread {
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
 			Future<UserInfo> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class) : null;
 			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
-			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp; 
+			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get();
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
 				//update marquee data
@@ -178,8 +179,8 @@ public class DataFetch extends Thread {
 			} catch (Exception e) {
 //				e.printStackTrace();
 			}
-			this.loaded = true;
-			networkUp = !fail;
+			this.loaded.set(true);
+			networkUp.set(!fail);
 			for (Runnable listener : listeners) {
 				listener.run();
 			}
@@ -246,10 +247,10 @@ public class DataFetch extends Thread {
 	}
 
 	public boolean isNetworkUp() {
-		return networkUp;
+		return networkUp.get();
 	}
 
 	public boolean isLoaded() {
-		return loaded;
+		return loaded.get();
 	}
 }
