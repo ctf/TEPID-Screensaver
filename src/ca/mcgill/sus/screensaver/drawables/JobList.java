@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,19 +29,19 @@ import ca.mcgill.sus.screensaver.SpriteManager;
 import ca.mcgill.sus.screensaver.io.PrintJob;
 
 public class JobList implements Drawable {
-	
+
 	final static WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); //initialises the server as a targetable thing
 
 	private final Map<String, List<PrintJob>> jobData = DataFetch.getInstance().jobData;
 	private final Map<String, Boolean> statuses = DataFetch.getInstance().printerStatus;
-	
+
 	public final int y;
 	private final AtomicBoolean dirty = new AtomicBoolean();
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
-								 pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
+			pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
 	private static final Color clrDown = new Color(Main.COLOR_DOWN, true);
 	private static final Color clrEmpty = new Color (Main.COLOR_UP, true);
-	
+
 	/**Constructor
 	 * @param y	The Y position
 	 */
@@ -69,11 +70,11 @@ public class JobList implements Drawable {
 			for (Entry<String, List<PrintJob>> jobs : queues) {
 				boolean up = statuses.get(jobs.getKey());
 				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, up),
-				icon = SpriteManager.getInstance().getColoredSprite("printer.png", up ? Main.COLOR_UP : Main.COLOR_DOWN);
+						icon = SpriteManager.getInstance().getColoredSprite("printer.png", up ? Main.COLOR_UP : Main.COLOR_DOWN);
 				g.setFont(FontManager.getInstance().getFont("constanb.ttf").deriveFont(28f));
 				g.setColor(new Color(up ? Main.COLOR_UP : Main.COLOR_DOWN, true));
 				int tableX = 8 + x * tableWidth,
-				iconWidth = icon.getWidth();
+						iconWidth = icon.getWidth();
 				g.drawString(jobs.getKey(), tableX + tableWidth / 2 - g.getFontMetrics().stringWidth(jobs.getKey()) / 2, y + 155);
 				g.drawImage(icon, tableX + tableWidth / 2 - iconWidth / 2, y + 10, iconWidth, iconWidth, null);
 				g.drawImage(table, tableX, y + 170, null);
@@ -81,7 +82,7 @@ public class JobList implements Drawable {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param list 		the list of print jobs to display
 	 * @param width		the width of the table
@@ -94,32 +95,28 @@ public class JobList implements Drawable {
 		out = new BufferedImage(width, 400, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
 		if (list.isEmpty()) {
-			if (status == false) {
-				g.setColor(clrDown);
-				g.fillRect(0, 0, out.getWidth(), out.getHeight());
-			} else {
-				g.setColor(clrEmpty);
-				g.fillRect(0, 0, out.getWidth(), out.getHeight());
-			}
-		}
-		Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
-		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-		//writes the table headers
-		g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));
-		g.setColor(new Color(Main.TEXT_COLOR, true));
-		g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
-		g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
-		g.drawString("Destination", width / 4, 1 * (fontPx + padding * 2) - padding - 2);
-		g.drawString("Status", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
-		//draws the divider
-		g.setColor(lines);
-		g.setStroke(new BasicStroke(2));
-		g.drawLine(0, 1 * (fontPx + padding * 2) - 1, width, 1 * (fontPx + padding * 2) - 1);
-		g.setStroke(new BasicStroke(1));
-		//draws list of printed jobs
-		SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
-		int i = 2;
-		if (!list.isEmpty()) {
+			if (!status) g.setColor(clrDown);
+			else g.setColor(clrEmpty);
+			g.fill(new RoundRectangle2D.Float(0, padding, out.getWidth(), out.getHeight() - padding, 5, 5));
+			(status?pusheenPopcorn:pusheenSad).draw(g, width / 2 - pusheenSad.getWidth() / 2, out.getHeight() / 2 - pusheenSad.getHeight() / 2); 
+		} else {
+			Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
+			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			//writes the table headers
+			g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));
+			g.setColor(new Color(Main.TEXT_COLOR, true));
+			g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
+			g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
+			g.drawString("Destination", width / 4, 1 * (fontPx + padding * 2) - padding - 2);
+			g.drawString("Status", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
+			//draws the divider
+			g.setColor(lines);
+			g.setStroke(new BasicStroke(2));
+			g.drawLine(0, 1 * (fontPx + padding * 2) - 1, width, 1 * (fontPx + padding * 2) - 1);
+			g.setStroke(new BasicStroke(1));
+			//draws list of printed jobs
+			SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
+			int i = 2;
 			for (PrintJob job : list) {
 				if (job.getFailed() != null) {
 					g.setColor(clrDown);
@@ -141,15 +138,6 @@ public class JobList implements Drawable {
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
 				i++;
-			}
-		} else {
-			//there are no jobs to print
-			if (status == false) {
-				//the printer is down
-				pusheenSad.draw(g, width / 2 - pusheenSad.getWidth() / 2, 100); //draws the sad pusheen
-			} else {
-				//nothing has been printed lately
-				pusheenPopcorn.draw(g, width / 2 - pusheenPopcorn.getWidth() / 2, 100); //draws the popcorn pusheen
 			}
 		}
 		g.dispose();
