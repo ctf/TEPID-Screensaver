@@ -108,7 +108,7 @@ public class JobList implements Drawable {
 			g.setColor(new Color(Main.TEXT_COLOR, true));
 			g.setFont(FontManager.getInstance().getFont("nhg-bold.ttf").deriveFont((float) fontPx));
 			g.drawString("User", 5, 1 * (fontPx + padding * 2) - padding - 2);
-			g.drawString("Destination", width / 4, 1 * (fontPx + padding * 2) - padding - 2);
+			g.drawString("Printer", width / 4, 1 * (fontPx + padding * 2) - padding - 2);
 			g.drawString("Status", width / 2, 1 * (fontPx + padding * 2) - padding - 2);
 			//draws the divider
 			g.setColor(lines);
