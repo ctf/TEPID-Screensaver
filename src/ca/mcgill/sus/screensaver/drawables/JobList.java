@@ -94,6 +94,8 @@ public class JobList implements Drawable {
 		BufferedImage out;
 		out = new BufferedImage(width, 400, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		if (list.isEmpty()) {
 			if (!status) g.setColor(clrDown);
 			else g.setColor(clrEmpty);
@@ -101,7 +103,6 @@ public class JobList implements Drawable {
 			(status?pusheenPopcorn:pusheenSad).draw(g, width / 2 - pusheenSad.getWidth() / 2, out.getHeight() / 2 - pusheenSad.getHeight() / 2); 
 		} else {
 			Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 			//writes the table headers
 			g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx));
 			g.setColor(new Color(Main.TEXT_COLOR, true));

@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,6 +48,7 @@ public class Clock implements Drawable {
 
 	@Override
 	public void draw(Graphics2D g, BufferedImage canvas, int canvasWidth, int canvasHeight) {
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont(72f));
 		Rectangle bounds = g.getFontMetrics().getStringBounds(this.time, g).getBounds();
 		int x = canvasWidth - bounds.width - 10;
