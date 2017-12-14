@@ -1,0 +1,23 @@
+group 'ca.mcgill.sus.screensaver'
+version '3.0.7'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+   compile fileTree(dir: 'lib', include: '*.jar')
+}
+
+task listJars {
+	doLast {
+    	configurations.compile.each { File file -> println file.name }
+    }
+}
+
+jar{
+    archiveName 'ctfscreen.jar'
+}
