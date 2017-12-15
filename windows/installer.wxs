@@ -13,18 +13,17 @@
       <Property Id="ARPURLINFOABOUT" Value="http://ctf.science.mcgill.ca/"/>
       <Property Id="ARPNOREPAIR" Value="1"/>
       <Property Id="ARPNOMODIFY" Value="1"/>
-      
-      
+        
     <Upgrade Id="$(var.ProductUpgradeCode)">
-      <UpgradeVersion Property='PREVIOUSVERSIONSINSTALLED' OnlyDetect="no" IncludeMinimum='yes' Minimum='0.0.0' IncludeMaximum='no' Maximum='$(var.ProductVersion)' />
+      <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" Minimum="0.0.1" Maximum='$(var.ProductVersion)' OnlyDetect="no" MigrateFeatures="yes" />
       <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Language="1033" Property="NEWERPRODUCTFOUND" />
     </Upgrade>
+
     <InstallExecuteSequence>
       <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERPRODUCTFOUND AND NOT Installed</Custom>
-      <RemoveExistingProducts Before='InstallInitialize' />
+      <RemoveExistingProducts After="InstallInitialize" />
     </InstallExecuteSequence>
     <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
-    <CustomAction Id="UIandAdvertised" Error="Something about the UI."/>
        
       <Directory Id="TARGETDIR" Name="SourceDir">
          <Directory Id="System64Folder">
@@ -35,7 +34,7 @@
          </Directory>
       </Directory>
  
-      <Feature Id="DefaultFeature" Level="1">		
+      <Feature Id="MainFeature" Title="MainFeature" Level="1">		
 		<ComponentRef Id="all" />
 		<ComponentGroupRef Id="libDir" />
       </Feature>
