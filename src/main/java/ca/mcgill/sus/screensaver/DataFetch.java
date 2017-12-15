@@ -111,40 +111,12 @@ public class DataFetch extends Thread {
 				destinations.putAll(newDestinations);
 				
 				//update user info
+				UserInfo user = null;
 				if (futureUserInfo != null) try {
 					UserInfo newUserInfo = futureUserInfo.get(interval, TimeUnit.SECONDS);
 					userInfo.clear();
 					userInfo.add(newUserInfo);
-					//pull profile picture for office
-					if (pullEvents) try {
-						//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
-						String email = newUserInfo.email == null ? newUserInfo.longUser : newUserInfo.email, 
-						gravatarPath = Util.md5Hex(email) + "?d=404&s=128";
-						Future<byte[]> futureGravatar = gravatarApi.path(gravatarPath).request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
-						String name = newUserInfo.realName == null ? newUserInfo.displayName : newUserInfo.realName;
-						BufferedImage googleThumbnail = null;
-						Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\"" + " mcgill").request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
-						try {
-							ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
-							String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
-							googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
-						} catch (Exception e) {
-						}
-						BufferedImage gravatar = null;
-						try {
-							gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
-						} catch (Exception e) {
-						}
-						BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
-						if (pic != null) {
-							profilePic.clear();
-							profilePic.add(Util.circleCrop(pic));
-						} else {
-							throw new RuntimeException();
-						}
-					} catch (Exception e) {
-						System.err.println("Could not fetch profile pic");
-					}
+					user = newUserInfo;
 				} catch (Exception e) {
 					System.err.println("Could not fetch user info");
 				}
@@ -177,6 +149,42 @@ public class DataFetch extends Thread {
 					List<Slide> newSlides = Util.loadSlides();
 					slides.clear();
 					slides.addAll(newSlides);
+				}
+				
+				//pull profile picture for office
+				if (pullEvents) try {
+					//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
+					Future<byte[]> futureGravatar = null;
+					if (user != null) {
+						String email = user.email == null ? user.longUser : user.email, 
+						gravatarPath = Util.md5Hex(email) + "?d=404&s=128";
+						futureGravatar = gravatarApi.path(gravatarPath).request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
+					}
+					//search google for "full name" + mcgill
+					String name = user == null ? System.getenv("username") : (user.realName == null ? user.displayName : user.realName);
+					BufferedImage googleThumbnail = null;
+					Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\"" + " mcgill").request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
+					try {
+						ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
+						String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
+						googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+					} catch (Exception e) {
+					}
+					//merge
+					BufferedImage gravatar = null;
+					if (futureGravatar != null) try {
+						gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
+					} catch (Exception e) {
+					}
+					BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
+					if (pic != null) {
+						profilePic.clear();
+						profilePic.add(Util.circleCrop(pic));
+					} else {
+						throw new RuntimeException();
+					}
+				} catch (Exception e) {
+					System.err.println("Could not fetch profile pic");
 				}
 				fail = false;
 			} catch (Exception e) {

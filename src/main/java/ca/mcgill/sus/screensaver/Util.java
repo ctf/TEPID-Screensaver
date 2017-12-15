@@ -342,15 +342,15 @@ public class Util {
 	}
 
 	public static BufferedImage circleCrop(BufferedImage image) {
-	    int w = image.getWidth(), h = image.getHeight();
+	    int w = Math.max(image.getWidth(), image.getHeight()), h = w;
 	    BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 	    Graphics2D g = out.createGraphics();
 	    g.setComposite(AlphaComposite.Src);
 	    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	    g.setColor(Color.WHITE);
+	    g.setColor(Color.BLACK);
 	    g.fillOval(0, 0, w, h);
 	    g.setComposite(AlphaComposite.SrcAtop);
-	    g.drawImage(image, 0, 0, null);
+	    g.drawImage(image, w / 2 - image.getWidth() / 2, h / 2 - image.getHeight() / 2, null);
 	    g.dispose();
 	    return out;
 	}

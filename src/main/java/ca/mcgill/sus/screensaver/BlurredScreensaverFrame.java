@@ -62,7 +62,7 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 					} catch (InterruptedException e) {
 					}
 					BufferedImage b1 = background, b2 = background;
-					int maxFrost = 0x77;
+					int maxFrost = 0x88;
 					long start = System.nanoTime();
 					for (int i = 0, f = 0, lastF = -1; i < maxBlur;) {
 						try {
@@ -89,7 +89,7 @@ public class BlurredScreensaverFrame extends ScreensaverFrame {
 							g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 							int alpha = (int) (((double) i / maxBlur) * maxFrost);
 							g.setColor(new Color((alpha << 24) | 0xffffff, true));
-							g.fillRect(0, 0, getWidth(), getHeight()); 
+							g.fillRect(0, 0, b2.getWidth(), b2.getHeight()); 
 							g.dispose();
 							stage.setBackground(composite);
 							stage.setDirty(true);

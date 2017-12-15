@@ -39,8 +39,7 @@ public class JobList implements Drawable {
 	private final AtomicBoolean dirty = new AtomicBoolean();
 	private final AnimatedSprite pusheenSad = SpriteManager.getInstance().getAnimatedSprite("pusheen_sad.png", 2, 2).setSpeedMs(200), 
 			pusheenPopcorn = SpriteManager.getInstance().getAnimatedSprite("pusheen_popcorn.png", 2, 2).setSpeedMs(200) ;
-	private static final Color clrDown = new Color(Main.COLOR_DOWN, true);
-	private static final Color clrEmpty = new Color (Main.COLOR_UP, true);
+	private static final Color clrDown = new Color(Main.COLOR_DOWN, true), clrEmpty = new Color (Main.COLOR_UP, true);
 
 	/**Constructor
 	 * @param y	The Y position
@@ -100,7 +99,8 @@ public class JobList implements Drawable {
 			if (!status) g.setColor(clrDown);
 			else g.setColor(clrEmpty);
 			g.fill(new RoundRectangle2D.Float(0, padding, out.getWidth(), out.getHeight() - padding, 5, 5));
-			(status?pusheenPopcorn:pusheenSad).draw(g, width / 2 - pusheenSad.getWidth() / 2, out.getHeight() / 2 - pusheenSad.getHeight() / 2); 
+			AnimatedSprite pusheen = status ? pusheenPopcorn : pusheenSad;
+			pusheen.draw(g, width / 2 - pusheen.getWidth() / 2, out.getHeight() / 2 - pusheen.getHeight() / 2); 
 		} else {
 			Color oddRows = new Color(0x1A000000 | (0xffffff & Main.TEXT_COLOR), true), lines = new Color(0x4D000000 | (0xffffff & Main.TEXT_COLOR), true);
 			//writes the table headers
