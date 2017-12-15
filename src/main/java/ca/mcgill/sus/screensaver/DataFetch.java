@@ -93,7 +93,7 @@ public class DataFetch extends Thread {
 			Future<UserInfo> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class) : null;
 			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
 			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
-			pullPropic = (Main.OFFICE_COMPUTER && pullSlides) || profilePic.isEmpty();
+			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
 				//update marquee data
