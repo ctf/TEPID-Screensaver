@@ -1,27 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/gson-2.3.1.jar"/>
-	<classpathentry kind="lib" path="lib/hk2-api-2.4.0-b31.jar"/>
-	<classpathentry kind="lib" path="lib/hk2-locator-2.4.0-b31.jar"/>
-	<classpathentry kind="lib" path="lib/hk2-utils-2.4.0-b31.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-annotations-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-core-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-databind-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-jaxrs-base-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-jaxrs-json-provider-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-module-jaxb-annotations-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/javax.annotation-api-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/javax.inject-2.4.0-b31.jar"/>
-	<classpathentry kind="lib" path="lib/javax.ws.rs-api-2.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-client.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-common.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-entity-filtering-2.22.1.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-guava-2.22.1.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.22.1.jar"/>
-	<classpathentry kind="lib" path="lib/biweekly-0.6.1.jar"/>
-	<classpathentry kind="lib" path="lib/vinnie-2.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/javatuples-1.2.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
+	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

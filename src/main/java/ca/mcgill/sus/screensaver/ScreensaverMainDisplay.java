@@ -5,6 +5,7 @@ import ca.mcgill.sus.screensaver.drawables.Error;
 import ca.mcgill.sus.screensaver.drawables.Header;
 import ca.mcgill.sus.screensaver.drawables.InvertingHeader;
 import ca.mcgill.sus.screensaver.drawables.JobList;
+import ca.mcgill.sus.screensaver.drawables.ProfilePic;
 import ca.mcgill.sus.screensaver.drawables.Slideshow;
 import ca.mcgill.sus.screensaver.drawables.UserInfoBar;
 
@@ -29,6 +30,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 						stage.addDrawable(new InvertingHeader(System.getenv("computerName"), 18, 20, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_LEFT));
 						stage.addDrawable(new UserInfoBar(48, 420));
 //						stage.addDrawable(new Marquee(350, Main.TEXT_COLOR));
+						if (Main.OFFICE_COMPUTER) stage.addDrawable(new ProfilePic());
 					} else {
 						//if network is down display special error screen
 						stage.addDrawable(new Error());

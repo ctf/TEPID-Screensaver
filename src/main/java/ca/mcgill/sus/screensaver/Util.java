@@ -1,21 +1,28 @@
 package ca.mcgill.sus.screensaver;
 
 import java.awt.AWTException;
+import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Robot;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -333,4 +340,45 @@ public class Util {
 		}
 		return lum / (w * h);
 	}
+
+	public static BufferedImage circleCrop(BufferedImage image) {
+	    int w = image.getWidth(), h = image.getHeight();
+	    BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g = out.createGraphics();
+	    g.setComposite(AlphaComposite.Src);
+	    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	    g.setColor(Color.WHITE);
+	    g.fillOval(0, 0, w, h);
+	    g.setComposite(AlphaComposite.SrcAtop);
+	    g.drawImage(image, 0, 0, null);
+	    g.dispose();
+	    return out;
+	}
+	
+	public static String hex(byte[] array) {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < array.length; ++i) {
+			sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(
+					1, 3));
+		}
+		return sb.toString();
+	}
+
+	public static String md5Hex(String message) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			return hex(md.digest(message.getBytes("CP1252")));
+		} catch (NoSuchAlgorithmException e) {
+		} catch (UnsupportedEncodingException e) {
+		}
+		return null;
+	}
+	
+	public static BufferedImage readImage(byte[] bytes) throws IOException {
+		ByteArrayInputStream baio = new ByteArrayInputStream(bytes);
+		BufferedImage image = ImageIO.read(baio);
+		baio.close();
+		return image;
+	}
+	
 }

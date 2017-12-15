@@ -1,5 +1,6 @@
 package ca.mcgill.sus.screensaver;
 
+import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.javatuples.Pair;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -57,12 +60,11 @@ public class DataFetch extends Thread {
 		return INSTANCE;
 	}
 	
-	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl); 
-	private final WebTarget icalServer = ClientBuilder
-			.newBuilder()
-			.register(JacksonFeature.class)
-			.build()
-			.target("https://calendar.google.com/calendar/ical"); 
+	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl),
+	icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical"),
+	gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/"),
+	gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(***REMOVED***); 
+	
 	private final String icsPath = ***REMOVED***;
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
 	
@@ -77,6 +79,7 @@ public class DataFetch extends Thread {
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
 	public final Queue<UserInfo> userInfo = new ConcurrentLinkedQueue<>();
 	public final Queue<Slide> slides = new ConcurrentLinkedQueue<>();
+	public final Queue<BufferedImage> profilePic = new ConcurrentLinkedQueue<>();
 	
 	@Override
 	public void run() {
@@ -112,10 +115,40 @@ public class DataFetch extends Thread {
 					UserInfo newUserInfo = futureUserInfo.get(interval, TimeUnit.SECONDS);
 					userInfo.clear();
 					userInfo.add(newUserInfo);
+					//pull profile picture for office
+					if (pullEvents) try {
+						//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
+						String email = newUserInfo.email == null ? newUserInfo.longUser : newUserInfo.email, 
+						gravatarPath = Util.md5Hex(email) + "?d=404&s=128";
+						Future<byte[]> futureGravatar = gravatarApi.path(gravatarPath).request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
+						String name = newUserInfo.realName == null ? newUserInfo.displayName : newUserInfo.realName;
+						BufferedImage googleThumbnail = null;
+						Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\"" + " mcgill").request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
+						try {
+							ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
+							String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
+							googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+						} catch (Exception e) {
+						}
+						BufferedImage gravatar = null;
+						try {
+							gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
+						} catch (Exception e) {
+						}
+						BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
+						if (pic != null) {
+							profilePic.clear();
+							profilePic.add(Util.circleCrop(pic));
+						} else {
+							throw new RuntimeException();
+						}
+					} catch (Exception e) {
+						System.err.println("Could not fetch profile pic");
+					}
 				} catch (Exception e) {
 					System.err.println("Could not fetch user info");
 				}
-				
+								
 				//process and update printer queues
 				Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
 				Map<String, List<PrintJob>> newJobs = new HashMap<>();
