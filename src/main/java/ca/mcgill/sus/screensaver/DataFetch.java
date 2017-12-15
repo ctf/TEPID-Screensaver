@@ -78,7 +78,7 @@ public class DataFetch extends Thread {
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
 	public final Queue<UserInfo> userInfo = new ConcurrentLinkedQueue<>();
-	public final Queue<Slide> slides = new ConcurrentLinkedQueue<>();
+	public final List<Slide> slides = Collections.synchronizedList(new ArrayList<>());
 	public final Queue<BufferedImage> profilePic = new ConcurrentLinkedQueue<>();
 	
 	@Override

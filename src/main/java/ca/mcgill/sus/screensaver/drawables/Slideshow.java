@@ -3,8 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
-import java.util.Queue;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.CubicBezier;
@@ -16,11 +15,9 @@ import ca.mcgill.sus.screensaver.io.Slide;
 public class Slideshow implements Drawable {
 	
 	private int w, h;
-	private long startTime;
 	private final int interval, transition;
 	private final CubicBezier easeInOut;
-	private final Queue<Slide> slides = DataFetch.getInstance().slides;
-	private Iterator<Slide> sliderator = slides.iterator();
+	private final List<Slide> slides = DataFetch.getInstance().slides;
 	private double progress;
 	private Slide slide, nextSlide;
 	private final AtomicBoolean dirty = new AtomicBoolean();
@@ -57,31 +54,21 @@ public class Slideshow implements Drawable {
 		g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 		g.drawImage(img, x, y, w, h, null);
 	}
-	
-	private Slide getNextSlide() {
-		if (slides.isEmpty()) return null;
-		if (!sliderator.hasNext()) sliderator = slides.iterator();
-		return sliderator.next();
-	}
 
 	@Override
-	public void step(long timestamp) {
-		//forcibly sync the starting timestamp to the nearest hour
-		if (startTime == 0) {
-			long sync = System.currentTimeMillis() - (System.currentTimeMillis() / 1000 / 60 / 60) * 1000 * 60 * 60;
-			startTime = timestamp - sync; 
-		}
-		long t = timestamp - startTime;
-		int totalDuration = interval + transition;
+	public void step(long notUsed) {
+		if (slides.isEmpty()) return;
+		long t = System.currentTimeMillis();
+		int totalDuration = interval + transition,
+		slideIndex = (int) ((double) t / totalDuration) % slides.size();
 		double p = 0;
 		if (t % totalDuration >= interval) {
 			p = easeInOut.calc(((double) (t % totalDuration) - interval) / transition);
 		}
-		if (slides.isEmpty()) return;
 		if (p < progress || slide == null) {
-			if (nextSlide == null) nextSlide = getNextSlide();
+			if (nextSlide == null) nextSlide = slides.get(slideIndex);
 			slide = nextSlide;
-			nextSlide = getNextSlide();
+			nextSlide = slides.get((slideIndex + 1) % slides.size());
 		}
 		if (p != progress || t == 0) this.setDirty(true);
 		progress = p;
