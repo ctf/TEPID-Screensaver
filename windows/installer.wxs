@@ -1,42 +1,36 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <?define ProductVersion = "$(env.PRODUCTVERSION)"?>
 <?define ProductUpgradeCode = "{EB638595-E06B-4002-8C48-96514116B7E2}"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:fire="http://schemas.microsoft.com/wix/FirewallExtension">
-   <Product Id="*" UpgradeCode="$(var.ProductUpgradeCode)" 
-            Name="CTF Screensaver" Version="$(var.ProductVersion)" Manufacturer="McGill Science Computer Taskforce" Language="1033">
-      <Package Platform="x64" InstallerVersion="200" Compressed="yes" 
-			Comments="This installer database contains the logic and data required to install CTF Screensaver."/>
-      <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
-      <Icon Id="ProductIcon" SourceFile="ctflogo.ico"/>
-      <Property Id="ARPPRODUCTICON" Value="ProductIcon"/>
-      <Property Id="ARPHELPLINK" Value="http://ctf.science.mcgill.ca/"/>
-      <Property Id="ARPURLINFOABOUT" Value="http://ctf.science.mcgill.ca/"/>
-      <Property Id="ARPNOREPAIR" Value="1"/>
-      <Property Id="ARPNOMODIFY" Value="1"/>
-        
-    <Upgrade Id="$(var.ProductUpgradeCode)">
-      <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" Minimum="0.0.1" Maximum='$(var.ProductVersion)' OnlyDetect="no" MigrateFeatures="yes" />
-      <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Language="1033" Property="NEWERPRODUCTFOUND" />
-    </Upgrade>
-
-    <InstallExecuteSequence>
-      <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERPRODUCTFOUND AND NOT Installed</Custom>
-      <RemoveExistingProducts After="InstallInitialize" />
-    </InstallExecuteSequence>
-    <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
-       
-      <Directory Id="TARGETDIR" Name="SourceDir">
-         <Directory Id="System64Folder">
-			<Component Id="all" Guid="*" Win64="yes" >
-				<File Id="scrFile" Source="ctfscreen.scr" />
-			</Component>
-			<Directory Id="dir_ctfscreen_data" />
-         </Directory>
-      </Directory>
- 
-      <Feature Id="MainFeature" Title="MainFeature" Level="1">		
-		<ComponentRef Id="all" />
-		<ComponentGroupRef Id="libDir" />
-      </Feature>
-   </Product>
+    <Product Id="*" UpgradeCode="$(var.ProductUpgradeCode)" Name="CTF Screensaver" Version="$(var.ProductVersion)" Manufacturer="McGill Science Computer Taskforce" Language="1033">
+        <Package Platform="x64" InstallerVersion="200" Compressed="yes" Comments="This installer database contains the logic and data required to install CTF Screensaver." />
+        <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
+        <Icon Id="ProductIcon" SourceFile="ctflogo.ico" />
+        <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+        <Property Id="ARPHELPLINK" Value="http://ctf.science.mcgill.ca/" />
+        <Property Id="ARPURLINFOABOUT" Value="http://ctf.science.mcgill.ca/" />
+        <Property Id="ARPNOREPAIR" Value="1" />
+        <Property Id="ARPNOMODIFY" Value="1" />
+        <Upgrade Id="$(var.ProductUpgradeCode)">
+            <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" Minimum="0.0.1" Maximum="$(var.ProductVersion)" OnlyDetect="no" MigrateFeatures="yes" />
+            <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Language="1033" Property="NEWERPRODUCTFOUND" />
+        </Upgrade>
+        <InstallExecuteSequence>
+            <Custom Action="PreventDowngrading" After="FindRelatedProducts">NEWERPRODUCTFOUND AND NOT Installed</Custom>
+            <RemoveExistingProducts After="InstallInitialize" />
+        </InstallExecuteSequence>
+        <CustomAction Id="PreventDowngrading" Error="Newer version already installed." />
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="System64Folder">
+                <Component Id="all" Guid="*" Win64="yes">
+                    <File Id="scrFile" Source="ctfscreen.scr" />
+                </Component>
+                <Directory Id="dir_ctfscreen_data" />
+            </Directory>
+        </Directory>
+        <Feature Id="MainFeature" Title="MainFeature" Level="1">
+            <ComponentRef Id="all" />
+            <ComponentGroupRef Id="libDir" />
+        </Feature>
+    </Product>
 </Wix>
