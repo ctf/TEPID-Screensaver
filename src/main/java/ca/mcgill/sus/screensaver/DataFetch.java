@@ -92,7 +92,8 @@ public class DataFetch extends Thread {
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
 			Future<UserInfo> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class) : null;
 			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
-			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get();
+			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
+			pullPropic = (Main.OFFICE_COMPUTER && pullSlides) || profilePic.isEmpty();
 			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
 			try {
 				//update marquee data
@@ -152,7 +153,7 @@ public class DataFetch extends Thread {
 				}
 				
 				//pull profile picture for office
-				if (pullEvents) try {
+				if (pullPropic) try {
 					//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
 					Future<byte[]> futureGravatar = null;
 					if (user != null) {
