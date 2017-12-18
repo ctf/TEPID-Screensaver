@@ -1,5 +1,5 @@
 group 'ca.mcgill.sus.screensaver'
-version '3.1.0'
+version '3.2.1'
 
 apply plugin: 'java'
 
@@ -12,12 +12,31 @@ dependencies {
    compile fileTree(dir: 'lib', include: '*.jar')
 }
 
-task listJars {
-	doLast {
-    	configurations.compile.each { File file -> println file.name }
-    }
+jar.baseName = 'ctfscreen'
+
+task copyRunner(type: Copy) {
+    into "$buildDir/libs"
+    from "windows"
 }
 
-jar{
-    archiveName 'ctfscreen.jar'
+task copyLibs(type: Copy) {
+    into "$buildDir/libs/ctfscreen-data"
+    from configurations.runtime
+}
+
+task windowsJar(type: Jar) {
+	from sourceSets.main.output
+	destinationDir = file("$buildDir/libs/ctfscreen-data")
+	baseName = 'ctfscreen'
+}
+
+task windows(type: GradleBuild) {
+    tasks = ['windowsJar', 'copyRunner', 'copyLibs']
+}
+
+task msi(type: Exec) {
+	dependsOn "windows"
+    workingDir "$buildDir/libs"
+    environment "PRODUCTVERSION", version
+    commandLine "cmd","/c","wix.bat"
 }
