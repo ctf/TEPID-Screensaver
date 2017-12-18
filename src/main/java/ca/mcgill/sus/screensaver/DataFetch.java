@@ -157,9 +157,8 @@ public class DataFetch extends Thread {
 					//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
 					Future<byte[]> futureGravatar = null;
 					if (user != null) {
-						String email = user.email == null ? user.longUser : user.email, 
-						gravatarPath = Util.md5Hex(email) + "?d=404&s=128";
-						futureGravatar = gravatarApi.path(gravatarPath).request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
+						String email = user.email == null ? user.longUser : user.email;
+						futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
 					}
 					//search google for "full name" + mcgill
 					String name = user == null ? System.getenv("username") : (user.realName == null ? user.displayName : user.realName);
