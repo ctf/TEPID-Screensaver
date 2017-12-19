@@ -32,6 +32,7 @@ task windowsJar(type: Jar) {
 
 task windows(type: GradleBuild) {
     tasks = ['windowsJar', 'copyRunner', 'copyLibs']
+    group 'build'
 }
 
 task msi(type: Exec) {
@@ -39,4 +40,5 @@ task msi(type: Exec) {
     workingDir "$buildDir/libs"
     environment "PRODUCTVERSION", version
     commandLine "cmd","/c","wix.bat"
+    group 'build'
 }
