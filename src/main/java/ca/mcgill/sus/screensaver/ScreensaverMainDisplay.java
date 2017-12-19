@@ -30,7 +30,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 						stage.addDrawable(new InvertingHeader(System.getenv("computerName"), 18, 20, Main.TEXT_COLOR, false).setAlignment(Header.ALIGN_LEFT));
 						stage.addDrawable(new UserInfoBar(48, 420));
 //						stage.addDrawable(new Marquee(350, Main.TEXT_COLOR));
-						if (Main.OFFICE_COMPUTER) stage.addDrawable(new ProfilePic());
+						if (Main.OFFICE_COMPUTER && Main.LOGGED_IN) stage.addDrawable(new ProfilePic());
 					} else {
 						//if network is down display special error screen
 						stage.addDrawable(new Error());
