@@ -10,6 +10,7 @@ repositories {
 
 dependencies {
    compile fileTree(dir: 'lib', include: '*.jar')
+   compile 'com.github.kmonkeyjam:slack-java-client:bdfe9e9880'
 }
 
 jar.baseName = 'ctfscreen'
