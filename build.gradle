@@ -2,6 +2,8 @@ group 'ca.mcgill.sus.screensaver'
 version '3.2.1'
 
 apply plugin: 'java'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()

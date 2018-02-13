@@ -208,11 +208,22 @@ public class DataFetch extends Thread {
 						VEvent e = event.getValue1();
 						Calendar c = GregorianCalendar.getInstance();
 						c.setTime(d);
-						Calendar oneWeek = GregorianCalendar.getInstance();
+						boolean isOnTheHour = c.get(Calendar.MINUTE) == 0;
+						c.set(Calendar.HOUR_OF_DAY, 0);
+						c.set(Calendar.MINUTE, 0);
+						c.set(Calendar.SECOND, 0);
+						c.set(Calendar.MILLISECOND, 0);
+						Calendar oneWeek = GregorianCalendar.getInstance(),
+						today = GregorianCalendar.getInstance();
+						today.set(Calendar.HOUR_OF_DAY, 0);
+						today.set(Calendar.MINUTE, 0);
+						today.set(Calendar.SECOND, 0);
+						today.set(Calendar.MILLISECOND, 0);
 						oneWeek.add(Calendar.DATE, 6);
-						boolean isSoon = c.before(oneWeek);
-						String dateFormat = (isSoon ? "E": "MMM d") + (c.get(Calendar.MINUTE) == 0 ? " @ h a" : " @ h:mm a");
-						upcomingEvents.add(new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
+						boolean isSoon = c.before(oneWeek),
+						isToday = c.equals(today);
+						String dateFormat = (isToday ? "" : (isSoon ? "E": "MMM d")) + (isOnTheHour ? " @ h a" : " @ h:mm a");
+						upcomingEvents.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
 					}
 					fail = false;
 					System.out.println("Fetched events");
