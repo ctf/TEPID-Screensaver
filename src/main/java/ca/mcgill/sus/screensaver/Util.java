@@ -269,6 +269,7 @@ public class Util {
 		} catch (Exception e) {}
 		Map<String, Slide> slides = new HashMap<>();
 		for (Entry<String, BufferedImage> e : images.entrySet()) {
+			if (e.getValue() == null) continue;
 			String name = (e.getKey().contains(".") ? e.getKey().substring(0, e.getKey().indexOf(".")): e.getKey()).toLowerCase();
 			boolean light = name.endsWith("_light");
 			if (light) name = name.substring(0, name.indexOf("_light"));
