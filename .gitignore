@@ -2,3 +2,6 @@
 CTF Screensaver-cache
 CTF Screensaver-SetupFiles
 build
+\.idea/
+
+out/
