@@ -1,14 +1,7 @@
 group 'ca.mcgill.sus.screensaver'
 version '3.2.2'
 
-apply plugin: 'java'
-apply plugin: 'kotlin'
-apply plugin: 'idea'
-sourceCompatibility = JVM_TARGET
-targetCompatibility = JVM_TARGET
-
 buildscript {
-    ext.kotlin_version = '1.2.41'
     repositories {
         jcenter()
         mavenCentral()
@@ -16,18 +9,38 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "ca.mcgill.tepid-commons:gradle-plugin:$TEPID_COMMONS"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
+        classpath "ca.mcgill:tepid-commons:$TEPID_COMMONS"
     }
 }
 
-dependencies {
-    compile fileTree(dir: 'lib', include: '*.jar')
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'idea'
+apply plugin: 'ca.mcgill.science.tepid.commons'
+
+sourceCompatibility = JVM_TARGET
+targetCompatibility = JVM_TARGET
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
-apply plugin: 'ca.mcgill.science.tepid.commons'
+dependencies {
+    testCompile "junit:junit:$JUNIT"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$KOTLIN"
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$KOTLIN"
+
+    compile "ca.mcgill.tepid-commons:core:$TEPID_COMMONS"
+    compile "ca.mcgill.tepid-commons:models:$TEPID_COMMONS"
+    compile "ca.mcgill.tepid-commons:utils:$TEPID_COMMONS"
+
+    compile fileTree(dir: 'lib', include: '*.jar')
+
+}
 
 jar.baseName = 'ctfscreen'
 
@@ -59,16 +72,14 @@ task msi(type: Exec) {
     commandLine "cmd","/c","wix.bat"
     group 'build'
 }
-repositories {
-    mavenCentral()
-}
+
 compileKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JVM_TARGET
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JVM_TARGET
     }
 }
