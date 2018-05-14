@@ -119,7 +119,7 @@ public class JobList implements Drawable {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
 			int i = 2;
 			for (PrintJob job : list) {
-				if (job.getFailed() != null) {
+				if (job.getFailed() != -1) {
 					g.setColor(clrDown);
 					g.fillRect(0, (i - 1) * (fontPx + padding * 2), width, fontPx + padding * 2);
 				} else if (i % 2 == 0) {
@@ -132,9 +132,9 @@ public class JobList implements Drawable {
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
 				if(job.getDestination() != null) g.drawString(DataFetch.getInstance().destinations.get(job.getDestination()).name, width / 4, i * (fontPx + padding * 2) - padding - 2);
 				String jobStatus = "Uploading...";
-				if(job.getPrinted() != null) jobStatus = ("Printed  " + dateFormat.format(job.getPrinted()));
+				if(job.getPrinted() != -1) jobStatus = ("Printed  " + dateFormat.format(job.getPrinted()));
 				else if(job.getError() != null) jobStatus = (job.getError());
-				else if(job.getReceived() != null) jobStatus = ("Received  " + dateFormat.format(job.getReceived()));
+				else if(job.getReceived() != -1) jobStatus = ("Received  " + dateFormat.format(job.getReceived()));
 				g.drawString(jobStatus, width / 2, i * (fontPx + padding * 2) - padding - 2);
 				g.setColor(lines);
 				g.drawLine(0, i * (fontPx + padding * 2), width, i * (fontPx + padding * 2));
