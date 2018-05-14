@@ -26,7 +26,7 @@ import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.SpriteManager;
-import ca.mcgill.sus.screensaver.io.PrintJob;
+import ca.mcgill.science.tepid.models.data.PrintJob;
 
 public class JobList implements Drawable {
 

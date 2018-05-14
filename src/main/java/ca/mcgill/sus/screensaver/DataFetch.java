@@ -40,7 +40,7 @@ import biweekly.property.DateStart;
 import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.sus.screensaver.io.Destination;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
-import ca.mcgill.sus.screensaver.io.PrintJob;
+import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;
 import ca.mcgill.sus.screensaver.io.UserInfo;
 
