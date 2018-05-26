@@ -56,7 +56,7 @@ dependencies {
 jar.baseName = 'ctfscreen'
 
 task copyConfigs(type: Copy) {
-    from "$tepid_config_dir/URL.properties"
+    from "$tepid_config_dir/URL.properties", "$tepid_config_dir/screensaver.properties"
     into "config"
 }
 

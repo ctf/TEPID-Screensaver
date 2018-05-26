@@ -3,6 +3,7 @@ package ca.mcgill.sus.screensaver
 import ca.mcgill.science.tepid.utils.LogUtils
 import ca.mcgill.science.tepid.utils.PropsLDAP
 import ca.mcgill.science.tepid.utils.PropsURL
+import ca.mcgill.science.tepid.utils.PropsScreensaver
 import ca.mcgill.science.tepid.utils.WithLogging
 import org.apache.logging.log4j.Level
 
@@ -18,6 +19,8 @@ object Config : WithLogging() {
     val SERVER_URL: String
     val WEB_URL: String
 
+    val office_regex: String
+
     val DEBUG: Boolean
 
     init {
@@ -31,6 +34,8 @@ object Config : WithLogging() {
         DEBUG = PropsURL.SERVER_URL_TESTING != SERVER_URL
 
         WEB_URL = PropsURL.WEB_URL_PRODUCTION
+
+        office_regex = PropsScreensaver.OFFICE_REGEX
 
         if (DEBUG) LogUtils.setLoggingLevel(log, Level.TRACE)
 
