@@ -22,6 +22,8 @@ object Config : WithLogging() {
     val office_regex: String
     val gravatar_search_terms: String
     val report_malfunctioning_to: String
+    val announcement_slide_directory: String
+    val background_picture_directory: String
 
     val DEBUG: Boolean
 
@@ -40,7 +42,8 @@ object Config : WithLogging() {
         office_regex = PropsScreensaver.OFFICE_REGEX
         gravatar_search_terms = PropsScreensaver.GRAVATAR_SEARCH_TERMS
         report_malfunctioning_to = PropsScreensaver.REPORT_MALFUNCTIONING_COMPUTER_TEXT
-
+        announcement_slide_directory = PropsScreensaver.ANNOUNCEMENT_SLIDE_LOCATION
+        background_picture_directory = PropsScreensaver.BACKGROUND_PICTURE_LOCATION
 
         if (DEBUG) LogUtils.setLoggingLevel(log, Level.TRACE)
 
