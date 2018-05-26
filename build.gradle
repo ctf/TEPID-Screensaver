@@ -77,7 +77,7 @@ task windowsJar(type: Jar) {
 }
 
 task windows(type: GradleBuild) {
-    tasks = ['windowsJar', 'copyRunner', 'copyLibs']
+    tasks = ['windowsJar', 'copyRunner', 'copyLibs', 'copyConfigs']
     group 'build'
 }
 
