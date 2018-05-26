@@ -24,6 +24,8 @@ object Config : WithLogging() {
     val report_malfunctioning_to: String
     val announcement_slide_directory: String
     val background_picture_directory: String
+    val GOOGLE_CUSTOM_SEARCH_KEY: String
+    val ICS_CALENDAR_ADDRESS: String
 
     val DEBUG: Boolean
 
@@ -44,6 +46,8 @@ object Config : WithLogging() {
         report_malfunctioning_to = PropsScreensaver.REPORT_MALFUNCTIONING_COMPUTER_TEXT
         announcement_slide_directory = PropsScreensaver.ANNOUNCEMENT_SLIDE_LOCATION
         background_picture_directory = PropsScreensaver.BACKGROUND_PICTURE_LOCATION
+        GOOGLE_CUSTOM_SEARCH_KEY = PropsScreensaver.GOOGLE_CUSTOM_SEARCH_KEY
+        ICS_CALENDAR_ADDRESS = PropsScreensaver.ICS_CALENDAR_ADDRESS
 
         if (DEBUG) LogUtils.setLoggingLevel(log, Level.TRACE)
 
