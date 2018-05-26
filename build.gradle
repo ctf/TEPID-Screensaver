@@ -19,6 +19,17 @@ apply plugin: 'kotlin'
 apply plugin: 'idea'
 apply plugin: 'ca.mcgill.science.tepid.commons'
 
+ext {
+    // can be passed with -Ptepid_config_dir=CONFIG_DIR, or set in an environment variable "tepid_config_dir
+    if (! project.hasProperty('tepid_config_dir')){
+        tepid_config_dir = "$System.env.tepid_config_dir"
+    }
+    if (! project.hasProperty('tepid_config_dir')){
+        throw new GradleException('tepid_config_dir not found')
+    }
+}
+
+
 sourceCompatibility = JVM_TARGET
 targetCompatibility = JVM_TARGET
 
@@ -43,6 +54,11 @@ dependencies {
 }
 
 jar.baseName = 'ctfscreen'
+
+task copyConfigs(type: Copy) {
+    from "$tepid_config_dir/URL.properties"
+    into "config"
+}
 
 task copyRunner(type: Copy) {
     into "$buildDir/libs"
