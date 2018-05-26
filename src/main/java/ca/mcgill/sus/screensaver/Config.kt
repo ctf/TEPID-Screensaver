@@ -20,6 +20,7 @@ object Config : WithLogging() {
     val WEB_URL: String
 
     val office_regex: String
+    val gravatar_search_terms: String
 
     val DEBUG: Boolean
 
@@ -36,6 +37,8 @@ object Config : WithLogging() {
         WEB_URL = PropsURL.WEB_URL_PRODUCTION
 
         office_regex = PropsScreensaver.OFFICE_REGEX
+        gravatar_search_terms = PropsScreensaver.GRAVATAR_SEARCH_TERMS
+
 
         if (DEBUG) LogUtils.setLoggingLevel(log, Level.TRACE)
 
