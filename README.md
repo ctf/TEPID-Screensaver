@@ -1,5 +1,27 @@
 # CTF Screensaver
 
+##Features
+The CTF Screensaver is the most extra screensaver around. It has a number of cool features:
+
+### Information Screens 
+A band at the top allows for colourful informational images to be broadcast. This makes it much more likely that people might actually notive what you've put up there. It also enables you to use images and logos in the info-blasts, which might catch someone's attention. We got about 100% increase in people noticing things when we rolled out this feature.
+
+The changing of the info screens is synchronised across devices, so that it looks nice if you have a whole lab going at once.
+
+Slides are pulled from the ANNOUNCEMENT_SLIDE_LOCATION directory. This can easily be populated with an active directory task, a script, or even make it a protected-write+open-read directory on a network share
+
+### TEPID tie-in
+The screensaver is the perfect way to display information about the TEPID printing service to your users. It displays print queues, their status, and (if they're up) it displays the 10 most recent print jobs from each queue (displaying the name of who printed, the time, and which printer in the queue it came out of). It will also display if a job failed and the reason for the failure. 
+
+If nothing has been printed in a queue in the past hour, a happy pusheen will be munching on popcorn. If a printer is down, a sad pusheen will be weeping. The area normally occupied by print jobs will instead be filled with a status-appropriate coloured rectangle, to aid people in easily identifying when a particular queue is completely down.
+
+### Office Mode
+The screensaver also has a special mode for your office's computers. These are the computers which your IT staff use (office computers are identified by matching their hostnames against the OFFICE_REGEX config option). Office mode enables 2 main items:
+1. Calendar : a ticker on a second display will cycle through upcoming events published to an ics calendar.
+1. Gravatar : the screensaver will attempt to pull a gravatar of the logged-in user's domain email. If it doesn't find one, it will attempt a Google search for the user's name and a custom search string (which can help narrow the search to probably the right person). If they have a LinkedIn account the SEO is usually good enough to get the average person to the first result. Hilarity may ensue when the search pulls up someone completely unrelated to the actual person.
+
+There's also some mildly nonfunctional members-on-duty display. This currently doesn't work, but it could someday.
+
 ## Build
 Gradle tasks: 
 - `jar` build jar
