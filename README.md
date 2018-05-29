@@ -4,6 +4,7 @@
 Gradle tasks: 
 - `jar` build jar
 - `windows` build jar and package it with a ctfscreen.scr launcher and libs in `ctfscreen-data` for copying to `System32`
+- `copyConfigs` copies your config files from somewhere else, so they get bundled into the JAR
 - `msi` build msi (make sure you are running on Windows and Wix is installed before running this)
 
 ## Run
