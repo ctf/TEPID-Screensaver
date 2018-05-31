@@ -245,7 +245,7 @@ public class Util {
 		BufferedImage background;
 		try {
 			InputStream bgJpg; 
-			File localBg = new File(System.getenv("systemdrive") + "\\CTF Screensaver" + (vertical ? " Vertical" : "") + ".jpg");
+			File localBg = new File(Config.INSTANCE.getBackground_picture_directory() + "CTF Screensaver" + (vertical ? " Vertical" : "") + ".jpg");
 			if (localBg.exists()) {
 				bgJpg = new FileInputStream(localBg);
 			} else {
@@ -261,7 +261,7 @@ public class Util {
 	public static List<Slide> loadSlides() {
 		Map<String, BufferedImage> images = new HashMap<>();
 		try {
-			for (File f : new File("C:\\Screensaver Slides").listFiles()) {
+			for (File f : new File(Config.INSTANCE.getAnnouncement_slide_directory()).listFiles()) {
 				try {
 					images.put(f.getName(), ImageIO.read(f));
 				} catch (Exception e) {}

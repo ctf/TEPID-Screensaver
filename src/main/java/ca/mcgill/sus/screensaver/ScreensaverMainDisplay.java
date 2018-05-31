@@ -38,7 +38,7 @@ public class ScreensaverMainDisplay extends BlurredScreensaverFrame {
 						stage.addDrawable(new Header("No Network Connection", 120, 220, 0x000000, true, "constanb.ttf"));
 						stage.addDrawable(new Header("This is usually the result of a disconnected cable.", 50, 900, 0xff0000, true, "constanb.ttf"));
 						stage.addDrawable(new Header("Please report that this workstation (" + System.getenv("computerName") + ")", 30, 975, 0xff0000, false, "constan.ttf"));
-						stage.addDrawable(new Header("is not functioning to a CTF volunteer in Burnside 1B19.", 30, 1015, 0xff0000, false, "constan.ttf"));
+						stage.addDrawable(new Header("is not functioning to" + Config.INSTANCE.getReport_malfunctioning_to(), 30, 1015, 0xff0000, false, "constan.ttf"));
 					}
 					stage.setDirty(true);
 				}

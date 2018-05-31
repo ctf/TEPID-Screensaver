@@ -26,6 +26,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import ca.mcgill.science.tepid.utils.PropsScreensaver;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.javatuples.Pair;
 
@@ -63,9 +64,9 @@ public class DataFetch extends Thread {
 	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl),
 	icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical"),
 	gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/"),
-	gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(***REMOVED***); 
+	gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image");
 	
-	private final String icsPath = ***REMOVED***;
+	private final String icsPath = Config.INSTANCE.getICS_CALENDAR_ADDRESS();
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
 	
 	private final AtomicBoolean networkUp = new AtomicBoolean(true);
@@ -163,7 +164,7 @@ public class DataFetch extends Thread {
 					//search google for "full name" + mcgill
 					String name = user == null ? System.getenv("username") : (user.realName == null ? user.displayName : user.realName);
 					BufferedImage googleThumbnail = null;
-					Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\"" + " mcgill").request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
+					Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
 					try {
 						ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
 						String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
