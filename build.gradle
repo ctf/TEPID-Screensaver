@@ -55,6 +55,14 @@ dependencies {
 
 jar.baseName = 'ctfscreen'
 
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "config"
+        }
+    }
+}
+
 task copyConfigs(type: Copy) {
     from "$tepid_config_dir/URL.properties", "$tepid_config_dir/screensaver.properties"
     into "config"
@@ -71,6 +79,9 @@ task copyLibs(type: Copy) {
 }
 
 task windowsJar(type: Jar) {
+    from('config') {
+        include '*.properties'
+    }
 	from sourceSets.main.output
 	destinationDir = file("$buildDir/libs/ctfscreen-data")
 	baseName = 'ctfscreen'
