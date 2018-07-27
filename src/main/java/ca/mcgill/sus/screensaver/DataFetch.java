@@ -283,12 +283,7 @@ public class DataFetch extends Thread {
 				}
 				if (soonest != null) events.add(new Pair<Date, VEvent>(soonest, e));
 			}
-			Collections.sort(events, new Comparator<Pair<Date, VEvent>>() {
-				@Override
-				public int compare(Pair<Date, VEvent> e1, Pair<Date, VEvent> e2) {
-					return e1.getValue0().compareTo(e2.getValue0());
-				}
-			});
+			Collections.sort(events, (e1, e2) -> e1.getValue0().compareTo(e2.getValue0()));
 			return events;
 		}
 	}

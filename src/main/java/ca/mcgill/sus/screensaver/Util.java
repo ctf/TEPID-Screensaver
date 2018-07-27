@@ -282,11 +282,7 @@ public class Util {
 			if (s.light == null) s.light = s.dark;
 			if (s.dark == null) s.dark = s.light;
 		}
-		out.sort(new Comparator<Slide>() {
-			public int compare(Slide s1, Slide s2) {
-				return s1.name.compareTo(s2.name);
-			}
-		});
+		out.sort((s1, s2) -> s1.name.compareTo(s2.name));
 		return out;
 	}
 	

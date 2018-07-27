@@ -46,11 +46,7 @@ public class JobList implements Drawable {
 	 */
 	public JobList(int y) {
 		this.y = y;
-		DataFetch.getInstance().addChangeListener(new Runnable() {
-			public void run() {
-				dirty.set(true);
-			}
-		});
+		DataFetch.getInstance().addChangeListener(() -> dirty.set(true));
 	}
 
 	@Override
@@ -60,12 +56,7 @@ public class JobList implements Drawable {
 			int x = 0, tableWidth = canvasWidth / jobData.size();
 			if (tableWidth <= 0) return;
 			List<Entry<String, List<PrintJob>>> queues = new ArrayList<>(jobData.entrySet());
-			Collections.sort(queues, new Comparator<Entry<String, List<PrintJob>>>() {
-				@Override
-				public int compare(Entry<String, List<PrintJob>> e1, Entry<String, List<PrintJob>> e2) {
-					return e1.getKey().compareTo(e2.getKey());
-				}
-			});
+			Collections.sort(queues, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
 			for (Entry<String, List<PrintJob>> jobs : queues) {
 				boolean up = statuses.get(jobs.getKey());
 				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, up),
