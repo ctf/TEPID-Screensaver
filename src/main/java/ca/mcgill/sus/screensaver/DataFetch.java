@@ -94,7 +94,7 @@ public class DataFetch extends Thread {
 			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
 			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
 			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
-			Future<String> futureEvents = pullEvents ? icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class) : null;
+
 			try {
 				//update marquee data
 				List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get(interval, TimeUnit.SECONDS));
@@ -192,7 +192,7 @@ public class DataFetch extends Thread {
 			}
 
 			if (pullEvents) {
-				fail &= processEvents(futureEvents);
+				fail &= processEvents();
 			}
 
 			this.loaded.set(true);
@@ -211,7 +211,10 @@ public class DataFetch extends Thread {
 		System.out.println("Data fetch thread over and out");
 	}
 
-	private boolean processEvents(Future<String> futureEvents) {
+	private boolean processEvents() {
+
+		Future<String> futureEvents = icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class);
+
 		boolean fail = true;
 		try {
 			//process upcoming events (if this is an office computer)
