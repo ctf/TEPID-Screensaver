@@ -77,7 +77,7 @@ public class JobList implements Drawable {
 	 * @param list 		the list of print jobs to display
 	 * @param width		the width of the table
 	 * @param status	the status of the print queue. will determine whether an empty queue gets the popcorn pusheen or the sad pusheen
-	 * @return
+	 * @return the buffered image created hereby
 	 */
 	public BufferedImage renderTable(List<PrintJob> list, int width, boolean status) {
 		int fontPx = 16, padding = 10;
