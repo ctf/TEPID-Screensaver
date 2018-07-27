@@ -11,7 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class ScreensaverFrame extends JFrame {
 	private static final long serialVersionUID = 4848839375816808489L;
@@ -22,7 +22,7 @@ public class ScreensaverFrame extends JFrame {
 		super("CTF Screensaver");
 		this.display = display;
 		this.window = window;
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		if (!window) this.setAlwaysOnTop(true);
 		if (!window) this.setUndecorated(true);
 		this.addKeyListener(new KeyAdapter() {

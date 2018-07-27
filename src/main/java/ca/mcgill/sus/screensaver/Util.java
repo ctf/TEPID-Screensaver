@@ -355,8 +355,7 @@ public class Util {
 	public static String hex(byte[] array) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < array.length; ++i) {
-			sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(
-					1, 3));
+			sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100), 1, 3);
 		}
 		return sb.toString();
 	}
