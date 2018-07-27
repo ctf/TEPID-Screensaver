@@ -1,7 +1,6 @@
 package ca.mcgill.sus.screensaver
 
 import ca.mcgill.science.tepid.utils.LogUtils
-import ca.mcgill.science.tepid.utils.PropsLDAP
 import ca.mcgill.science.tepid.utils.PropsURL
 import ca.mcgill.science.tepid.utils.PropsScreensaver
 import ca.mcgill.science.tepid.utils.WithLogging
