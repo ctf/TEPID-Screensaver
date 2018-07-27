@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -42,7 +41,7 @@ import ca.mcgill.science.tepid.models.data.Destination;
 import ca.mcgill.science.tepid.models.data.MarqueeData;
 import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;
-import ca.mcgill.sus.screensaver.io.UserInfo;
+import ca.mcgill.science.tepid.models.data.NameUser;
 
 public class DataFetch extends Thread {
 	
@@ -77,7 +76,7 @@ public class DataFetch extends Thread {
 	public final Map<String, List<PrintJob>> jobData = new ConcurrentHashMap<>();
 	public final Queue<MarqueeData> marqueeData = new ConcurrentLinkedQueue<>();
 	public final Queue<String> upcomingEvents = new ConcurrentLinkedQueue<>();
-	public final Queue<UserInfo> userInfo = new ConcurrentLinkedQueue<>();
+	public final Queue<NameUser> nameUser = new ConcurrentLinkedQueue<>();
 	public final List<Slide> slides = Collections.synchronizedList(new ArrayList<>());
 	public final Queue<BufferedImage> profilePic = new ConcurrentLinkedQueue<>();
 	
@@ -90,7 +89,7 @@ public class DataFetch extends Thread {
 			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 			Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
 			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
-			Future<UserInfo> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(UserInfo.class) : null;
+			Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
 			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
 			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
 			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
@@ -112,12 +111,12 @@ public class DataFetch extends Thread {
 				destinations.putAll(newDestinations);
 				
 				//update user info
-				UserInfo user = null;
+				NameUser user = null;
 				if (futureUserInfo != null) try {
-					UserInfo newUserInfo = futureUserInfo.get(interval, TimeUnit.SECONDS);
-					userInfo.clear();
-					userInfo.add(newUserInfo);
-					user = newUserInfo;
+					NameUser newNameUser = futureUserInfo.get(interval, TimeUnit.SECONDS);
+					nameUser.clear();
+					nameUser.add(newNameUser);
+					user = newNameUser;
 				} catch (Exception e) {
 					System.err.println("Could not fetch user info");
 				}
@@ -157,11 +156,11 @@ public class DataFetch extends Thread {
 					//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
 					Future<byte[]> futureGravatar = null;
 					if (user != null) {
-						String email = user.email == null ? user.longUser : user.email;
+						String email = user.getEmail() == null ? user.getLongUser() : user.getEmail();
 						futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
 					}
 					//search google for "full name" + mcgill
-					String name = user == null ? System.getenv("username") : (user.realName == null ? user.displayName : user.realName);
+					String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
 					BufferedImage googleThumbnail = null;
 					Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
 					try {

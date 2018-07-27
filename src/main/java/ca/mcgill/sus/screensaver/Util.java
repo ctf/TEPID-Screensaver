@@ -371,6 +371,6 @@ public class Util {
 		return image;
 	}
 
-	public static Calendar resetCalendar ()
+//	public static Calendar resetCalendar ()
 	
 }
