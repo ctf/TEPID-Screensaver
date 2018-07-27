@@ -7,11 +7,8 @@ import ca.mcgill.science.tepid.utils.WithLogging
 import org.apache.logging.log4j.Level
 
 /**
- * Created by Allan Wang on 24/03/2018.
- *
- * The following are default keys used for testing
- * They are pulled from priv.properties under the root project folder
- * If no file is found, default values will be supplied (usually empty strings)
+ * A unified interface for all the config gathering.
+ * Config options are pulled with the PropHolders in TEPID-Commons
  */
 object Config : WithLogging() {
 
