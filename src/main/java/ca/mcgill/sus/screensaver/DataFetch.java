@@ -191,7 +191,7 @@ public class DataFetch extends Thread {
 //				e.printStackTrace();
 			}
 
-			fail = processEvents(fail, pullEvents, futureEvents);
+			fail &= processEvents(pullEvents, futureEvents);
 			this.loaded.set(true);
 			networkUp.set(!fail);
 			for (Runnable listener : listeners) {
@@ -208,7 +208,8 @@ public class DataFetch extends Thread {
 		System.out.println("Data fetch thread over and out");
 	}
 
-	private boolean processEvents(boolean fail, boolean pullEvents, Future<String> futureEvents) {
+	private boolean processEvents(boolean pullEvents, Future<String> futureEvents) {
+		boolean fail = true;
 		try {
 			//process upcoming events (if this is an office computer)
 			if (pullEvents) {
