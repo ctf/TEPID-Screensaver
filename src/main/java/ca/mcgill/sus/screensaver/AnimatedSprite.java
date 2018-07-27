@@ -27,10 +27,6 @@ public class AnimatedSprite {
 		g.drawImage(frames[frame], x, y, null);
 	}
 
-	public int getSpeedMs() {
-		return speedMs;
-	}
-
 	public AnimatedSprite setSpeedMs(int speedMs) {
 		this.speedMs = speedMs;
 		return this;
