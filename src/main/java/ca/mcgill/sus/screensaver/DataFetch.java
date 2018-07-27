@@ -26,7 +26,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import ca.mcgill.science.tepid.utils.PropsScreensaver;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.javatuples.Pair;
 
@@ -39,7 +38,7 @@ import biweekly.io.TimezoneAssignment;
 import biweekly.io.TimezoneInfo;
 import biweekly.property.DateStart;
 import biweekly.util.com.google.ical.compat.javautil.DateIterator;
-import ca.mcgill.sus.screensaver.io.Destination;
+import ca.mcgill.science.tepid.models.data.Destination;
 import ca.mcgill.sus.screensaver.io.MarqueeData;
 import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;

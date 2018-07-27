@@ -130,7 +130,7 @@ public class JobList implements Drawable {
 				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(job.getUserIdentification(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
-				if(job.getDestination() != null) g.drawString(DataFetch.getInstance().destinations.get(job.getDestination()).name, width / 4, i * (fontPx + padding * 2) - padding - 2);
+				if(job.getDestination() != null) g.drawString(DataFetch.getInstance().destinations.get(job.getDestination()).getName(), width / 4, i * (fontPx + padding * 2) - padding - 2);
 				String jobStatus = "Uploading...";
 				if(job.getPrinted() != -1) jobStatus = ("Printed  " + dateFormat.format(job.getPrinted()));
 				else if(job.getError() != null) jobStatus = (job.getError());
