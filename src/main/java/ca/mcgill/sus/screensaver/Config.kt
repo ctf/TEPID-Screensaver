@@ -36,18 +36,18 @@ object Config : WithLogging() {
         log.info("**********************************")
 
 
-        SERVER_URL = PropsURL.SERVER_URL_PRODUCTION  + "screensaver/"
-        DEBUG = PropsURL.SERVER_URL_TESTING != SERVER_URL
+        SERVER_URL = PropsURL.SERVER_URL_PRODUCTION?.plus("screensaver/") ?: throw RuntimeException()
+        DEBUG = PropsURL.TESTING?.toBoolean() ?: true
 
-        WEB_URL = PropsURL.WEB_URL_PRODUCTION
+        WEB_URL = PropsURL.WEB_URL_PRODUCTION ?: throw RuntimeException()
 
-        office_regex = PropsScreensaver.OFFICE_REGEX
-        gravatar_search_terms = PropsScreensaver.GRAVATAR_SEARCH_TERMS
-        report_malfunctioning_to = PropsScreensaver.REPORT_MALFUNCTIONING_COMPUTER_TEXT
-        announcement_slide_directory = PropsScreensaver.ANNOUNCEMENT_SLIDE_LOCATION
-        background_picture_directory = PropsScreensaver.BACKGROUND_PICTURE_LOCATION
-        GOOGLE_CUSTOM_SEARCH_KEY = PropsScreensaver.GOOGLE_CUSTOM_SEARCH_KEY
-        ICS_CALENDAR_ADDRESS = PropsScreensaver.ICS_CALENDAR_ADDRESS
+        office_regex = PropsScreensaver.OFFICE_REGEX ?: ""
+        gravatar_search_terms = PropsScreensaver.GRAVATAR_SEARCH_TERMS ?: ""
+        report_malfunctioning_to = PropsScreensaver.REPORT_MALFUNCTIONING_COMPUTER_TEXT ?: ""
+        announcement_slide_directory = PropsScreensaver.ANNOUNCEMENT_SLIDE_LOCATION ?: ""
+        background_picture_directory = PropsScreensaver.BACKGROUND_PICTURE_LOCATION ?: ""
+        GOOGLE_CUSTOM_SEARCH_KEY = PropsScreensaver.GOOGLE_CUSTOM_SEARCH_KEY ?: ""
+        ICS_CALENDAR_ADDRESS = PropsScreensaver.ICS_CALENDAR_ADDRESS ?: ""
 
         if (DEBUG) LogUtils.setLoggingLevel(log, Level.TRACE)
 
