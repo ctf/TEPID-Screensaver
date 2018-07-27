@@ -190,51 +190,8 @@ public class DataFetch extends Thread {
 			} catch (Exception e) {
 //				e.printStackTrace();
 			}
-			try {
-				//process upcoming events (if this is an office computer) 
-				if (pullEvents) {
-					ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
-					Date rightNow = new Date();
-					Semester currentSemester = Semester.getSemester(rightNow);
-					//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
-					TimezoneInfo tzInfo = ical.getTimezoneInfo();
-					List<Pair<Date, VEvent>> events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester, tzInfo);
-					//get next semester's events if there are none for this semester left
-					if (events.isEmpty()) events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester.next(), tzInfo);
-					//format into human-friendly strings
-					upcomingEvents.clear();
-					for (Pair<Date, VEvent> event : events) {
-						Date d = event.getValue0();
-						VEvent e = event.getValue1();
 
-						Calendar timeOfEvent = GregorianCalendar.getInstance();
-						timeOfEvent.setTime(d);
-						boolean isOnTheHour = timeOfEvent.get(Calendar.MINUTE) == 0;
-						timeOfEvent.set(Calendar.HOUR_OF_DAY, 0);
-						timeOfEvent.set(Calendar.MINUTE, 0);
-						timeOfEvent.set(Calendar.SECOND, 0);
-						timeOfEvent.set(Calendar.MILLISECOND, 0);
-
-						Calendar oneWeek = GregorianCalendar.getInstance();
-						oneWeek.add(Calendar.DATE, 6);
-
-						Calendar today = GregorianCalendar.getInstance();
-						today.set(Calendar.HOUR_OF_DAY, 0);
-						today.set(Calendar.MINUTE, 0);
-						today.set(Calendar.SECOND, 0);
-						today.set(Calendar.MILLISECOND, 0);
-
-						boolean isSoon = timeOfEvent.before(oneWeek),
-						isToday = timeOfEvent.equals(today);
-						String dateFormat = (isToday ? "" : (isSoon ? "E": "MMM d")) + (isOnTheHour ? " @ h a" : " @ h:mm a");
-						upcomingEvents.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
-					}
-					fail = false;
-					System.out.println("Fetched events");
-				}
-			} catch (Exception e) {
-//				e.printStackTrace();
-			}
+			fail = processEvents(fail, pullEvents, futureEvents);
 			this.loaded.set(true);
 			networkUp.set(!fail);
 			for (Runnable listener : listeners) {
@@ -250,7 +207,56 @@ public class DataFetch extends Thread {
 		}
 		System.out.println("Data fetch thread over and out");
 	}
-	
+
+	private boolean processEvents(boolean fail, boolean pullEvents, Future<String> futureEvents) {
+		try {
+			//process upcoming events (if this is an office computer)
+			if (pullEvents) {
+				ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
+				Date rightNow = new Date();
+				Semester currentSemester = Semester.getSemester(rightNow);
+				//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
+				TimezoneInfo tzInfo = ical.getTimezoneInfo();
+				List<Pair<Date, VEvent>> events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester, tzInfo);
+				//get next semester's events if there are none for this semester left
+				if (events.isEmpty()) events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester.next(), tzInfo);
+				//format into human-friendly strings
+				upcomingEvents.clear();
+				for (Pair<Date, VEvent> event : events) {
+					Date d = event.getValue0();
+					VEvent e = event.getValue1();
+
+					Calendar timeOfEvent = GregorianCalendar.getInstance();
+					timeOfEvent.setTime(d);
+					boolean isOnTheHour = timeOfEvent.get(Calendar.MINUTE) == 0;
+					timeOfEvent.set(Calendar.HOUR_OF_DAY, 0);
+					timeOfEvent.set(Calendar.MINUTE, 0);
+					timeOfEvent.set(Calendar.SECOND, 0);
+					timeOfEvent.set(Calendar.MILLISECOND, 0);
+
+					Calendar oneWeek = GregorianCalendar.getInstance();
+					oneWeek.add(Calendar.DATE, 6);
+
+					Calendar today = GregorianCalendar.getInstance();
+					today.set(Calendar.HOUR_OF_DAY, 0);
+					today.set(Calendar.MINUTE, 0);
+					today.set(Calendar.SECOND, 0);
+					today.set(Calendar.MILLISECOND, 0);
+
+					boolean isSoon = timeOfEvent.before(oneWeek),
+					isToday = timeOfEvent.equals(today);
+					String dateFormat = (isToday ? "" : (isSoon ? "E": "MMM d")) + (isOnTheHour ? " @ h a" : " @ h:mm a");
+					upcomingEvents.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
+				}
+				fail = false;
+				System.out.println("Fetched events");
+			}
+		} catch (Exception e) {
+//				e.printStackTrace();
+		}
+		return fail;
+	}
+
 	private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
 		DateStart dtstart = e.getDateStart();
 		TimeZone timezone;
