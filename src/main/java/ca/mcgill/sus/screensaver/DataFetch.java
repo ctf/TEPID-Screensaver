@@ -206,22 +206,26 @@ public class DataFetch extends Thread {
 					for (Pair<Date, VEvent> event : events) {
 						Date d = event.getValue0();
 						VEvent e = event.getValue1();
-						Calendar c = GregorianCalendar.getInstance();
-						c.setTime(d);
-						boolean isOnTheHour = c.get(Calendar.MINUTE) == 0;
-						c.set(Calendar.HOUR_OF_DAY, 0);
-						c.set(Calendar.MINUTE, 0);
-						c.set(Calendar.SECOND, 0);
-						c.set(Calendar.MILLISECOND, 0);
-						Calendar oneWeek = GregorianCalendar.getInstance(),
-						today = GregorianCalendar.getInstance();
+
+						Calendar timeOfEvent = GregorianCalendar.getInstance();
+						timeOfEvent.setTime(d);
+						boolean isOnTheHour = timeOfEvent.get(Calendar.MINUTE) == 0;
+						timeOfEvent.set(Calendar.HOUR_OF_DAY, 0);
+						timeOfEvent.set(Calendar.MINUTE, 0);
+						timeOfEvent.set(Calendar.SECOND, 0);
+						timeOfEvent.set(Calendar.MILLISECOND, 0);
+
+						Calendar oneWeek = GregorianCalendar.getInstance();
+						oneWeek.add(Calendar.DATE, 6);
+
+						Calendar today = GregorianCalendar.getInstance();
 						today.set(Calendar.HOUR_OF_DAY, 0);
 						today.set(Calendar.MINUTE, 0);
 						today.set(Calendar.SECOND, 0);
 						today.set(Calendar.MILLISECOND, 0);
-						oneWeek.add(Calendar.DATE, 6);
-						boolean isSoon = c.before(oneWeek),
-						isToday = c.equals(today);
+
+						boolean isSoon = timeOfEvent.before(oneWeek),
+						isToday = timeOfEvent.equals(today);
 						String dateFormat = (isToday ? "" : (isSoon ? "E": "MMM d")) + (isOnTheHour ? " @ h a" : " @ h:mm a");
 						upcomingEvents.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
 					}

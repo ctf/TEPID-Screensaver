@@ -23,12 +23,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
@@ -375,5 +370,7 @@ public class Util {
 		baio.close();
 		return image;
 	}
+
+	public static Calendar resetCalendar ()
 	
 }
