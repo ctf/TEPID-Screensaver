@@ -370,7 +370,4 @@ public class Util {
 		baio.close();
 		return image;
 	}
-
-//	public static Calendar resetCalendar ()
-	
 }
