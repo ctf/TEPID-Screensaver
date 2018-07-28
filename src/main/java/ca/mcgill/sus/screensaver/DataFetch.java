@@ -98,14 +98,8 @@ public class DataFetch extends Thread {
 				updateDestinations();
 				NameUser user = updateUserInfo();
 				processPrintQueues();
-				
-				//load slide images
-				if (slides.isEmpty() || pullSlides) {
-					List<Slide> newSlides = Util.loadSlides();
-					slides.clear();
-					slides.addAll(newSlides);
-				}
-				
+				loadSlideImages(pullSlides);
+
 				//pull profile picture for office
 				if (pullPropic) try {
 					//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
@@ -163,6 +157,15 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	private void loadSlideImages(boolean pullSlides) {
+		//load slide images
+		if (slides.isEmpty() || pullSlides) {
+			List<Slide> newSlides = Util.loadSlides();
+			slides.clear();
+			slides.addAll(newSlides);
+		}
 	}
 
 	private void processPrintQueues() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
