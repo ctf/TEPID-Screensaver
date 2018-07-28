@@ -94,8 +94,6 @@ public class DataFetch extends Thread {
 
 			try {
 				updateMarqueeData();
-				Map<String, Boolean> newStatus = updatePrinterStatus();
-
 
 				//update destinations
 				Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
@@ -116,6 +114,8 @@ public class DataFetch extends Thread {
 				}
 								
 				//process and update printer queues
+				Map<String, Boolean> newStatus = updatePrinterStatus();
+
 				Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
 				Map<String, List<PrintJob>> newJobs = new HashMap<>();
 				//iterates over each queue and gets a list of jobs sent to them
