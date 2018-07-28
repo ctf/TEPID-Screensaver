@@ -4,10 +4,14 @@ import ca.mcgill.sus.screensaver.Util;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -56,6 +60,13 @@ public class BufferedImageUtilsTest {
 		assertTrue(bufferedImagesEqual(expected, actual));
 	}
 
+	@Test
+	public void testBlur(){
+		BufferedImage input = loadImage(testAssetPath + "test_image.png");
+		BufferedImage actual = Util.blur(5, input);
+		BufferedImage expected = loadImage(testAssetPath + "util/goal_blur.png");
+		assertTrue(bufferedImagesEqual(expected, actual));
+	}
 /*	*//**
 	 * 	A function for generating target images assuming everything works right
 	 *//*
