@@ -1,7 +1,10 @@
 package util;
 
 import ca.mcgill.sus.screensaver.Util;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@RunWith(JUnitParamsRunner.class)
 public class BufferedImageUtilsTest {
 
 	private String testAssetPath = "out/test/classes/";
@@ -102,6 +106,14 @@ public class BufferedImageUtilsTest {
 	@Test
 	public void testLoadSlides(){
 		fail("NI: testing this will be much easier with the path as a parameter");
+	}
+
+	@Test
+	@Parameters({"1432778632, 0.45618222479862386", 	//0x55667788
+			"2003195204, 0.34809321867696424"		//0x77665544
+	})
+	public void luminanceTest(int argb, double expected){
+		assertThat(Util.luminance(argb), is(expected));
 	}
 
 /*	*//**

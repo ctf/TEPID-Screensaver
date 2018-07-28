@@ -41,6 +41,7 @@ repositories {
 dependencies {
     testCompile "junit:junit:$JUNIT"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$KOTLIN"
+    testCompile 'pl.pragmatists:JUnitParams:1.1.1'
 
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN"
     compile "org.jetbrains.kotlin:kotlin-reflect:$KOTLIN"
