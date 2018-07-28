@@ -86,31 +86,32 @@ public class DataFetch extends Thread {
 		while (!Thread.interrupted()) {
 			boolean fail = true;
 			long startTime = System.currentTimeMillis();
-			Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
-			Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
-			Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
-			Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
+
 			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
 			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
 			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
 
 			try {
 				//update marquee data
+				Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
 				List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get(interval, TimeUnit.SECONDS));
 				marqueeData.clear();
 				marqueeData.addAll(newMarquee);
-				
+
 				//update printer status
+				Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
 				Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
 				printerStatus.clear();
 				printerStatus.putAll(newStatus);
-				
+
 				//update destinations
+				Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
 				Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
 				destinations.clear();
 				destinations.putAll(newDestinations);
 				
 				//update user info
+				Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
 				NameUser user = null;
 				if (futureUserInfo != null) try {
 					NameUser newNameUser = futureUserInfo.get(interval, TimeUnit.SECONDS);
