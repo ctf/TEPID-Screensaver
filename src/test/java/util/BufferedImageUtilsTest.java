@@ -116,6 +116,15 @@ public class BufferedImageUtilsTest {
 		assertThat(Util.luminance(argb), is(expected));
 	}
 
+	@Test
+	public void luminanceAvgTest(){
+		BufferedImage input = loadImage(testAssetPath + "test_image.png");
+		input = Util.convert(input, BufferedImage.TYPE_INT_ARGB);
+		double actual = Util.luminanceAvg(input, 20,30,50,40);
+		double expected = 0.4327436850953641;
+		assertEquals(expected, actual, 0.1);
+	}
+
 /*	*//**
 	 * 	A function for generating target images assuming everything works right
 	 *//*
