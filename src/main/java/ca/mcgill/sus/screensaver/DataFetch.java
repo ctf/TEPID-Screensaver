@@ -42,6 +42,7 @@ import ca.mcgill.science.tepid.models.data.MarqueeData;
 import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;
 import ca.mcgill.science.tepid.models.data.NameUser;
+import org.jetbrains.annotations.NotNull;
 
 public class DataFetch extends Thread {
 	
@@ -93,12 +94,8 @@ public class DataFetch extends Thread {
 
 			try {
 				updateMarqueeData();
+				Map<String, Boolean> newStatus = updatePrinterStatus();
 
-				//update printer status
-				Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
-				Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
-				printerStatus.clear();
-				printerStatus.putAll(newStatus);
 
 				//update destinations
 				Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
@@ -205,6 +202,16 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	@NotNull
+	private Map<String, Boolean> updatePrinterStatus() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
+		//update printer status
+		Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
+		Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
+		printerStatus.clear();
+		printerStatus.putAll(newStatus);
+		return newStatus;
 	}
 
 	private void updateMarqueeData() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
