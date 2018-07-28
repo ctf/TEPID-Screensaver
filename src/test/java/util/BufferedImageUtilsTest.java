@@ -94,6 +94,16 @@ public class BufferedImageUtilsTest {
 		}
 	}
 
+	@Test
+	public void testLoadBackground(){
+		fail("NI: testing this will be much easier with the path as a parameter");
+	}
+
+	@Test
+	public void testLoadSlides(){
+		fail("NI: testing this will be much easier with the path as a parameter");
+	}
+
 /*	*//**
 	 * 	A function for generating target images assuming everything works right
 	 *//*
