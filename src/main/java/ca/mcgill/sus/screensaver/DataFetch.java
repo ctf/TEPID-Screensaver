@@ -43,6 +43,7 @@ import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;
 import ca.mcgill.science.tepid.models.data.NameUser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DataFetch extends Thread {
 	
@@ -95,19 +96,8 @@ public class DataFetch extends Thread {
 			try {
 				updateMarqueeData();
 				updateDestinations();
+				NameUser user = updateUserInfo();
 				
-				//update user info
-				Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
-				NameUser user = null;
-				if (futureUserInfo != null) try {
-					NameUser newNameUser = futureUserInfo.get(interval, TimeUnit.SECONDS);
-					nameUser.clear();
-					nameUser.add(newNameUser);
-					user = newNameUser;
-				} catch (Exception e) {
-					System.err.println("Could not fetch user info");
-				}
-								
 				//process and update printer queues
 				Map<String, Boolean> newStatus = updatePrinterStatus();
 
@@ -197,6 +187,22 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	@Nullable
+	private NameUser updateUserInfo() {
+		//update user info
+		Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
+		NameUser user = null;
+		if (futureUserInfo != null) try {
+			NameUser newNameUser = futureUserInfo.get(interval, TimeUnit.SECONDS);
+			nameUser.clear();
+			nameUser.add(newNameUser);
+			user = newNameUser;
+		} catch (Exception e) {
+			System.err.println("Could not fetch user info");
+		}
+		return user;
 	}
 
 	private void updateDestinations() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
