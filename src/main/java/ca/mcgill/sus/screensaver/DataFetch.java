@@ -92,11 +92,7 @@ public class DataFetch extends Thread {
 			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
 
 			try {
-				//update marquee data
-				Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
-				List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get(interval, TimeUnit.SECONDS));
-				marqueeData.clear();
-				marqueeData.addAll(newMarquee);
+				updateMarqueeData();
 
 				//update printer status
 				Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
@@ -209,6 +205,14 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	private void updateMarqueeData() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
+		//update marquee data
+		Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
+		List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get(interval, TimeUnit.SECONDS));
+		marqueeData.clear();
+		marqueeData.addAll(newMarquee);
 	}
 
 	private boolean processEvents() {
