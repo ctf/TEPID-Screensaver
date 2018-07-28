@@ -94,12 +94,7 @@ public class DataFetch extends Thread {
 
 			try {
 				updateMarqueeData();
-
-				//update destinations
-				Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
-				Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
-				destinations.clear();
-				destinations.putAll(newDestinations);
+				updateDestinations();
 				
 				//update user info
 				Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
@@ -202,6 +197,14 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	private void updateDestinations() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
+		//update destinations
+		Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
+		Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
+		destinations.clear();
+		destinations.putAll(newDestinations);
 	}
 
 	@NotNull
