@@ -43,15 +43,15 @@ public class Util {
 	public static BufferedImage color(BufferedImage image, int color) {
 		image = convert(image, BufferedImage.TYPE_INT_ARGB);
 		int alphaDif;
-		if (((color >> 24) & 0xff) > 0) { 
-			alphaDif = 0xff - ((color >> 24) & 0xff);
+		if (ColorUtil.hasAlpha(color)) {
+			alphaDif = 0xff - ColorUtil.getAlpha(color);
 		} else {
 			alphaDif = 0;
 		}
-		color &= 0xffffff;
+		color = ColorUtil.getColor(color);
 		int[] pix = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 		for (int i = 0; i < pix.length; i++) {
-			int alpha = 0xff & Math.max(0, (0xff & (pix[i] >> 24)) - alphaDif);
+			int alpha = 0xff & Math.max(0, ColorUtil.getAlpha(pix[i]) - alphaDif);
 			pix[i] = (alpha << 24) | color;
 		}
 		return image;
