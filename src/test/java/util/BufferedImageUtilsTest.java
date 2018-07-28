@@ -56,16 +56,17 @@ public class BufferedImageUtilsTest {
 		assertTrue(bufferedImagesEqual(expected, actual));
 	}
 
-	/**
+/*	*//**
 	 * 	A function for generating target images assuming everything works right
-	 */
-/*
+	 *//*
 	@Test
 	public void makeify(){
 		try {
-			BufferedImage i = loadImage(assetPath + "sprites/printer.png");
-			File f = new File("goal_color.png");
-			BufferedImage o = Util.color(i, 0x8888ccff);
+			BufferedImage input = loadImage(testAssetPath + "test_image.png");
+
+			BufferedImage o = Util.circleCrop( input);
+
+			File f = new File("goal_circleCrop.png");
 			ImageIO.write(o, "png", f);
 		}
 		catch(IOException e){
