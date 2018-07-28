@@ -67,6 +67,33 @@ public class BufferedImageUtilsTest {
 		BufferedImage expected = loadImage(testAssetPath + "util/goal_blur.png");
 		assertTrue(bufferedImagesEqual(expected, actual));
 	}
+
+	@Test
+	public void testCanTakeScreenshotBounds(){
+		BufferedImage screenshot = null;
+		try {
+			screenshot = Util.screenshot(new Rectangle(40,50));
+		} catch (Exception e){
+			fail("Threw exception while taking screenshot");
+		}
+		if (screenshot == null){
+			fail("Screenshot is null");
+		}
+	}
+
+	@Test
+	public void testCanTakeScreenshotDisplay(){
+		BufferedImage screenshot = null;
+		try {
+			screenshot = Util.screenshot(0);
+		} catch (Exception e){
+			fail("Threw exception while taking screenshot");
+		}
+		if (screenshot == null){
+			fail("Screenshot is null");
+		}
+	}
+
 /*	*//**
 	 * 	A function for generating target images assuming everything works right
 	 *//*
