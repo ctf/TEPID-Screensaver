@@ -125,6 +125,15 @@ public class BufferedImageUtilsTest {
 		assertEquals(expected, actual, 0.1);
 	}
 
+	@Test
+	public void circleCropTest(){
+		BufferedImage input = loadImage(testAssetPath + "test_image.png");
+		BufferedImage actual = Util.circleCrop(input);
+		BufferedImage expected = loadImage(testAssetPath + "util/goal_circleCrop.png");
+		assertTrue(bufferedImagesEqual(expected, actual));
+
+	}
+
 /*	*//**
 	 * 	A function for generating target images assuming everything works right
 	 *//*
