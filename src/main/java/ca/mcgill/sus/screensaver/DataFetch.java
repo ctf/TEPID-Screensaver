@@ -99,41 +99,8 @@ public class DataFetch extends Thread {
 				NameUser user = updateUserInfo();
 				processPrintQueues();
 				loadSlideImages(pullSlides);
+				pullProfilePicture(pullPropic, user);
 
-				//pull profile picture for office
-				if (pullPropic) try {
-					//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
-					Future<byte[]> futureGravatar = null;
-					if (user != null) {
-						String email = user.getEmail() == null ? user.getLongUser() : user.getEmail();
-						futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
-					}
-					//search google for "full name" + mcgill
-					String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
-					BufferedImage googleThumbnail = null;
-					Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
-					try {
-						ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
-						String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
-						googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
-					} catch (Exception e) {
-					}
-					//merge
-					BufferedImage gravatar = null;
-					if (futureGravatar != null) try {
-						gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
-					} catch (Exception e) {
-					}
-					BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
-					if (pic != null) {
-						profilePic.clear();
-						profilePic.add(Util.circleCrop(pic));
-					} else {
-						throw new RuntimeException();
-					}
-				} catch (Exception e) {
-					System.err.println("Could not fetch profile pic");
-				}
 				fail = false;
 			} catch (Exception e) {
 //				e.printStackTrace();
@@ -157,6 +124,43 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	private void pullProfilePicture(boolean pullPropic, NameUser user) {
+		//pull profile picture for office
+		if (pullPropic) try {
+			//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
+			Future<byte[]> futureGravatar = null;
+			if (user != null) {
+				String email = user.getEmail() == null ? user.getLongUser() : user.getEmail();
+				futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
+			}
+			//search google for "full name" + mcgill
+			String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
+			BufferedImage googleThumbnail = null;
+			Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
+			try {
+				ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
+				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
+				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+			} catch (Exception e) {
+			}
+			//merge
+			BufferedImage gravatar = null;
+			if (futureGravatar != null) try {
+				gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
+			} catch (Exception e) {
+			}
+			BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
+			if (pic != null) {
+				profilePic.clear();
+				profilePic.add(Util.circleCrop(pic));
+			} else {
+				throw new RuntimeException();
+			}
+		} catch (Exception e) {
+			System.err.println("Could not fetch profile pic");
+		}
 	}
 
 	private void loadSlideImages(boolean pullSlides) {
