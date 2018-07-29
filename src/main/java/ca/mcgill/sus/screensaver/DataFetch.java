@@ -99,7 +99,9 @@ public class DataFetch extends Thread {
 				NameUser user = updateUserInfo();
 				processPrintQueues();
 				loadSlideImages(pullSlides);
-				pullProfilePicture(pullPropic, user);
+				if (pullPropic) {
+					pullProfilePicture(user);
+				}
 
 				fail = false;
 			} catch (Exception e) {
@@ -126,9 +128,9 @@ public class DataFetch extends Thread {
 		System.out.println("Data fetch thread over and out");
 	}
 
-	private void pullProfilePicture(boolean pullPropic, NameUser user) {
+	private void pullProfilePicture(NameUser user) {
 		//pull profile picture for office
-		if (pullPropic) try {
+		 try {
 			//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
 			Future<byte[]> futureGravatar = null;
 			if (user != null) {
