@@ -61,6 +61,8 @@ public class Util {
 		if (radius < 1) {
 			return (null);
 		}
+
+		//init
 		int w = original.getWidth();
 		int h = original.getHeight();
 		BufferedImage output = convert(original, BufferedImage.TYPE_INT_RGB);
@@ -68,20 +70,23 @@ public class Util {
 		int wm = w - 1;
 		int hm = h - 1;
 		int wh = w * h;
-		int div = radius + radius + 1;
+
 		int r[] = new int[wh];
 		int g[] = new int[wh];
 		int b[] = new int[wh];
 		int rsum, gsum, bsum, x, y, i, p, yp, yi, yw;
 		int vmin[] = new int[Math.max(w, h)];
-		int divsum = (div + 1) >> 1;
-		divsum *= divsum;
+
+		int div = radius + radius + 1; // effective diameter
+		int divsum = (int) Math.pow ((div + 1) / 2, 2); //effective radius squared
 		int dv[] = new int[256 * divsum];
 		for (i = 0; i < 256 * divsum; i++) {
 			dv[i] = (i / divsum);
-		}
+		} //generates an array from 0 to 255 with divsum elements of each number
+
+
 		yw = yi = 0;
-		int[][] stack = new int[div][3];
+		int[][] stack = new int[div][3]; 		// stack of length of effective diameter, with RGB components
 		int stackpointer;
 		int stackstart;
 		int[] sir;
@@ -89,18 +94,35 @@ public class Util {
 		int r1 = radius + 1;
 		int routsum, goutsum, boutsum;
 		int rinsum, ginsum, binsum;
+
+		// for every row
 		for (y = 0; y < h; y++) {
+			// clear sums
 			rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
+
+
+			// from every in the range of -r to +r
 			for (i = -radius; i <= radius; i++) {
+				// p is the pixel at position i, bounded by the start and end of the row
 				p = pix[yi + Math.min(wm, Math.max(i, 0))];
+
+				// set sir to position in stack (forces non-negative)
 				sir = stack[i + radius];
+
+				//extract color components to stack
 				sir[0] = (p & 0xff0000) >> 16;
 				sir[1] = (p & 0x00ff00) >> 8;
 				sir[2] = (p & 0x0000ff);
+
+				// complement of distance
 				rbs = r1 - Math.abs(i);
+
+				// add color with complement of distance as weight
 				rsum += sir[0] * rbs;
 				gsum += sir[1] * rbs;
 				bsum += sir[2] * rbs;
+
+				// add sir to insum if before center or outsum if after center
 				if (i > 0) {
 					rinsum += sir[0];
 					ginsum += sir[1];
@@ -111,57 +133,101 @@ public class Util {
 					boutsum += sir[2];
 				}
 			}
+			// sir will still hold the last pixel's colors
+
+			// for every column in row
 			stackpointer = radius;
 			for (x = 0; x < w; x++) {
+				// assign rsum/divsum*255
 				r[yi] = dv[rsum];
 				g[yi] = dv[gsum];
 				b[yi] = dv[bsum];
+
+				// reduce rsum by the amount leaving
 				rsum -= routsum;
 				gsum -= goutsum;
 				bsum -= boutsum;
+
+				// set stackstart to pointer + r + 1
 				stackstart = stackpointer - radius + div;
 				sir = stack[stackstart % div];
+
+				// decrease outsum by the next pixel
 				routsum -= sir[0];
 				goutsum -= sir[1];
 				boutsum -= sir[2];
+
+				// if it's the first row,
 				if (y == 0) {
+					// set the vmin element corresponding to the column to the column + radius + 1 capped at the width - 1
 					vmin[x] = Math.min(x + radius + 1, wm);
 				}
 				p = pix[yw + vmin[x]];
+
+				// load this pixel's colors into sir
 				sir[0] = (p & 0xff0000) >> 16;
 				sir[1] = (p & 0x00ff00) >> 8;
 				sir[2] = (p & 0x0000ff);
+
+				// add sir to insum
 				rinsum += sir[0];
 				ginsum += sir[1];
 				binsum += sir[2];
+
+				// add insum to sum
 				rsum += rinsum;
 				gsum += ginsum;
 				bsum += binsum;
+
+				// increment stackpointer
 				stackpointer = (stackpointer + 1) % div;
 				sir = stack[(stackpointer) % div];
+
+				// add color to outsum and subtract from insum
 				routsum += sir[0];
 				goutsum += sir[1];
 				boutsum += sir[2];
 				rinsum -= sir[0];
 				ginsum -= sir[1];
 				binsum -= sir[2];
+
+				// increment yi
 				yi++;
 			}
+			// increment yw by width
 			yw += w;
 		}
+
+		//for every column
 		for (x = 0; x < w; x++) {
+			// clear sums
 			rinsum = ginsum = binsum = routsum = goutsum = boutsum = rsum = gsum = bsum = 0;
+
+			// sets yp to the offset necessary to move radius rows back
 			yp = -radius * w;
+
+			// from every in the range of -r to +r
 			for (i = -radius; i <= radius; i++) {
+				// sets yi to the farthest pixel vertically from the center
 				yi = Math.max(0, yp) + x;
+
+				// loads sir
 				sir = stack[i + radius];
+
+				// assigns colors to sir
 				sir[0] = r[yi];
 				sir[1] = g[yi];
 				sir[2] = b[yi];
+
+				// complement of distance
 				rbs = r1 - Math.abs(i);
+
+				// add color with complement of distance as weight
 				rsum += r[yi] * rbs;
 				gsum += g[yi] * rbs;
 				bsum += b[yi] * rbs;
+
+				// add sir to insum if before center or outsum if after center
 				if (i > 0) {
 					rinsum += sir[0];
 					ginsum += sir[1];
@@ -171,45 +237,80 @@ public class Util {
 					goutsum += sir[1];
 					boutsum += sir[2];
 				}
+
+				// if i is less than the total number of pixels
 				if (i < hm) {
+					// increment the pointer to pixel by 1 row
 					yp += w;
 				}
 			}
+
 			yi = x;
 			stackpointer = radius;
+			// for every row
 			for (y = 0; y < h; y++) {
+				// rebuild pixel array
 				// Preserve alpha channel: ( 0xff000000 & pix[yi] )
 				pix[yi] = (0xff000000 & pix[yi]) | (dv[rsum] << 16)
 						| (dv[gsum] << 8) | dv[bsum];
+
+				// subtract outsum from sum
 				rsum -= routsum;
 				gsum -= goutsum;
 				bsum -= boutsum;
+
+				// move stack pointer
 				stackstart = stackpointer - radius + div;
+
+				// load sir
 				sir = stack[stackstart % div];
+
+				// subtract sir from outsum
 				routsum -= sir[0];
 				goutsum -= sir[1];
 				boutsum -= sir[2];
+
+				// if first column
 				if (x == 0) {
+					// set the vmin element corresponding to the column to the column + radius + 1 capped at the width - 1
 					vmin[y] = Math.min(y + r1, hm) * w;
 				}
+
+				// set the index to the current position in the 1D array
 				p = x + vmin[y];
+
+				// set sir from color array
 				sir[0] = r[p];
 				sir[1] = g[p];
 				sir[2] = b[p];
+
+				// add sir to insum
 				rinsum += sir[0];
 				ginsum += sir[1];
 				binsum += sir[2];
+
+				// add insum to sum
 				rsum += rinsum;
 				gsum += ginsum;
 				bsum += binsum;
+
+				// increment stack pointer
 				stackpointer = (stackpointer + 1) % div;
+
+				// load sir
 				sir = stack[stackpointer];
+
+				// add sir to outsum
 				routsum += sir[0];
 				goutsum += sir[1];
 				boutsum += sir[2];
+
+				// subtract sir from sum
 				rinsum -= sir[0];
 				ginsum -= sir[1];
 				binsum -= sir[2];
+
+				// increment yi to next row
 				yi += w;
 			}
 		}
@@ -334,19 +435,19 @@ public class Util {
 	}
 
 	public static BufferedImage circleCrop(BufferedImage image) {
-	    int w = Math.max(image.getWidth(), image.getHeight()), h = w;
-	    BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-	    Graphics2D g = out.createGraphics();
-	    g.setComposite(AlphaComposite.Src);
-	    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-	    g.setColor(Color.BLACK);
-	    g.fillOval(0, 0, w, h);
-	    g.setComposite(AlphaComposite.SrcAtop);
-	    g.drawImage(image, w / 2 - image.getWidth() / 2, h / 2 - image.getHeight() / 2, null);
-	    g.dispose();
-	    return out;
+		int w = Math.max(image.getWidth(), image.getHeight()), h = w;
+		BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = out.createGraphics();
+		g.setComposite(AlphaComposite.Src);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setColor(Color.BLACK);
+		g.fillOval(0, 0, w, h);
+		g.setComposite(AlphaComposite.SrcAtop);
+		g.drawImage(image, w / 2 - image.getWidth() / 2, h / 2 - image.getHeight() / 2, null);
+		g.dispose();
+		return out;
 	}
-	
+
 	public static String hex(byte[] array) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < array.length; ++i) {
