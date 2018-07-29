@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DataFetch extends Thread {
 	
-	public static final int interval = 15, icalInterval = 5 * 60;
+	private static final int interval = 15, icalInterval = 5 * 60;
  
 	private DataFetch() {
 		this.setDaemon(true);
