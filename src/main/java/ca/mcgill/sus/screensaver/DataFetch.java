@@ -2,18 +2,8 @@ package ca.mcgill.sus.screensaver;
 
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -322,7 +312,7 @@ public class DataFetch extends Thread {
 				}
 				if (soonest != null) events.add(new Pair<Date, VEvent>(soonest, e));
 			}
-			Collections.sort(events, (e1, e2) -> e1.getValue0().compareTo(e2.getValue0()));
+			events.sort(Comparator.comparing(Pair::getValue0));
 			return events;
 		}
 	}
