@@ -277,18 +277,18 @@ public class DataFetch extends Thread {
 	}
 
 	private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
-		DateStart dtstart = e.getDateStart();
+		DateStart dateStart = e.getDateStart();
 		TimeZone timezone;
-		if (tzInfo.isFloating(dtstart)){
+		if (tzInfo.isFloating(dateStart)){
 		  timezone = TimeZone.getDefault();
 		} else {
-		  TimezoneAssignment dtstartTimezone = tzInfo.getTimezone(dtstart);
-		  timezone = (dtstartTimezone == null) ? TimeZone.getTimeZone("UTC") : dtstartTimezone.getTimeZone();
+		  TimezoneAssignment dateStartTimezone = tzInfo.getTimezone(dateStart);
+		  timezone = (dateStartTimezone == null) ? TimeZone.getTimeZone("UTC") : dateStartTimezone.getTimeZone();
 		}
 		return timezone;
 	}
 	
-	private static enum Semester {
+	private enum Semester {
 		FALL, WINTER, SPRING;
 	    public Semester next() {
 	        return values()[(this.ordinal() + 1) % values().length];
@@ -310,7 +310,7 @@ public class DataFetch extends Thread {
 					if (d.before(after) || Semester.getSemester(d) != s) continue;
 					if (soonest == null || d.before(soonest)) soonest = d;
 				}
-				if (soonest != null) events.add(new Pair<Date, VEvent>(soonest, e));
+				if (soonest != null) events.add(new Pair<>(soonest, e));
 			}
 			events.sort(Comparator.comparing(Pair::getValue0));
 			return events;
