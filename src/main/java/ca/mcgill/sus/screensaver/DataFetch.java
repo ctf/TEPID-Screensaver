@@ -134,12 +134,14 @@ public class DataFetch extends Thread {
 				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
 				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			//merge
 			BufferedImage gravatar = null;
 			if (futureGravatar != null) try {
 				gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
 			if (pic != null) {
