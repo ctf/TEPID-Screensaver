@@ -31,7 +31,7 @@ import javax.imageio.ImageIO;
 import ca.mcgill.sus.screensaver.io.Slide;
 
 public class Util {
-	
+
 	public static BufferedImage convert(BufferedImage image, int type) {
 		BufferedImage out = new BufferedImage(image.getWidth(), image.getHeight(), type);
 		Graphics2D g = out.createGraphics();
@@ -39,7 +39,7 @@ public class Util {
 		g.dispose();
 		return out;
 	}
-	
+
 	public static BufferedImage color(BufferedImage image, int color) {
 		image = convert(image, BufferedImage.TYPE_INT_ARGB);
 		int alphaDif;
@@ -95,21 +95,21 @@ public class Util {
 				p = pix[yi + Math.min(wm, Math.max(i, 0))];
 				sir = stack[i + radius];
 				sir[0] = (p & 0xff0000) >> 16;
-			sir[1] = (p & 0x00ff00) >> 8;
-		sir[2] = (p & 0x0000ff);
-		rbs = r1 - Math.abs(i);
-		rsum += sir[0] * rbs;
-		gsum += sir[1] * rbs;
-		bsum += sir[2] * rbs;
-		if (i > 0) {
-			rinsum += sir[0];
-			ginsum += sir[1];
-			binsum += sir[2];
-		} else {
-			routsum += sir[0];
-			goutsum += sir[1];
-			boutsum += sir[2];
-		}
+				sir[1] = (p & 0x00ff00) >> 8;
+				sir[2] = (p & 0x0000ff);
+				rbs = r1 - Math.abs(i);
+				rsum += sir[0] * rbs;
+				gsum += sir[1] * rbs;
+				bsum += sir[2] * rbs;
+				if (i > 0) {
+					rinsum += sir[0];
+					ginsum += sir[1];
+					binsum += sir[2];
+				} else {
+					routsum += sir[0];
+					goutsum += sir[1];
+					boutsum += sir[2];
+				}
 			}
 			stackpointer = radius;
 			for (x = 0; x < w; x++) {
@@ -129,23 +129,23 @@ public class Util {
 				}
 				p = pix[yw + vmin[x]];
 				sir[0] = (p & 0xff0000) >> 16;
-			sir[1] = (p & 0x00ff00) >> 8;
-			sir[2] = (p & 0x0000ff);
-			rinsum += sir[0];
-			ginsum += sir[1];
-			binsum += sir[2];
-			rsum += rinsum;
-			gsum += ginsum;
-			bsum += binsum;
-			stackpointer = (stackpointer + 1) % div;
-			sir = stack[(stackpointer) % div];
-			routsum += sir[0];
-			goutsum += sir[1];
-			boutsum += sir[2];
-			rinsum -= sir[0];
-			ginsum -= sir[1];
-			binsum -= sir[2];
-			yi++;
+				sir[1] = (p & 0x00ff00) >> 8;
+				sir[2] = (p & 0x0000ff);
+				rinsum += sir[0];
+				ginsum += sir[1];
+				binsum += sir[2];
+				rsum += rinsum;
+				gsum += ginsum;
+				bsum += binsum;
+				stackpointer = (stackpointer + 1) % div;
+				sir = stack[(stackpointer) % div];
+				routsum += sir[0];
+				goutsum += sir[1];
+				boutsum += sir[2];
+				rinsum -= sir[0];
+				ginsum -= sir[1];
+				binsum -= sir[2];
+				yi++;
 			}
 			yw += w;
 		}
@@ -223,7 +223,7 @@ public class Util {
 			throw new RuntimeException("Could not take screenshot", e);
 		}
 	}
-	
+
 	public static BufferedImage screenshot(int display) {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] gd = ge.getScreenDevices();
@@ -235,11 +235,11 @@ public class Util {
 		}
 		return screenshot(bounds);
 	}
-	
+
 	public static BufferedImage loadBackground(boolean vertical) {
 		BufferedImage background;
 		try {
-			InputStream bgJpg; 
+			InputStream bgJpg;
 			File localBg = new File(Config.INSTANCE.getBackground_picture_directory() + "CTF Screensaver" + (vertical ? " Vertical" : "") + ".jpg");
 			if (localBg.exists()) {
 				bgJpg = new FileInputStream(localBg);
@@ -252,7 +252,7 @@ public class Util {
 		}
 		return background;
 	}
-	
+
 	public static List<Slide> loadSlides() {
 		Map<String, BufferedImage> images = new HashMap<>();
 		try {
@@ -280,7 +280,7 @@ public class Util {
 		out.sort((s1, s2) -> s1.name.compareTo(s2.name));
 		return out;
 	}
-	
+
 	/**A function which causes the thread to wait for a time 
 	 * @param ms	The time for which the thread should do nothing
 	 */
@@ -309,14 +309,14 @@ public class Util {
 		System.arraycopy(a2, 0, out, a1.length, a2.length);
 		return out;
 	}
-	
+
 	public static double luminance(int argb) {
 		double r = (double) ((argb >> 16) & 0xff) / 0xff,
-		g = (double) ((argb >> 8) & 0xff) / 0xff,
-		b = (double) (argb & 0xff) / 0xff;
+				g = (double) ((argb >> 8) & 0xff) / 0xff,
+				b = (double) (argb & 0xff) / 0xff;
 		return Math.sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
 	}
-	
+
 	public static double luminanceAvg(BufferedImage img, int x, int y, int w, int h) {
 		if (img.getType() != BufferedImage.TYPE_INT_ARGB && img.getType() != BufferedImage.TYPE_INT_RGB) throw new RuntimeException("Non-int image types not supported");
 		x = Math.max(0, Math.min(x, img.getWidth()));
@@ -363,7 +363,7 @@ public class Util {
 		}
 		return null;
 	}
-	
+
 	public static BufferedImage readImage(byte[] bytes) throws IOException {
 		ByteArrayInputStream baio = new ByteArrayInputStream(bytes);
 		BufferedImage image = ImageIO.read(baio);
