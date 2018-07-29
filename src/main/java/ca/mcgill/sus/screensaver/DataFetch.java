@@ -102,14 +102,12 @@ public class DataFetch extends Thread {
 				if (pullPropic) {
 					pullProfilePicture(user);
 				}
-
+				if (pullEvents) {
+					fail &= processEvents();
+				}
 				fail = false;
 			} catch (Exception e) {
 //				e.printStackTrace();
-			}
-
-			if (pullEvents) {
-				fail &= processEvents();
 			}
 
 			this.loaded.set(true);
