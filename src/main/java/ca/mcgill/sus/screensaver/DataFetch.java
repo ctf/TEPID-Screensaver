@@ -125,14 +125,18 @@ public class DataFetch extends Thread {
 			 //merge
 			BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
 			if (pic != null) {
-				profilePic.clear();
-				profilePic.add(Util.circleCrop(pic));
+				setProfilePic(pic);
 			} else {
 				throw new RuntimeException();
 			}
 		} catch (Exception e) {
 			System.err.println("Could not fetch profile pic");
 		}
+	}
+
+	private void setProfilePic(BufferedImage pic) {
+		profilePic.clear();
+		profilePic.add(Util.circleCrop(pic));
 	}
 
 	@Nullable
