@@ -120,8 +120,8 @@ public class DataFetch extends Thread {
 		//pull profile picture for office
 		 try {
 			 BufferedImage gravatar = pullGravatar(user);
-			 BufferedImage googleThumbnail = getWebImage(user);
-			 
+			 BufferedImage googleThumbnail = pullWebImage(user);
+
 			 //merge
 			BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
 			if (pic != null) {
@@ -136,7 +136,7 @@ public class DataFetch extends Thread {
 	}
 
 	@Nullable
-	private BufferedImage getWebImage(NameUser user) {
+	private BufferedImage pullWebImage(NameUser user) {
 		//search google for "full name" + mcgill
 		String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
 		BufferedImage googleThumbnail = null;
