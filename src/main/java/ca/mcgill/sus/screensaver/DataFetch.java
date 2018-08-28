@@ -141,8 +141,11 @@ public class DataFetch extends Thread {
 			Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
 			try {
 				ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
-				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
-				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+				boolean hasResults = ("0".equals(String.valueOf(imageSearchResult.get("searchInformation").get("totalResults"))));
+				if (hasResults) {
+					String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
+					googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
