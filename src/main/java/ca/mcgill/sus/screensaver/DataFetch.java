@@ -97,7 +97,7 @@ public class DataFetch extends Thread {
 				}
 				fail = false;
 			} catch (Exception e) {
-//				e.printStackTrace();
+				e.printStackTrace();
 			}
 
 			this.loaded.set(true);
@@ -132,6 +132,7 @@ public class DataFetch extends Thread {
 			throw new RuntimeException();
 		 } catch (Exception e) {
 			System.err.println("Could not fetch profile pic");
+			e.printStackTrace();
 		}
 	}
 
