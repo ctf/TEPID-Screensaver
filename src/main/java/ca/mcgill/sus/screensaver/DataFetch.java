@@ -148,8 +148,7 @@ public class DataFetch extends Thread {
 				email = user.getLongUser();
 			}
 			else {
-				email = ""; //non-nullable fallback, will result in a 404 which is less elegant than simply not fetching.
-							//could be used to provide an organisational default instead?
+				return (null); // return null if there's no point searching
 			}
 			futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
 		}
