@@ -135,30 +135,6 @@ public class DataFetch extends Thread {
 		}
 	}
 
-	private void setProfilePic(BufferedImage pic) {
-		profilePic.clear();
-		profilePic.add(Util.circleCrop(pic));
-	}
-
-	@Nullable
-	private BufferedImage pullWebImage(NameUser user) {
-		//search google for "full name" + mcgill
-		String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
-		BufferedImage googleThumbnail = null;
-		Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
-		try {
-			ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
-			boolean hasResults = ("0".equals(String.valueOf(imageSearchResult.get("searchInformation").get("totalResults"))));
-			if (hasResults) {
-				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
-				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return googleThumbnail;
-	}
-
 	@Nullable
 	private BufferedImage pullGravatar(NameUser user) {
 		//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
@@ -185,6 +161,30 @@ public class DataFetch extends Thread {
 			e.printStackTrace();
 		}
 		return gravatar;
+	}
+
+	@Nullable
+	private BufferedImage pullWebImage(NameUser user) {
+		//search google for "full name" + mcgill
+		String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
+		BufferedImage googleThumbnail = null;
+		Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
+		try {
+			ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
+			boolean hasResults = ("0".equals(String.valueOf(imageSearchResult.get("searchInformation").get("totalResults"))));
+			if (hasResults) {
+				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
+				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return googleThumbnail;
+	}
+
+	private void setProfilePic(BufferedImage pic) {
+		profilePic.clear();
+		profilePic.add(Util.circleCrop(pic));
 	}
 
 	private void loadSlideImages(boolean pullSlides) {
