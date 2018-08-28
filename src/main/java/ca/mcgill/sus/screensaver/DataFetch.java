@@ -119,11 +119,17 @@ public class DataFetch extends Thread {
 	private void pullProfilePicture(NameUser user) {
 		//pull profile picture for office
 		 try {
-			 BufferedImage gravatar = pullGravatar(user);
-			 BufferedImage googleThumbnail = pullWebImage(user);
+		 	BufferedImage pic;
 
-			 //merge
-			BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
+			BufferedImage gravatar = pullGravatar(user);
+			if (gravatar != null){
+				setProfilePic(gravatar);
+				return;
+			}
+			BufferedImage googleThumbnail = pullWebImage(user);
+
+			//merge
+			pic = googleThumbnail;
 			if (pic != null) {
 				setProfilePic(pic);
 			} else {
