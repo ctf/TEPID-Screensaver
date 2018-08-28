@@ -122,7 +122,17 @@ public class DataFetch extends Thread {
 			//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
 			Future<byte[]> futureGravatar = null;
 			if (user != null) {
-				String email = user.getEmail() == null ? user.getLongUser() : user.getEmail();
+				String email;
+				if (user.getEmail() != null) {
+					email = user.getEmail();
+				}
+				else if (user.getLongUser() != null) {
+					email = user.getLongUser();
+				}
+				else {
+					email = ""; //non-nullable fallback, will result in a 404 which is less elegant than simply not fetching.
+								//could be used to provide an organisational default instead?
+				}
 				futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
 			}
 			//search google for "full name" + mcgill
