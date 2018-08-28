@@ -46,11 +46,7 @@ public class JobList implements Drawable {
 	 */
 	public JobList(int y) {
 		this.y = y;
-		DataFetch.getInstance().addChangeListener(new Runnable() {
-			public void run() {
-				dirty.set(true);
-			}
-		});
+		DataFetch.getInstance().addChangeListener(() -> dirty.set(true));
 	}
 
 	@Override
@@ -60,12 +56,7 @@ public class JobList implements Drawable {
 			int x = 0, tableWidth = canvasWidth / jobData.size();
 			if (tableWidth <= 0) return;
 			List<Entry<String, List<PrintJob>>> queues = new ArrayList<>(jobData.entrySet());
-			Collections.sort(queues, new Comparator<Entry<String, List<PrintJob>>>() {
-				@Override
-				public int compare(Entry<String, List<PrintJob>> e1, Entry<String, List<PrintJob>> e2) {
-					return e1.getKey().compareTo(e2.getKey());
-				}
-			});
+			Collections.sort(queues, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
 			for (Entry<String, List<PrintJob>> jobs : queues) {
 				boolean up = statuses.get(jobs.getKey());
 				BufferedImage table = renderTable(jobs.getValue(), tableWidth - 16, up),
@@ -86,7 +77,7 @@ public class JobList implements Drawable {
 	 * @param list 		the list of print jobs to display
 	 * @param width		the width of the table
 	 * @param status	the status of the print queue. will determine whether an empty queue gets the popcorn pusheen or the sad pusheen
-	 * @return
+	 * @return the buffered image created hereby
 	 */
 	public BufferedImage renderTable(List<PrintJob> list, int width, boolean status) {
 		int fontPx = 16, padding = 10;
@@ -130,7 +121,7 @@ public class JobList implements Drawable {
 				g.setFont(FontManager.getInstance().getFont("nhg.ttf").deriveFont((float) fontPx + 4));
 				g.drawString(job.getUserIdentification(), 5, i * (fontPx + padding * 2) - padding - 2);
 				g.setFont(FontManager.getInstance().getFont("nhg-thin.ttf").deriveFont((float) fontPx + 4));
-				if(job.getDestination() != null) g.drawString(DataFetch.getInstance().destinations.get(job.getDestination()).name, width / 4, i * (fontPx + padding * 2) - padding - 2);
+				if(job.getDestination() != null) g.drawString(DataFetch.getInstance().destinations.get(job.getDestination()).getName(), width / 4, i * (fontPx + padding * 2) - padding - 2);
 				String jobStatus = "Uploading...";
 				if(job.getPrinted() != -1) jobStatus = ("Printed  " + dateFormat.format(job.getPrinted()));
 				else if(job.getError() != null) jobStatus = (job.getError());

@@ -12,7 +12,7 @@ import ca.mcgill.sus.screensaver.DataFetch;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.Util;
-import ca.mcgill.sus.screensaver.io.UserInfo;
+import ca.mcgill.science.tepid.models.data.NameUser;
 
 public class UserInfoBar extends Header {
 
@@ -28,15 +28,18 @@ public class UserInfoBar extends Header {
 		update = new Runnable() {
 			public void run() {
 				try {
-					UserInfo userInfo = DataFetch.getInstance().userInfo.peek();
-					if (userInfo == null) {
+					NameUser nameUser = DataFetch.getInstance().nameUser.peek();
+					if (nameUser == null) {
 						displayName = System.getenv("username");
 					} else {
 						if (Main.OFFICE_COMPUTER) {
-							displayName = userInfo.salutation;
+							displayName = nameUser.getSalutation();
 						} else {
-							displayName = String.format("%s. %s", userInfo.givenName.charAt(0), userInfo.lastName);
+							displayName = String.format("%s. %s", nameUser.getGivenName().charAt(0), nameUser.getLastName());
 						}
+					}
+					if (displayName == null) {
+						displayName = "someone";
 					}
 				} catch (Exception e) {
 					displayName = System.getenv("username");

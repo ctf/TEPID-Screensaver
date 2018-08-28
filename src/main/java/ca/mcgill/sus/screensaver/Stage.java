@@ -100,12 +100,7 @@ public class Stage extends JPanel {
 		if (SwingUtilities.isEventDispatchThread()) {
 			Stage.this.repaint();
 		} else {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					Stage.this.repaint();
-				}
-			});
+			SwingUtilities.invokeLater(() -> Stage.this.repaint());
 		}
 	}
 	
