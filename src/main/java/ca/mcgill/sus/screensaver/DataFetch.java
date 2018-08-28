@@ -119,17 +119,10 @@ public class DataFetch extends Thread {
 	private void pullProfilePicture(NameUser user) {
 		//pull profile picture for office
 		 try {
-			 Future<byte[]> futureGravatar = pullGravatar(user);
+			 BufferedImage gravatar = pullGravatar(user);
 			 BufferedImage googleThumbnail = getWebImage(user);
-
-
+			 
 			 //merge
-			BufferedImage gravatar = null;
-			if (futureGravatar != null) try {
-				gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 			BufferedImage pic = gravatar == null ? googleThumbnail : gravatar;
 			if (pic != null) {
 				profilePic.clear();
@@ -162,7 +155,7 @@ public class DataFetch extends Thread {
 	}
 
 	@Nullable
-	private Future<byte[]> pullGravatar(NameUser user) {
+	private BufferedImage pullGravatar(NameUser user) {
 		//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
 		Future<byte[]> futureGravatar = null;
 		if (user != null) {
@@ -179,7 +172,14 @@ public class DataFetch extends Thread {
 			}
 			futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
 		}
-		return futureGravatar;
+
+		BufferedImage gravatar = null;
+		if (futureGravatar != null) try {
+			gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return gravatar;
 	}
 
 	private void loadSlideImages(boolean pullSlides) {
