@@ -119,23 +119,18 @@ public class DataFetch extends Thread {
 	private void pullProfilePicture(NameUser user) {
 		//pull profile picture for office
 		 try {
-		 	BufferedImage pic;
-
-			BufferedImage gravatar = pullGravatar(user);
-			if (gravatar != null){
+			 BufferedImage gravatar = pullGravatar(user);
+			if (gravatar != null) {
 				setProfilePic(gravatar);
 				return;
 			}
 			BufferedImage googleThumbnail = pullWebImage(user);
-
-			//merge
-			pic = googleThumbnail;
-			if (pic != null) {
-				setProfilePic(pic);
-			} else {
-				throw new RuntimeException();
+			if (googleThumbnail != null) {
+				setProfilePic(googleThumbnail);
+				return;
 			}
-		} catch (Exception e) {
+			throw new RuntimeException();
+		 } catch (Exception e) {
 			System.err.println("Could not fetch profile pic");
 		}
 	}
