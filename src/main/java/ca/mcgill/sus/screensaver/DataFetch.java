@@ -119,37 +119,11 @@ public class DataFetch extends Thread {
 	private void pullProfilePicture(NameUser user) {
 		//pull profile picture for office
 		 try {
-			//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
-			Future<byte[]> futureGravatar = null;
-			if (user != null) {
-				String email;
-				if (user.getEmail() != null) {
-					email = user.getEmail();
-				}
-				else if (user.getLongUser() != null) {
-					email = user.getLongUser();
-				}
-				else {
-					email = ""; //non-nullable fallback, will result in a 404 which is less elegant than simply not fetching.
-								//could be used to provide an organisational default instead?
-				}
-				futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
-			}
-			//search google for "full name" + mcgill
-			String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
-			BufferedImage googleThumbnail = null;
-			Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
-			try {
-				ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
-				boolean hasResults = ("0".equals(String.valueOf(imageSearchResult.get("searchInformation").get("totalResults"))));
-				if (hasResults) {
-					String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
-					googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			//merge
+			 Future<byte[]> futureGravatar = pullGravatar(user);
+			 BufferedImage googleThumbnail = getWebImage(user);
+
+
+			 //merge
 			BufferedImage gravatar = null;
 			if (futureGravatar != null) try {
 				gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
@@ -166,6 +140,46 @@ public class DataFetch extends Thread {
 		} catch (Exception e) {
 			System.err.println("Could not fetch profile pic");
 		}
+	}
+
+	@Nullable
+	private BufferedImage getWebImage(NameUser user) {
+		//search google for "full name" + mcgill
+		String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
+		BufferedImage googleThumbnail = null;
+		Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
+		try {
+			ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
+			boolean hasResults = ("0".equals(String.valueOf(imageSearchResult.get("searchInformation").get("totalResults"))));
+			if (hasResults) {
+				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
+				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return googleThumbnail;
+	}
+
+	@Nullable
+	private Future<byte[]> pullGravatar(NameUser user) {
+		//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
+		Future<byte[]> futureGravatar = null;
+		if (user != null) {
+			String email;
+			if (user.getEmail() != null) {
+				email = user.getEmail();
+			}
+			else if (user.getLongUser() != null) {
+				email = user.getLongUser();
+			}
+			else {
+				email = ""; //non-nullable fallback, will result in a 404 which is less elegant than simply not fetching.
+							//could be used to provide an organisational default instead?
+			}
+			futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
+		}
+		return futureGravatar;
 	}
 
 	private void loadSlideImages(boolean pullSlides) {
