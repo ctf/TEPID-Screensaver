@@ -38,6 +38,9 @@ public class UserInfoBar extends Header {
 							displayName = String.format("%s. %s", nameUser.getGivenName().charAt(0), nameUser.getLastName());
 						}
 					}
+					if (displayName == null) {
+						displayName = "someone";
+					}
 				} catch (Exception e) {
 					displayName = System.getenv("username");
 				}
