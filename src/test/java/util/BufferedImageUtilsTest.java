@@ -3,6 +3,7 @@ package util;
 import ca.mcgill.sus.screensaver.Util;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -98,11 +99,13 @@ public class BufferedImageUtilsTest {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void testLoadBackground(){
 		fail("NI: testing this will be much easier with the path as a parameter");
 	}
 
+	@Ignore
 	@Test
 	public void testLoadSlides(){
 		fail("NI: testing this will be much easier with the path as a parameter");
