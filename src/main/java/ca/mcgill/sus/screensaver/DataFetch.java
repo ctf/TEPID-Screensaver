@@ -272,13 +272,16 @@ public class DataFetch extends Thread {
 
 		//process upcoming events (if this is an office computer)
 		ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
-		Date rightNow = new Date();
-		Semester currentSemester = Semester.getSemester(rightNow);
+
+		Date eventsStart = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(eventsStart);
+		c.add(Calendar.MONTH, 2);
+		Date eventsEnd = c.getTime();
 		//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
 		TimezoneInfo tzInfo = ical.getTimezoneInfo();
-		List<Pair<Date, VEvent>> events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester, tzInfo);
-		//get next semester's events if there are none for this semester left
-		if (events.isEmpty()) events = Semester.filterEvents(ical.getEvents(), rightNow, currentSemester.next(), tzInfo);
+		List<Pair<Date, VEvent>> events = Semester.filterEvents(ical.getEvents(), eventsStart, eventsEnd, tzInfo);
+
 		//format into human-friendly strings
 		upcomingEvents.clear();
 		for (Pair<Date, VEvent> event : events) {
@@ -335,14 +338,15 @@ public class DataFetch extends Thread {
 			if (month > Calendar.APRIL) return Semester.SPRING;
 			return Semester.WINTER;
 		}
-		private static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date after, Semester s, TimezoneInfo tzInfo) {
+		private static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date start, Date end, TimezoneInfo tzInfo) {
 			List<Pair<Date, VEvent>> events = new ArrayList<>();
 			for (VEvent e : rawEvents) {
 				Date soonest = null;
 				for (DateIterator iter = e.getDateIterator(getTimezone(tzInfo, e)); iter.hasNext();) {
 					Date d = iter.next();
-					if (d.before(after) || Semester.getSemester(d) != s) continue;
+					if (d.before(start)) continue;
 					if (soonest == null || d.before(soonest)) soonest = d;
+					if (d.after(end)) break;
 				}
 				if (soonest != null) events.add(new Pair<>(soonest, e));
 			}
