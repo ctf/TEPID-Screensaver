@@ -273,9 +273,8 @@ public class DataFetch extends Thread {
 		//process upcoming events (if this is an office computer)
 		ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
 
-		Date eventsStart = new Date();
 		Calendar c = Calendar.getInstance();
-		c.setTime(eventsStart);
+		Date eventsStart = c.getTime();
 		c.add(Calendar.MONTH, 2);
 		Date eventsEnd = c.getTime();
 		//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
