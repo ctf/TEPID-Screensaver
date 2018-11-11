@@ -1,6 +1,8 @@
 package ca.mcgill.sus.screensaver;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
@@ -226,10 +228,33 @@ public class DataFetch extends Thread {
 	@Nullable
 	private NameUser updateUserInfo() {
 		//update user info
-		Future<NameUser> futureUserInfo = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
+
+		String command = "powershell.exe \"Get-AdUser " + System.getenv("username") + " -properties DisplayName\"";
+
+
+		Map<String, String> nameInformation = new HashMap<>();
+		try {
+			Process PsGetAdUser = Runtime.getRuntime().exec(command);
+			BufferedReader stdout = new BufferedReader(new InputStreamReader(PsGetAdUser.getInputStream()));
+
+			String rawLine;
+			while ((rawLine = stdout.readLine()) != null) {
+				String[] line = rawLine.split(":");
+				if (line.length == 2){
+					nameInformation.put(line[0].trim(), line[1].trim());
+				}
+			}
+			stdout.close();
+		} catch (Exception e) {
+			System.err.println("Could not fetch user info using powershell");
+		}
+
+		System.out.println(nameInformation);
+
+		Future<NameUser> futureNick = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
 		NameUser user = null;
-		if (futureUserInfo != null) try {
-			NameUser newNameUser = futureUserInfo.get(interval, TimeUnit.SECONDS);
+		if (futureNick != null) try {
+			NameUser newNameUser = futureNick.get(interval, TimeUnit.SECONDS);
 			nameUser.clear();
 			nameUser.add(newNameUser);
 			user = newNameUser;
