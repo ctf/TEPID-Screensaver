@@ -265,6 +265,18 @@ public class DataFetch extends Thread {
 		} catch (Exception e) {
 			System.err.println("Could not fetch user nick: \n" + e);
 		}
+
+		user.setSalutation(user.getNick() != null ? user.getNick() : user.getDisplayName());
+		if (user.getNick() != null) {
+			user.setSalutation(user.getNick());
+		} else if (user.getDisplayName() != null) {
+			user.setSalutation(user.getDisplayName());
+		} else if (user.getShortUser() != null) {
+			user.setSalutation(user.getShortUser());
+		} else {
+			user.setSalutation(System.getenv("username"));
+		}
+
 		nameUser.clear();
 		nameUser.add(user);
 
