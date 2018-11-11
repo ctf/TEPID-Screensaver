@@ -38,32 +38,32 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DataFetch extends Thread {
-	
+
 	private static final int interval = 15, icalInterval = 5 * 60;
- 
+
 	private DataFetch() {
 		this.setDaemon(true);
 		this.start();
 	}
-	
+
 	private static DataFetch INSTANCE;
-	
+
 	public static synchronized DataFetch getInstance() {
 		if (INSTANCE == null) INSTANCE = new DataFetch();
 		return INSTANCE;
 	}
-	
+
 	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl),
 	icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical"),
 	gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/"),
 	gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image");
-	
+
 	private final String icsPath = Config.INSTANCE.getICS_CALENDAR_ADDRESS();
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
-	
+
 	private final AtomicBoolean networkUp = new AtomicBoolean(true);
 	private final AtomicBoolean loaded = new AtomicBoolean();
-	
+
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
 	public final Map<String, Destination> destinations = new ConcurrentHashMap<>();
@@ -73,31 +73,47 @@ public class DataFetch extends Thread {
 	public final Queue<NameUser> nameUser = new ConcurrentLinkedQueue<>();
 	public final List<Slide> slides = Collections.synchronizedList(new ArrayList<>());
 	public final Queue<BufferedImage> profilePic = new ConcurrentLinkedQueue<>();
-	
+
 	@Override
 	public void run() {
 		int iterations = 0;
 		while (!Thread.interrupted()) {
-			boolean fail = true;
+			boolean fail = false;
 			long startTime = System.currentTimeMillis();
 
-			boolean pullSlides = iterations++ * interval % icalInterval == 0, 
+			boolean pullSlides = iterations++ * interval % icalInterval == 0,
 			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
 			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
 
 			try {
 				updateMarqueeData();
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+
+			try {
 				updateDestinations();
-				NameUser user = updateUserInfo();
 				processPrintQueues();
+			}catch(Exception e){
+				e.printStackTrace();
+				fail=true;
+			}
+
+			try {
+				updateUserInfo();
+			}catch(Exception e){
+				e.printStackTrace();
+				fail=true;
+			}
+
+			try {
 				loadSlideImages(pullSlides);
 				if (pullPropic) {
-					pullProfilePicture(user);
+					pullProfilePicture(nameUser.peek());
 				}
 				if (pullEvents) {
 					processEvents();
 				}
-				fail = false;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -120,22 +136,17 @@ public class DataFetch extends Thread {
 
 	private void pullProfilePicture(NameUser user) {
 		//pull profile picture for office
-		 try {
-			 BufferedImage gravatar = pullGravatar(user);
-			if (gravatar != null) {
-				setProfilePic(gravatar);
-				return;
-			}
-			BufferedImage googleThumbnail = pullWebImage(user);
-			if (googleThumbnail != null) {
-				setProfilePic(googleThumbnail);
-				return;
-			}
-			throw new RuntimeException();
-		 } catch (Exception e) {
-			System.err.println("Could not fetch profile pic");
-			e.printStackTrace();
+		 BufferedImage gravatar = pullGravatar(user);
+		if (gravatar != null) {
+			setProfilePic(gravatar);
+			return;
 		}
+		BufferedImage googleThumbnail = pullWebImage(user);
+		if (googleThumbnail != null) {
+			setProfilePic(googleThumbnail);
+			return;
+		}
+		throw new RuntimeException();
 	}
 
 	@Nullable
@@ -225,7 +236,6 @@ public class DataFetch extends Thread {
 		jobData.putAll(newJobs);
 	}
 
-	@Nullable
 	private NameUser updateUserInfo() {
 		//update user info
 
@@ -367,7 +377,7 @@ public class DataFetch extends Thread {
 		}
 		return timezone;
 	}
-	
+
 	private enum Semester {
 		FALL, WINTER, SPRING;
 	    public Semester next() {
@@ -398,7 +408,7 @@ public class DataFetch extends Thread {
 		}
 	}
 
-	
+
 	public void addChangeListener(Runnable listener) {
 		listeners.add(listener);
 	}
