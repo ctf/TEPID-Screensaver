@@ -229,7 +229,8 @@ public class DataFetch extends Thread {
 	private NameUser updateUserInfo() {
 		//update user info
 
-		String command = "powershell.exe \"Get-AdUser " + System.getenv("username") + " -properties DisplayName\"";
+		String command = "powershell.exe \"Import-Module ActiveDirectory; $attributes = 'displayName', 'samAccountName', 'mail', 'name', 'givenName', 'surname';" +
+				"Get-AdUser " + System.getenv("username") + " -Properties $attributes | select $attributes\"";
 
 
 		Map<String, String> nameInformation = new HashMap<>();
