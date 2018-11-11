@@ -22,6 +22,10 @@ The screensaver also has a special mode for your office's computers. These are t
 
 There's also some mildly nonfunctional members-on-duty display. This currently doesn't work, but it could someday.
 
+## Compatibility
+
+Requires TEPID 2.2 minimum.
+
 ## Build
 Gradle tasks: 
 - `jar` build jar
