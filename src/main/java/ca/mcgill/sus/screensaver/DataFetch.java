@@ -232,7 +232,6 @@ public class DataFetch extends Thread {
 		String command = "powershell.exe \"Import-Module ActiveDirectory; $attributes = 'displayName', 'samAccountName', 'mail', 'name', 'givenName', 'surname';" +
 				"Get-AdUser " + System.getenv("username") + " -Properties $attributes | select $attributes\"";
 
-
 		Map<String, String> nameInformation = new HashMap<>();
 		try {
 			Process PsGetAdUser = Runtime.getRuntime().exec(command);
@@ -252,13 +251,22 @@ public class DataFetch extends Thread {
 
 		System.out.println(nameInformation);
 
+		NameUser user = new NameUser();
+		user.setDisplayName(nameInformation.get("displayName"));
+		user.setGivenName(nameInformation.get("givenName"));
+		user.setLastName(nameInformation.get("surname"));
+		user.setShortUser(nameInformation.get("samAccountName"));
+		user.setEmail(nameInformation.get("mail"));
+
+		System.out.println(user);
+
 		Future<NameUser> futureNick = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(NameUser.class) : null;
-		NameUser user = null;
+		NameUser newUser = null;
 		if (futureNick != null) try {
 			NameUser newNameUser = futureNick.get(interval, TimeUnit.SECONDS);
 			nameUser.clear();
 			nameUser.add(newNameUser);
-			user = newNameUser;
+			newUser = newNameUser;
 		} catch (Exception e) {
 			System.err.println("Could not fetch user info");
 		}
