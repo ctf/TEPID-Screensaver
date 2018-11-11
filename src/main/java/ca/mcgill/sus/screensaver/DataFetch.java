@@ -272,8 +272,14 @@ public class DataFetch extends Thread {
 		if (futureNick != null) try {
 			String newNick = futureNick.get(interval, TimeUnit.SECONDS);
 			user.setNick(newNick);
-		} catch (Exception e) {
-			System.err.println("Could not fetch user nick: \n" + e);
+		} catch (javax.ws.rs.NotFoundException e404){
+		    // means that there is no nick for that user
+        } catch (Exception e) {
+		    if (e.getCause() instanceof javax.ws.rs.NotFoundException){
+                // means that there is no nick for that user
+            } else{
+                System.err.println("Could not fetch user nick: \n" + e);
+            }
 		}
 
 		user.setSalutation(user.getNick() != null ? user.getNick() : user.getDisplayName());
