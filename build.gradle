@@ -10,7 +10,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
-        classpath "ca.mcgill:tepid-commons:$TEPID_COMMONS"
+        classpath "ca.mcgill.tepid-commons:gradle-plugin:$TEPID_COMMONS"
     }
 }
 
@@ -46,7 +46,6 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$KOTLIN"
     compile "org.jetbrains.kotlin:kotlin-reflect:$KOTLIN"
 
-    compile "ca.mcgill.tepid-commons:core:$TEPID_COMMONS"
     compile "ca.mcgill.tepid-commons:models:$TEPID_COMMONS"
     compile "ca.mcgill.tepid-commons:utils:$TEPID_COMMONS"
 
