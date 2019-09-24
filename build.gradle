@@ -5,7 +5,7 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
-        maven { url "https://jitpack.io" }
+        maven { url "https://www.jitpack.io" }
     }
 
     dependencies {
@@ -35,7 +35,7 @@ targetCompatibility = JVM_TARGET
 
 repositories {
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    maven { url "https://www.jitpack.io" }
 }
 
 dependencies {
@@ -48,6 +48,7 @@ dependencies {
 
     compile "ca.mcgill.tepid-commons:models:$TEPID_COMMONS"
     compile "ca.mcgill.tepid-commons:utils:$TEPID_COMMONS"
+    compile "ca.mcgill.tepid-commons:retrofit:$TEPID_COMMONS"
 
     compile 'net.sf.biweekly:biweekly:0.6.2'
     compile "com.google.code.gson:gson:2.8.5"
