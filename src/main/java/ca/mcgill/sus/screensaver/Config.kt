@@ -39,7 +39,7 @@ object Config : WithLogging() {
         log.info("**********************************")
 
 
-        SERVER_URL = PropsURL.SERVER_URL_PRODUCTION?.plus("screensaver/") ?: throw RuntimeException()
+        SERVER_URL = PropsURL.SERVER_URL_PRODUCTION ?: throw RuntimeException()
         DEBUG = PropsURL.TESTING?.toBoolean() ?: true
 
         WEB_URL = PropsURL.WEB_URL_PRODUCTION ?: throw RuntimeException()
