@@ -317,7 +317,7 @@ public class DataFetch extends Thread {
 
 	private void updateDestinations() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
 		//update destinations
-		Future<Map<String, Destination>> futureDestinations = tepidServer.path("/destinations").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Destination>>(){});
+		Future<Map<String, Destination>> futureDestinations = ConfigKt.asCompletableFuture(	api.getDestinations());
 		Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
 		destinations.clear();
 		destinations.putAll(newDestinations);
