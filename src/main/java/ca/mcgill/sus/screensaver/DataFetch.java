@@ -280,7 +280,10 @@ public class DataFetch extends Thread {
 		user.setEmail(nameInformation.get("mail"));
 
 		//todo: handle 404 error
-		Future<String> futureNick = Main.LOGGED_IN ? tepidServer.path("user").path(System.getenv("username")).request(MediaType.APPLICATION_JSON).async().get(String.class) : null;
+		Future<String> futureNick = Main.LOGGED_IN ?
+				ConfigKt.asCompletableFuture(
+						api.getUserNick(System.getenv("username"))
+				) : null;
 
 		if (futureNick != null) try {
 			String newNick = futureNick.get(interval, TimeUnit.SECONDS);
