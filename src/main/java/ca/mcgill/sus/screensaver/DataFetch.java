@@ -63,7 +63,6 @@ public class DataFetch extends Thread {
 		return INSTANCE;
 	}
 
-	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl+"screensaver/");
 	private final ITepidScreensaver api = ConfigKt.getApi();
 	private final WebTarget icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical");
 	private final WebTarget gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/");
