@@ -3,10 +3,15 @@ package ca.mcgill.sus.screensaver
 import ca.mcgill.science.tepid.api.ITepidScreensaver
 import ca.mcgill.science.tepid.api.TepidScreensaverApi
 import ca.mcgill.science.tepid.utils.LogUtils
-import ca.mcgill.science.tepid.utils.PropsURL
 import ca.mcgill.science.tepid.utils.PropsScreensaver
+import ca.mcgill.science.tepid.utils.PropsURL
 import ca.mcgill.science.tepid.utils.WithLogging
 import org.apache.logging.log4j.Level
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.HttpException
+import retrofit2.Response
+import java.util.concurrent.CompletableFuture
 
 /**
  * A unified interface for all the config gathering.
@@ -51,4 +56,35 @@ object Config : WithLogging() {
     }
 }
 
-val api = TepidScreensaverApi(Config.SERVER_URL, Config.DEBUG).create()
+fun buildApi(): ITepidScreensaver {
+    return TepidScreensaverApi(Config.SERVER_URL, Config.DEBUG).create()
+}
+
+val api = buildApi()
+
+fun <R> Call<R>.asCompletableFuture(): CompletableFuture<R> {
+    val future = object : CompletableFuture<R>() {
+        override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
+            if (mayInterruptIfRunning) {
+                cancel()
+            }
+            return super.cancel(mayInterruptIfRunning)
+        }
+    }
+
+    enqueue(object : Callback<R> {
+        override fun onResponse(call: Call<R>, response: Response<R>) {
+            if (response.isSuccessful) {
+                future.complete(response.body())
+            } else {
+                future.completeExceptionally(HttpException(response))
+            }
+        }
+
+        override fun onFailure(call: Call<R>, t: Throwable) {
+            future.completeExceptionally(t)
+        }
+    })
+
+    return future
+}
