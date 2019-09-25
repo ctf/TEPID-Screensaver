@@ -74,6 +74,8 @@ public class DataFetch extends Thread {
 	private final AtomicBoolean networkUp = new AtomicBoolean(true);
 	private final AtomicBoolean loaded = new AtomicBoolean();
 
+	private final AtomicBoolean hasNick = new AtomicBoolean(true);
+
 	//models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
 	public final Map<String, Destination> destinations = new ConcurrentHashMap<>();
@@ -278,23 +280,20 @@ public class DataFetch extends Thread {
 		user.setShortUser(nameInformation.get("samAccountName"));
 		user.setEmail(nameInformation.get("mail"));
 
-		//todo: handle 404 error
-		Future<String> futureNick = Main.LOGGED_IN ?
-				ConfigKt.asCompletableFuture(
-						api.getUserNick(System.getenv("username"))
-				) : null;
+		if (hasNick.get()) {
+			Future<String> futureNick = Main.LOGGED_IN ?
+					ConfigKt.asCompletableFuture(
+							api.getUserNick(System.getenv("username"))
+					) : null;
 
-		if (futureNick != null) try {
-			String newNick = futureNick.get(interval, TimeUnit.SECONDS);
-			user.setNick(newNick);
-		} catch (javax.ws.rs.NotFoundException e404){
-		    // means that there is no nick for that user
-        } catch (Exception e) {
-		    if (e.getCause() instanceof javax.ws.rs.NotFoundException){
-                // means that there is no nick for that user
-            } else{
-                System.err.println("Could not fetch user nick: \n" + e);
-            }
+			if (futureNick != null) try {
+				String newNick = futureNick.get(interval, TimeUnit.SECONDS);
+				user.setNick(newNick);
+			} catch (javax.ws.rs.NotFoundException e404) {
+				hasNick.set(false);
+			} catch (Exception e) {
+				System.err.println("Could not fetch user nick: \n" + e);
+			}
 		}
 
 		user.setSalutation(user.getNick() != null ? user.getNick() : user.getDisplayName());
