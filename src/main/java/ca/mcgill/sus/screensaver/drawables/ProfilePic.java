@@ -3,7 +3,7 @@ package ca.mcgill.sus.screensaver.drawables;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import ca.mcgill.sus.screensaver.DataFetch;
+import ca.mcgill.sus.screensaver.datafetch.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 
 public class ProfilePic implements Drawable {	

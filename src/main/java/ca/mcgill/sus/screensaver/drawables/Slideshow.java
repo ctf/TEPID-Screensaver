@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ca.mcgill.sus.screensaver.CubicBezier;
-import ca.mcgill.sus.screensaver.DataFetch;
+import ca.mcgill.sus.screensaver.datafetch.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.Util;
 import ca.mcgill.sus.screensaver.io.Slide;

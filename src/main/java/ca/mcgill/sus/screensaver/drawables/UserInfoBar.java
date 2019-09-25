@@ -8,7 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
 
-import ca.mcgill.sus.screensaver.DataFetch;
+import ca.mcgill.sus.screensaver.datafetch.DataFetch;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.Util;

@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +20,7 @@ import javax.ws.rs.client.WebTarget;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import ca.mcgill.sus.screensaver.AnimatedSprite;
-import ca.mcgill.sus.screensaver.DataFetch;
+import ca.mcgill.sus.screensaver.datafetch.DataFetch;
 import ca.mcgill.sus.screensaver.Drawable;
 import ca.mcgill.sus.screensaver.FontManager;
 import ca.mcgill.sus.screensaver.Main;

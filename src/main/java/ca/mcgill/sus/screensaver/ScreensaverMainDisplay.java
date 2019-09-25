@@ -1,5 +1,6 @@
 package ca.mcgill.sus.screensaver;
 
+import ca.mcgill.sus.screensaver.datafetch.DataFetch;
 import ca.mcgill.sus.screensaver.drawables.Clock;
 import ca.mcgill.sus.screensaver.drawables.Error;
 import ca.mcgill.sus.screensaver.drawables.Header;
