@@ -326,7 +326,7 @@ public class DataFetch extends Thread {
 	@NotNull
 	private Map<String, Boolean> updatePrinterStatus() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
 		//update printer status
-		Future<Map<String, Boolean>> futureStatus = tepidServer.path("/queues/status").request(MediaType.APPLICATION_JSON).async().get(new GenericType<Map<String, Boolean>>(){});
+		Future<Map<String, Boolean>> futureStatus = ConfigKt.asCompletableFuture(	api.getQueueStatus());
 		Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
 		printerStatus.clear();
 		printerStatus.putAll(newStatus);
