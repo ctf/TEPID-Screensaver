@@ -227,20 +227,22 @@ public class DataFetch extends Thread {
 		Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
 		Map<String, List<PrintJob>> newJobs = new HashMap<>();
 		//iterates over each queue and gets a list of jobs sent to them
+
 		for (Entry<String, Boolean> q : newStatus.entrySet()) {
 			if (printerStatus.get(q.getKey())) {
-				futureJobs.put(q.getKey(), tepidServer
-								.path("queues").path(q.getKey())  	//path to specific queue
-								.queryParam("limit", 10)
-								.queryParam("from", System.currentTimeMillis() - (60 * 60 * 1000)) //only get jobs from the last hour
-								.request(MediaType.APPLICATION_JSON).async()
-								.get(new GenericType<List<PrintJob>>(){}));
+				futureJobs.put(q.getKey(),
+						ConfigKt.asCompletableFuture(
+								api.listJobs(q.getKey(), 10, System.currentTimeMillis() - (60 * 60 * 1000)) //only get jobs from the last hour
+						)
+				);
 
 			} else {
 				newJobs.put(q.getKey(), new ArrayList<PrintJob>(0));
 			}
 		}
+
 		for (Entry<String, Future<List<PrintJob>>> e : futureJobs.entrySet()) {
+
 			newJobs.put(e.getKey(), e.getValue().get(interval, TimeUnit.SECONDS));
 		}
 		jobData.clear();
