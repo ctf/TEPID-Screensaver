@@ -1,5 +1,7 @@
 package ca.mcgill.sus.screensaver
 
+import ca.mcgill.science.tepid.api.ITepidScreensaver
+import ca.mcgill.science.tepid.api.TepidScreensaverApi
 import ca.mcgill.science.tepid.utils.LogUtils
 import ca.mcgill.science.tepid.utils.PropsURL
 import ca.mcgill.science.tepid.utils.PropsScreensaver
@@ -46,7 +48,7 @@ object Config : WithLogging() {
         ICS_CALENDAR_ADDRESS = PropsScreensaver.ICS_CALENDAR_ADDRESS ?: ""
 
         if (DEBUG) LogUtils.setLoggingLevel(log, Level.TRACE)
-
     }
-
 }
+
+val api = TepidScreensaverApi(Config.SERVER_URL, Config.DEBUG).create()

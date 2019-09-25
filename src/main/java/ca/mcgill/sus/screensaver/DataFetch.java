@@ -17,6 +17,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import ca.mcgill.science.tepid.api.ITepidScreensaver;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.javatuples.Pair;
 
@@ -33,6 +34,7 @@ import ca.mcgill.science.tepid.models.data.Destination;
 import ca.mcgill.science.tepid.models.data.MarqueeData;
 import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;
+import ca.mcgill.sus.screensaver.ConfigKt;
 import ca.mcgill.science.tepid.models.data.NameUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
