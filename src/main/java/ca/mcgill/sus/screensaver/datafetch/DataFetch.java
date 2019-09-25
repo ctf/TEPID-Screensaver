@@ -82,7 +82,7 @@ public class DataFetch extends Thread {
 			gImageApi,
 			null
 	);
-	private SlideFetch slideFetch = new SlideFetch();
+	private SlideFetch slideFetch = new SlideFetch(interval/icalInterval);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -128,13 +128,20 @@ public class DataFetch extends Thread {
 			}
 
 			try {
-				loadSlideImages(pullSlides);
+				//load slide images
+				FetchResult<List<Slide>> slideResult = slideFetch.fetchUnexceptionally();
+				if (slideResult.success) {
+					slides.clear();
+					slides.addAll(slideResult.value);
+				}
+
 				if (pullPropic) {
-					FetchResult<BufferedImage> result = profilePictureFetch.fetch();
-					if (result.success){
-						setProfilePic(result.value);
+					FetchResult<BufferedImage> profilePicResult = profilePictureFetch.fetch();
+					if (profilePicResult.success){
+						setProfilePic(profilePicResult.value);
 					}
 				}
+
 				if (pullEvents) {
 					processEvents();
 				}
@@ -161,17 +168,6 @@ public class DataFetch extends Thread {
 	private void setProfilePic(BufferedImage pic) {
 		profilePic.clear();
 		profilePic.add(Util.circleCrop(pic));
-	}
-
-	private void loadSlideImages(boolean pullSlides) {
-		//load slide images
-		if (slides.isEmpty() || pullSlides) {
-			FetchResult<List<Slide>> result = slideFetch.fetchUnexceptionally();
-			if (result.success){
-				slides.clear();
-				slides.addAll(result.value);
-			}
-		}
 	}
 
 	private void processPrintQueues() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
