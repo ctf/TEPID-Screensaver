@@ -1,28 +1,5 @@
 package ca.mcgill.sus.screensaver;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-
-import ca.mcgill.science.tepid.api.ITepidScreensaver;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.javatuples.Pair;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
@@ -30,14 +7,45 @@ import biweekly.io.TimezoneAssignment;
 import biweekly.io.TimezoneInfo;
 import biweekly.property.DateStart;
 import biweekly.util.com.google.ical.compat.javautil.DateIterator;
+import ca.mcgill.science.tepid.api.ITepidScreensaver;
 import ca.mcgill.science.tepid.models.data.Destination;
 import ca.mcgill.science.tepid.models.data.MarqueeData;
+import ca.mcgill.science.tepid.models.data.NameUser;
 import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.io.Slide;
-import ca.mcgill.sus.screensaver.ConfigKt;
-import ca.mcgill.science.tepid.models.data.NameUser;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataFetch extends Thread {
 
