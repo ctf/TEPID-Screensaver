@@ -17,11 +17,9 @@ import ca.mcgill.sus.screensaver.ConfigKt;
 import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.Util;
 import ca.mcgill.sus.screensaver.io.Slide;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -77,7 +75,15 @@ public class DataFetch extends Thread {
 
 	private final AtomicBoolean hasNick = new AtomicBoolean(true);
 
-	//models
+	// DataFetchables
+	private ProfilePictureFetch profilePictureFetch = new ProfilePictureFetch(
+			interval,
+			gravatarApi,
+			gImageApi,
+			null
+	);
+
+	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
 	public final Map<String, Destination> destinations = new ConcurrentHashMap<>();
 	public final Map<String, List<PrintJob>> jobData = new ConcurrentHashMap<>();
@@ -114,6 +120,7 @@ public class DataFetch extends Thread {
 
 			try {
 				updateUserInfo();
+				profilePictureFetch.setUser(nameUser.peek());
 			}catch(Exception e){
 				e.printStackTrace();
 				fail=true;
@@ -122,7 +129,10 @@ public class DataFetch extends Thread {
 			try {
 				loadSlideImages(pullSlides);
 				if (pullPropic) {
-					pullProfilePicture(nameUser.peek());
+					FetchResult<BufferedImage> result = profilePictureFetch.fetch();
+					if (result.success){
+						setProfilePic(result.value);
+					}
 				}
 				if (pullEvents) {
 					processEvents();
@@ -145,67 +155,6 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
-	}
-
-	private void pullProfilePicture(NameUser user) {
-		//pull profile picture for office
-		 BufferedImage gravatar = pullGravatar(user);
-		if (gravatar != null) {
-			setProfilePic(gravatar);
-			return;
-		}
-		BufferedImage googleThumbnail = pullWebImage(user);
-		if (googleThumbnail != null) {
-			setProfilePic(googleThumbnail);
-			return;
-		}
-		throw new RuntimeException();
-	}
-
-	@Nullable
-	private BufferedImage pullGravatar(NameUser user) {
-		//look for gravatar; d=404 means don't return a default image, 404 instead; s=128 is the size
-		Future<byte[]> futureGravatar = null;
-		if (user != null) {
-			String email;
-			if (user.getEmail() != null) {
-				email = user.getEmail();
-			}
-			else if (user.getLongUser() != null) {
-				email = user.getLongUser();
-			}
-			else {
-				return (null); // return null if there's no point searching
-			}
-			futureGravatar = gravatarApi.path(Util.md5Hex(email)).queryParam("d", "404").queryParam("s", "110").request(MediaType.APPLICATION_OCTET_STREAM).async().get(byte[].class);
-		}
-
-		BufferedImage gravatar = null;
-		if (futureGravatar != null) try {
-			gravatar = Util.readImage(futureGravatar.get(interval, TimeUnit.SECONDS));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return gravatar;
-	}
-
-	@Nullable
-	private BufferedImage pullWebImage(NameUser user) {
-		//search google for "full name" + mcgill
-		String name = user == null ? System.getenv("username") : (user.getRealName() == null ? user.getDisplayName() : user.getRealName());
-		BufferedImage googleThumbnail = null;
-		Future<ObjectNode> futureImageResult = gImageApi.queryParam("q", "\"" + name + "\" " + Config.INSTANCE.getGravatar_search_terms()).request(MediaType.APPLICATION_JSON).async().get(ObjectNode.class);
-		try {
-			ObjectNode imageSearchResult = futureImageResult.get(interval, TimeUnit.SECONDS);
-			boolean hasResults = !("\"0\"".equals(String.valueOf(imageSearchResult.get("searchInformation").get("totalResults"))));
-			if (hasResults) {
-				String thumbnailUrl = imageSearchResult.get("items").get(0).get("image").get("thumbnailLink").asText();
-				googleThumbnail = Util.readImage(ClientBuilder.newClient().target(thumbnailUrl).request().get(byte[].class));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return googleThumbnail;
 	}
 
 	private void setProfilePic(BufferedImage pic) {

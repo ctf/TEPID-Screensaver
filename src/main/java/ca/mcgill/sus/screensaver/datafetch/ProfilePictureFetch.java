@@ -18,7 +18,9 @@ public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
     private final long timeOutInterval;
     private final WebTarget gravatarApi;
     private final WebTarget gImageApi;
-    private final NameUser user;
+    // TODO: make final with proper instantiation order
+    private NameUser user;
+    public void setUser(NameUser _user){ user = _user;}
 
     ProfilePictureFetch(long _timeOutInterval, WebTarget _gravatarApi, WebTarget _gImageApi, NameUser _user) {
         timeOutInterval = _timeOutInterval;
