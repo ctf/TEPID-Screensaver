@@ -1,7 +1,5 @@
 package ca.mcgill.sus.screensaver.datafetch;
 
-import biweekly.Biweekly;
-import biweekly.ICalendar;
 import biweekly.component.VEvent;
 import biweekly.io.TimezoneAssignment;
 import biweekly.io.TimezoneInfo;
@@ -23,23 +21,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Queue;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -83,6 +69,11 @@ public class DataFetch extends Thread {
 			null
 	);
 	private SlideFetch slideFetch = new SlideFetch(interval/icalInterval);
+	private EventsFetch eventsFetch = new EventsFetch(
+			icalInterval,
+			icalServer,
+			icsPath
+	);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -129,7 +120,7 @@ public class DataFetch extends Thread {
 
 			try {
 				//load slide images
-				FetchResult<List<Slide>> slideResult = slideFetch.fetchUnexceptionally();
+				FetchResult<List<Slide>> slideResult = slideFetch.fetch();
 				if (slideResult.success) {
 					slides.clear();
 					slides.addAll(slideResult.value);
@@ -143,7 +134,10 @@ public class DataFetch extends Thread {
 				}
 
 				if (pullEvents) {
-					processEvents();
+					FetchResult<Queue<String>> eventsResult = eventsFetch.fetch();
+					if (eventsResult.success){
+						setEvents(eventsResult.value);
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -288,51 +282,9 @@ public class DataFetch extends Thread {
 		marqueeData.addAll(newMarquee);
 	}
 
-	private void processEvents()
-			throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
-
-		Future<String> futureEvents = icalServer.path(icsPath).request(MediaType.TEXT_PLAIN).async().get(String.class);
-
-		//process upcoming events (if this is an office computer)
-		ICalendar ical = Biweekly.parse(futureEvents.get(interval, TimeUnit.SECONDS)).first();
-
-		Calendar c = Calendar.getInstance();
-		Date eventsStart = c.getTime();
-		c.add(Calendar.MONTH, 2);
-		Date eventsEnd = c.getTime();
-		//filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
-		TimezoneInfo tzInfo = ical.getTimezoneInfo();
-		List<Pair<Date, VEvent>> events = Semester.filterEvents(ical.getEvents(), eventsStart, eventsEnd, tzInfo);
-
-		//format into human-friendly strings
+	private void setEvents(Queue<String> events){
 		upcomingEvents.clear();
-		for (Pair<Date, VEvent> event : events) {
-			Date d = event.getValue0();
-			VEvent e = event.getValue1();
-
-			Calendar timeOfEvent = GregorianCalendar.getInstance();
-			timeOfEvent.setTime(d);
-			boolean isOnTheHour = timeOfEvent.get(Calendar.MINUTE) == 0;
-			timeOfEvent.set(Calendar.HOUR_OF_DAY, 0);
-			timeOfEvent.set(Calendar.MINUTE, 0);
-			timeOfEvent.set(Calendar.SECOND, 0);
-			timeOfEvent.set(Calendar.MILLISECOND, 0);
-
-			Calendar oneWeek = GregorianCalendar.getInstance();
-			oneWeek.add(Calendar.DATE, 6);
-
-			Calendar today = GregorianCalendar.getInstance();
-			today.set(Calendar.HOUR_OF_DAY, 0);
-			today.set(Calendar.MINUTE, 0);
-			today.set(Calendar.SECOND, 0);
-			today.set(Calendar.MILLISECOND, 0);
-
-			boolean isSoon = timeOfEvent.before(oneWeek),
-			isToday = timeOfEvent.equals(today);
-			String dateFormat = (isToday ? "" : (isSoon ? "E": "MMM d")) + (isOnTheHour ? " @ h a" : " @ h:mm a");
-			upcomingEvents.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
-		}
-		System.out.println("Fetched events");
+		upcomingEvents.addAll(events);
 	}
 
 	private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
@@ -347,7 +299,7 @@ public class DataFetch extends Thread {
 		return timezone;
 	}
 
-	private enum Semester {
+	public enum Semester {
 		FALL, WINTER, SPRING;
 	    public Semester next() {
 	        return values()[(this.ordinal() + 1) % values().length];
@@ -360,7 +312,7 @@ public class DataFetch extends Thread {
 			if (month > Calendar.APRIL) return Semester.SPRING;
 			return Semester.WINTER;
 		}
-		private static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date start, Date end, TimezoneInfo tzInfo) {
+		static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date start, Date end, TimezoneInfo tzInfo) {
 			List<Pair<Date, VEvent>> events = new ArrayList<>();
 			for (VEvent e : rawEvents) {
 				Date soonest = null;

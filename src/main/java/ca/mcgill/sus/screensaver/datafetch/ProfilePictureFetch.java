@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
 
+    private BufferedImage profilePic;
+
     private final long timeOutInterval;
     private final WebTarget gravatarApi;
     private final WebTarget gImageApi;
@@ -28,8 +30,6 @@ public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
         gImageApi = _gImageApi;
         user = _user;
     }
-
-    private BufferedImage profilePic;
 
     private void setProfilePic(BufferedImage pic) {
         profilePic = pic;
