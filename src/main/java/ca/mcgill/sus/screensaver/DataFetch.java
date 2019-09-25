@@ -63,10 +63,11 @@ public class DataFetch extends Thread {
 		return INSTANCE;
 	}
 
-	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl),
-	icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical"),
-	gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/"),
-	gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image");
+	private final WebTarget tepidServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target(Main.serverUrl+"screensaver/");
+	private final ITepidScreensaver api = ConfigKt.getApi();
+	private final WebTarget icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical");
+	private final WebTarget gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/");
+	private final WebTarget gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image");
 
 	private final String icsPath = Config.INSTANCE.getICS_CALENDAR_ADDRESS();
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
