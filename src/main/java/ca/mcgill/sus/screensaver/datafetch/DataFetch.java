@@ -82,6 +82,7 @@ public class DataFetch extends Thread {
 			gImageApi,
 			null
 	);
+	private SlideFetch slideFetch = new SlideFetch();
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -165,9 +166,11 @@ public class DataFetch extends Thread {
 	private void loadSlideImages(boolean pullSlides) {
 		//load slide images
 		if (slides.isEmpty() || pullSlides) {
-			List<Slide> newSlides = Util.loadSlides();
-			slides.clear();
-			slides.addAll(newSlides);
+			FetchResult<List<Slide>> result = slideFetch.fetchUnexceptionally();
+			if (result.success){
+				slides.clear();
+				slides.addAll(result.value);
+			}
 		}
 	}
 
