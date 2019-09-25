@@ -7,6 +7,9 @@ public class FetchResult<T> {
     public FetchResult(T _value, Boolean _success){
         value = _value;
         success = _success;
-        
+    }
+
+    public FetchResult(T _value){
+        this(_value, true);
     }
 }
