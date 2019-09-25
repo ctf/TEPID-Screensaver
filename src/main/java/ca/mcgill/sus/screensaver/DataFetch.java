@@ -335,8 +335,8 @@ public class DataFetch extends Thread {
 
 	private void updateMarqueeData() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
 		//update marquee data
-		Future<MarqueeData[]> futureMarquee = tepidServer.path("marquee").request(MediaType.APPLICATION_JSON).async().get(MarqueeData[].class);
-		List<MarqueeData> newMarquee = Arrays.asList(futureMarquee.get(interval, TimeUnit.SECONDS));
+		Future<List<MarqueeData>> futureMarquee = ConfigKt.asCompletableFuture(	api.getMarquee());
+		List<MarqueeData> newMarquee = futureMarquee.get(interval, TimeUnit.SECONDS);
 		marqueeData.clear();
 		marqueeData.addAll(newMarquee);
 	}
