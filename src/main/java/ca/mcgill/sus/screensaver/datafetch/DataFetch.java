@@ -68,7 +68,7 @@ public class DataFetch extends Thread {
 			gImageApi,
 			null
 	);
-	private SlideFetch slideFetch = new SlideFetch(interval/icalInterval);
+	private SlideFetch slideFetch = new SlideFetch(icalInterval/interval);
 	private EventsFetch eventsFetch = new EventsFetch(
 			icalInterval,
 			icalServer,
