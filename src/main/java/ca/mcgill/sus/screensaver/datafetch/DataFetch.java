@@ -78,6 +78,10 @@ public class DataFetch extends Thread {
 			interval,
 			api::getDestinations
 	);
+	private ITepidFetch<Map<String, Boolean>> fetchQueueStatus = new ITepidFetch<>(
+			interval,
+			api::getQueueStatus
+	);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -113,6 +117,11 @@ public class DataFetch extends Thread {
 					destinations.putAll(destinationResult.value);
 				}
 
+				FetchResult<Map<String, Boolean>> queueStatusResult = fetchQueueStatus.fetch();
+				if (queueStatusResult.success) {
+					printerStatus.clear();
+					printerStatus.putAll(queueStatusResult.value);
+				}
 
 				processPrintQueues();
 			}catch(Exception e){
