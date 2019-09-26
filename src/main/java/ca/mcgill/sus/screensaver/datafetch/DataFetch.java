@@ -82,6 +82,10 @@ public class DataFetch extends Thread {
 			interval,
 			api::getQueueStatus
 	);
+	private ITepidFetch<List<MarqueeData>> fetchMarquee = new ITepidFetch<>(
+			interval,
+			api::getMarquee
+	);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -104,10 +108,10 @@ public class DataFetch extends Thread {
 			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
 			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
 
-			try {
-				updateMarqueeData();
-			}catch(Exception e){
-				e.printStackTrace();
+			FetchResult<List<MarqueeData>> marqueeResult = fetchMarquee.fetchUnexceptionally();
+			if (marqueeResult.success){
+				marqueeData.clear();
+				marqueeData.addAll(marqueeResult.value);
 			}
 
 			try {
@@ -283,14 +287,6 @@ public class DataFetch extends Thread {
 		printerStatus.clear();
 		printerStatus.putAll(newStatus);
 		return newStatus;
-	}
-
-	private void updateMarqueeData() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
-		//update marquee data
-		Future<List<MarqueeData>> futureMarquee = ConfigKt.asCompletableFuture(	api.getMarquee());
-		List<MarqueeData> newMarquee = futureMarquee.get(interval, TimeUnit.SECONDS);
-		marqueeData.clear();
-		marqueeData.addAll(newMarquee);
 	}
 
 	private void setEvents(Queue<String> events){
