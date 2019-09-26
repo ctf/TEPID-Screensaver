@@ -74,6 +74,10 @@ public class DataFetch extends Thread {
 			icalServer,
 			icsPath
 	);
+	private ITepidFetch<Map<String, Destination>> fetchDestinations = new ITepidFetch<>(
+			interval,
+			api::getDestinations
+	);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -103,7 +107,13 @@ public class DataFetch extends Thread {
 			}
 
 			try {
-				updateDestinations();
+				FetchResult<Map<String, Destination>> destinationResult = fetchDestinations.fetch();
+				if (destinationResult.success) {
+					destinations.clear();
+					destinations.putAll(destinationResult.value);
+				}
+
+
 				processPrintQueues();
 			}catch(Exception e){
 				e.printStackTrace();
@@ -254,14 +264,6 @@ public class DataFetch extends Thread {
 		nameUser.add(user);
 
 		return user;
-	}
-
-	private void updateDestinations() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
-		//update destinations
-		Future<Map<String, Destination>> futureDestinations = ConfigKt.asCompletableFuture(	api.getDestinations());
-		Map<String, Destination> newDestinations = futureDestinations.get(interval, TimeUnit.SECONDS);
-		destinations.clear();
-		destinations.putAll(newDestinations);
 	}
 
 	@NotNull
