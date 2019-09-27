@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -126,7 +125,7 @@ public class DataFetch extends Thread {
 
 				FetchResult<Map<String, Boolean>> queueStatusResult = fetchQueueStatus.fetch();
 				if (queueStatusResult.success) {
-					jobsFetch.setQueues(new ArrayList<>(queueStatusResult.value.keySet()));
+					jobsFetch.setQueueStatuses(queueStatusResult.value);
 					printerStatus.clear();
 					printerStatus.putAll(queueStatusResult.value);
 				}
@@ -192,35 +191,6 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
-	}
-
-	private void processPrintQueues() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
-		//process and update printer queues
-		Map<String, Boolean> newStatus = fetchQueueStatus.fetch().value;
-
-		Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
-		Map<String, List<PrintJob>> newJobs = new HashMap<>();
-		//iterates over each queue and gets a list of jobs sent to them
-
-		for (Entry<String, Boolean> q : newStatus.entrySet()) {
-			if (printerStatus.get(q.getKey())) {
-				futureJobs.put(q.getKey(),
-						ConfigKt.asCompletableFuture(
-								api.listJobs(q.getKey(), 10, System.currentTimeMillis() - (60 * 60 * 1000)) //only get jobs from the last hour
-						)
-				);
-
-			} else {
-				newJobs.put(q.getKey(), new ArrayList<PrintJob>(0));
-			}
-		}
-
-		for (Entry<String, Future<List<PrintJob>>> e : futureJobs.entrySet()) {
-
-			newJobs.put(e.getKey(), e.getValue().get(interval, TimeUnit.SECONDS));
-		}
-		jobData.clear();
-		jobData.putAll(newJobs);
 	}
 
 	private NameUser updateUserInfo() {

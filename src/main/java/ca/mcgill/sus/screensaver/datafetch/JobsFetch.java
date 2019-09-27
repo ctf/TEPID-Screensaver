@@ -15,19 +15,20 @@ public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
 
     private final long timeOutInterval;
     private final ITepidScreensaver api;
-    private List<String> queueNames;
+    private Map<String, Boolean> queueStatuses;
 
 
     private Map<String, ITepidFetch<List<PrintJob>>> queueJobFetchers;
 
-    public void setQueues(List<String> queueNames) {
-        if (this.queueNames == queueNames) {
+    public void setQueueStatuses(Map<String, Boolean> queueStatuses) {
+        if (this.queueStatuses == queueStatuses) {
             return;
         }
-        queueJobFetchers = queueNames.stream()
+        this.queueStatuses = queueStatuses;
+        queueJobFetchers = new ArrayList<>(queueStatuses.keySet()).stream()
                 .collect(Collectors.toMap(
                         queueName -> queueName,
-                        queueName -> new ITepidFetch<List<PrintJob>>(
+                        queueName -> new ITepidFetch<>(
                                 timeOutInterval,
                                 () -> api.listJobs(queueName, 10, System.currentTimeMillis() - (60 * 60 * 1000)) //only get jobs from the last hour
                         ))
@@ -54,9 +55,11 @@ public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         (entry) -> {
-                            FetchResult<List<PrintJob>> result = entry.getValue();
-                            if (result.success) {
-                                return result.value;
+                            if (queueStatuses.get(entry.getKey())) {
+                                FetchResult<List<PrintJob>> result = entry.getValue();
+                                if (result.success) {
+                                    return result.value;
+                                }
                             }
                             return new ArrayList<>(0);
                         }
