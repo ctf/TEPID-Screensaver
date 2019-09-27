@@ -17,7 +17,6 @@ import ca.mcgill.sus.screensaver.Util;
 import ca.mcgill.sus.screensaver.io.Slide;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.javatuples.Pair;
-import org.jetbrains.annotations.NotNull;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -152,14 +151,16 @@ public class DataFetch extends Thread {
 				if (pullPropic) {
 					FetchResult<BufferedImage> profilePicResult = profilePictureFetch.fetch();
 					if (profilePicResult.success){
-						setProfilePic(profilePicResult.value);
+						profilePic.clear();
+						profilePic.add(Util.circleCrop(profilePicResult.value));
 					}
 				}
 
 				if (pullEvents) {
 					FetchResult<Queue<String>> eventsResult = eventsFetch.fetch();
 					if (eventsResult.success){
-						setEvents(eventsResult.value);
+						upcomingEvents.clear();
+						upcomingEvents.addAll(eventsResult.value);
 					}
 				}
 			} catch (Exception e) {
@@ -182,14 +183,9 @@ public class DataFetch extends Thread {
 		System.out.println("Data fetch thread over and out");
 	}
 
-	private void setProfilePic(BufferedImage pic) {
-		profilePic.clear();
-		profilePic.add(Util.circleCrop(pic));
-	}
-
 	private void processPrintQueues() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
 		//process and update printer queues
-		Map<String, Boolean> newStatus = updatePrinterStatus();
+		Map<String, Boolean> newStatus = fetchQueueStatus.fetch().value;
 
 		Map<String, Future<List<PrintJob>>> futureJobs = new HashMap<>();
 		Map<String, List<PrintJob>> newJobs = new HashMap<>();
@@ -277,21 +273,6 @@ public class DataFetch extends Thread {
 		nameUser.add(user);
 
 		return user;
-	}
-
-	@NotNull
-	private Map<String, Boolean> updatePrinterStatus() throws InterruptedException, java.util.concurrent.ExecutionException, java.util.concurrent.TimeoutException {
-		//update printer status
-		Future<Map<String, Boolean>> futureStatus = ConfigKt.asCompletableFuture(	api.getQueueStatus());
-		Map<String, Boolean> newStatus = futureStatus.get(interval, TimeUnit.SECONDS);
-		printerStatus.clear();
-		printerStatus.putAll(newStatus);
-		return newStatus;
-	}
-
-	private void setEvents(Queue<String> events){
-		upcomingEvents.clear();
-		upcomingEvents.addAll(events);
 	}
 
 	private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
