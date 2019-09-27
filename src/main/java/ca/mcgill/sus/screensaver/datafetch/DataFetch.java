@@ -1,10 +1,5 @@
 package ca.mcgill.sus.screensaver.datafetch;
 
-import biweekly.component.VEvent;
-import biweekly.io.TimezoneAssignment;
-import biweekly.io.TimezoneInfo;
-import biweekly.property.DateStart;
-import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import ca.mcgill.science.tepid.api.ITepidScreensaver;
 import ca.mcgill.science.tepid.models.data.Destination;
 import ca.mcgill.science.tepid.models.data.MarqueeData;
@@ -16,7 +11,6 @@ import ca.mcgill.sus.screensaver.Main;
 import ca.mcgill.sus.screensaver.Util;
 import ca.mcgill.sus.screensaver.io.Slide;
 import org.glassfish.jersey.jackson.JacksonFeature;
-import org.javatuples.Pair;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -151,7 +145,6 @@ public class DataFetch extends Thread {
 			}
 
 			try {
-				//load slide images
 				FetchResult<List<Slide>> slideResult = slideFetch.fetch();
 				if (slideResult.success) {
 					slides.clear();
@@ -255,49 +248,6 @@ public class DataFetch extends Thread {
 
 		return user;
 	}
-
-	private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
-		DateStart dateStart = e.getDateStart();
-		TimeZone timezone;
-		if (tzInfo.isFloating(dateStart)){
-		  timezone = TimeZone.getDefault();
-		} else {
-		  TimezoneAssignment dateStartTimezone = tzInfo.getTimezone(dateStart);
-		  timezone = (dateStartTimezone == null) ? TimeZone.getTimeZone("UTC") : dateStartTimezone.getTimeZone();
-		}
-		return timezone;
-	}
-
-	public enum Semester {
-		FALL, WINTER, SPRING;
-	    public Semester next() {
-	        return values()[(this.ordinal() + 1) % values().length];
-	    }
-		private static Semester getSemester(Date d) {
-			Calendar c = GregorianCalendar.getInstance();
-			c.setTime(d);
-			int month = c.get(Calendar.MONTH);
-			if (month > Calendar.AUGUST) return Semester.FALL;
-			if (month > Calendar.APRIL) return Semester.SPRING;
-			return Semester.WINTER;
-		}
-		static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date start, Date end, TimezoneInfo tzInfo) {
-			List<Pair<Date, VEvent>> events = new ArrayList<>();
-			for (VEvent e : rawEvents) {
-				Date soonest = null;
-				for (DateIterator iter = e.getDateIterator(getTimezone(tzInfo, e)); iter.hasNext();) {
-					Date d = iter.next();
-					if (d.before(start)) continue;
-					if (soonest == null || d.before(soonest)) soonest = d;
-					if (d.after(end)) break;
-				}
-				if (soonest != null) events.add(new Pair<>(soonest, e));
-			}
-			events.sort(Comparator.comparing(Pair::getValue0));
-			return events;
-		}
-	}
-
 
 	public void addChangeListener(Runnable listener) {
 		listeners.add(listener);

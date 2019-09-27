@@ -3,7 +3,10 @@ package ca.mcgill.sus.screensaver.datafetch;
 import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
+import biweekly.io.TimezoneAssignment;
 import biweekly.io.TimezoneInfo;
+import biweekly.property.DateStart;
+import biweekly.util.com.google.ical.compat.javautil.DateIterator;
 import org.javatuples.Pair;
 
 import javax.ws.rs.client.WebTarget;
@@ -44,7 +47,7 @@ public class EventsFetch extends DataFetchable<Queue<String>> {
         Date eventsEnd = c.getTime();
         //filter events (remove past events, only include soonest instance of recurring event, make sure it's current semester)
         TimezoneInfo tzInfo = ical.getTimezoneInfo();
-        List<Pair<Date, VEvent>> filteredEvents = DataFetch.Semester.filterEvents(ical.getEvents(), eventsStart, eventsEnd, tzInfo);
+        List<Pair<Date, VEvent>> filteredEvents = Semester.filterEvents(ical.getEvents(), eventsStart, eventsEnd, tzInfo);
 
         //format into human-friendly strings
         for (Pair<Date, VEvent> event : filteredEvents) {
@@ -75,6 +78,48 @@ public class EventsFetch extends DataFetchable<Queue<String>> {
         }
         System.out.println("Fetched events");
         return new FetchResult<>(events);
+    }
+
+    private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {
+        DateStart dateStart = e.getDateStart();
+        TimeZone timezone;
+        if (tzInfo.isFloating(dateStart)){
+            timezone = TimeZone.getDefault();
+        } else {
+            TimezoneAssignment dateStartTimezone = tzInfo.getTimezone(dateStart);
+            timezone = (dateStartTimezone == null) ? TimeZone.getTimeZone("UTC") : dateStartTimezone.getTimeZone();
+        }
+        return timezone;
+    }
+
+    public enum Semester {
+        FALL, WINTER, SPRING;
+        public Semester next() {
+            return values()[(this.ordinal() + 1) % values().length];
+        }
+        private static Semester getSemester(Date d) {
+            Calendar c = GregorianCalendar.getInstance();
+            c.setTime(d);
+            int month = c.get(Calendar.MONTH);
+            if (month > Calendar.AUGUST) return Semester.FALL;
+            if (month > Calendar.APRIL) return Semester.SPRING;
+            return Semester.WINTER;
+        }
+        static List<Pair<Date, VEvent>> filterEvents(List<VEvent> rawEvents, Date start, Date end, TimezoneInfo tzInfo) {
+            List<Pair<Date, VEvent>> events = new ArrayList<>();
+            for (VEvent e : rawEvents) {
+                Date soonest = null;
+                for (DateIterator iter = e.getDateIterator(getTimezone(tzInfo, e)); iter.hasNext();) {
+                    Date d = iter.next();
+                    if (d.before(start)) continue;
+                    if (soonest == null || d.before(soonest)) soonest = d;
+                    if (d.after(end)) break;
+                }
+                if (soonest != null) events.add(new Pair<>(soonest, e));
+            }
+            events.sort(Comparator.comparing(Pair::getValue0));
+            return events;
+        }
     }
 
 }
