@@ -360,9 +360,13 @@ public class Util {
 			for (File f : new File(Config.INSTANCE.getAnnouncement_slide_directory()).listFiles()) {
 				try {
 					images.put(f.getName(), ImageIO.read(f));
-				} catch (Exception e) {}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		Map<String, Slide> slides = new HashMap<>();
 		for (Entry<String, BufferedImage> e : images.entrySet()) {
 			if (e.getValue() == null) continue;
