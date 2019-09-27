@@ -85,6 +85,10 @@ public class DataFetch extends Thread {
 			interval,
 			api::getMarquee
 	);
+	private JobsFetch jobsFetch = new JobsFetch(
+			interval,
+			api
+	);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -122,11 +126,18 @@ public class DataFetch extends Thread {
 
 				FetchResult<Map<String, Boolean>> queueStatusResult = fetchQueueStatus.fetch();
 				if (queueStatusResult.success) {
+					jobsFetch.setQueues(new ArrayList<>(queueStatusResult.value.keySet()));
 					printerStatus.clear();
 					printerStatus.putAll(queueStatusResult.value);
 				}
 
-				processPrintQueues();
+				FetchResult<Map<String, List<PrintJob>>> jobsResult = jobsFetch.fetch();
+				if (jobsResult.success) {
+					jobData.clear();
+					jobData.putAll(jobsResult.value);
+				}
+
+//				processPrintQueues();
 			}catch(Exception e){
 				e.printStackTrace();
 				fail=true;
