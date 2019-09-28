@@ -12,7 +12,6 @@ import ca.mcgill.sus.screensaver.io.Slide;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,11 +35,7 @@ public class DataFetch extends Thread {
 	}
 
 	private final ITepidScreensaver api = ConfigKt.getApi();
-	private final WebTarget icalServer = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical");
-	private final WebTarget gravatarApi = ClientBuilder.newClient().target("https://www.gravatar.com/avatar/");
-	private final WebTarget gImageApi = ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image");
 
-	private final String icsPath = Config.INSTANCE.getICS_CALENDAR_ADDRESS();
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
 
 	private final AtomicBoolean success = new AtomicBoolean(true);
@@ -48,38 +43,23 @@ public class DataFetch extends Thread {
 	private final AtomicBoolean loaded = new AtomicBoolean();
 
 	// DataFetchables
-	private UserFetch userFetch = new WindowsUserFetch(
-			interval,
-			api
-	);
+	private UserFetch userFetch = new WindowsUserFetch(interval, api);
 	private ProfilePictureFetch profilePictureFetch = new ProfilePictureFetch(
 			interval,
-			gravatarApi,
-			gImageApi,
+			ClientBuilder.newClient().target("https://www.gravatar.com/avatar/"),
+			ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image"),
 			null
 	);
 	private SlideFetch slideFetch = new SlideFetch(icalInterval / interval);
 	private EventsFetch eventsFetch = new EventsFetch(
 			icalInterval,
-			icalServer,
-			icsPath
+			ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical"),
+			Config.INSTANCE.getICS_CALENDAR_ADDRESS()
 	);
-	private ITepidFetch<Map<String, Destination>> fetchDestinations = new ITepidFetch<>(
-			interval,
-			api::getDestinations
-	);
-	private ITepidFetch<Map<String, Boolean>> fetchQueueStatus = new ITepidFetch<>(
-			interval,
-			api::getQueueStatus
-	);
-	private ITepidFetch<List<MarqueeData>> fetchMarquee = new ITepidFetch<>(
-			interval,
-			api::getMarquee
-	);
-	private JobsFetch jobsFetch = new JobsFetch(
-			interval,
-			api
-	);
+	private ITepidFetch<Map<String, Destination>> fetchDestinations = new ITepidFetch<>(interval, api::getDestinations);
+	private ITepidFetch<Map<String, Boolean>> fetchQueueStatus = new ITepidFetch<>(interval, api::getQueueStatus);
+	private ITepidFetch<List<MarqueeData>> fetchMarquee = new ITepidFetch<>(interval, api::getMarquee);
+	private JobsFetch jobsFetch = new JobsFetch(interval, api);
 
 	// models
 	public final Map<String, Boolean> printerStatus = new ConcurrentHashMap<>();
@@ -169,7 +149,8 @@ public class DataFetch extends Thread {
 		});
 	}
 
-	private void fetchOptionally(boolean result){};
+	private void fetchOptionally(boolean result) {
+	}
 
 	private void fetchMandatorily(boolean result) {
 		System.out.println(result);
