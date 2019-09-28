@@ -100,7 +100,7 @@ public class DataFetch extends Thread {
 
 			boolean pullSlides = iterations++ * interval % icalInterval == 0,
 					pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
-					pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
+					pullPropic = Main.OFFICE_COMPUTER;
 
 
 			// TEPID

@@ -37,6 +37,10 @@ public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
 
     @Override
     public FetchResult<BufferedImage> fetch() {
+        if (profilePic != null) {
+            return new FetchResult<>(profilePic);
+        }
+
         BufferedImage gravatar = pullGravatar(user);
         if (gravatar != null) {
             setProfilePic(gravatar);
