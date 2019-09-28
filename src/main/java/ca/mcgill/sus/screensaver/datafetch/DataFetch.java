@@ -15,13 +15,9 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataFetch extends Thread {
@@ -51,9 +47,11 @@ public class DataFetch extends Thread {
 	private final AtomicBoolean networkUp = new AtomicBoolean(true);
 	private final AtomicBoolean loaded = new AtomicBoolean();
 
-	private final AtomicBoolean hasNick = new AtomicBoolean(true);
-
 	// DataFetchables
+	private UserFetch userFetch = new WindowsUserFetch(
+			interval,
+			api
+	);
 	private ProfilePictureFetch profilePictureFetch = new ProfilePictureFetch(
 			interval,
 			gravatarApi,
@@ -130,14 +128,18 @@ public class DataFetch extends Thread {
 					jobData.putAll(jobsResult.value);
 				}
 
-//				processPrintQueues();
 			}catch(Exception e){
 				e.printStackTrace();
 				fail=true;
 			}
 
 			try {
-				updateUserInfo();
+				FetchResult<NameUser> userResult = userFetch.fetch();
+				if (userResult.success) {
+					nameUser.clear();
+					nameUser.add(userResult.value);
+				}
+
 				profilePictureFetch.setUser(nameUser.peek());
 			}catch(Exception e){
 				e.printStackTrace();
@@ -184,69 +186,6 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
-	}
-
-	private NameUser updateUserInfo() {
-		//update user info
-
-		String command = "powershell.exe \"Import-Module ActiveDirectory; $attributes = 'displayName', 'samAccountName', 'mail', 'name', 'givenName', 'surname';" +
-				"Get-AdUser " + System.getenv("username") + " -Properties $attributes | select $attributes\"";
-
-		Map<String, String> nameInformation = new HashMap<>();
-		try {
-			Process PsGetAdUser = Runtime.getRuntime().exec(command);
-			BufferedReader stdout = new BufferedReader(new InputStreamReader(PsGetAdUser.getInputStream()));
-
-			String rawLine;
-			while ((rawLine = stdout.readLine()) != null) {
-				String[] line = rawLine.split(":");
-				if (line.length == 2){
-					nameInformation.put(line[0].trim(), line[1].trim());
-				}
-			}
-			stdout.close();
-		} catch (Exception e) {
-			System.err.println("Could not fetch user info using powershell");
-		}
-
-		NameUser user = new NameUser();
-		user.setDisplayName(nameInformation.get("displayName"));
-		user.setGivenName(nameInformation.get("givenName"));
-		user.setLastName(nameInformation.get("surname"));
-		user.setShortUser(nameInformation.get("samAccountName"));
-		user.setEmail(nameInformation.get("mail"));
-
-		if (hasNick.get()) {
-			Future<String> futureNick = Main.LOGGED_IN ?
-					ConfigKt.asCompletableFuture(
-							api.getUserNick(System.getenv("username"))
-					) : null;
-
-			if (futureNick != null) try {
-				String newNick = futureNick.get(interval, TimeUnit.SECONDS);
-				user.setNick(newNick);
-			} catch (javax.ws.rs.NotFoundException e404) {
-				hasNick.set(false);
-			} catch (Exception e) {
-				System.err.println("Could not fetch user nick: \n" + e);
-			}
-		}
-
-		user.setSalutation(user.getNick() != null ? user.getNick() : user.getDisplayName());
-		if (user.getNick() != null) {
-			user.setSalutation(user.getNick());
-		} else if (user.getDisplayName() != null) {
-			user.setSalutation(user.getDisplayName());
-		} else if (user.getShortUser() != null) {
-			user.setSalutation(user.getShortUser());
-		} else {
-			user.setSalutation(System.getenv("username"));
-		}
-
-		nameUser.clear();
-		nameUser.add(user);
-
-		return user;
 	}
 
 	public void addChangeListener(Runnable listener) {
