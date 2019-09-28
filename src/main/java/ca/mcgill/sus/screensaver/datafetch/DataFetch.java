@@ -43,6 +43,7 @@ public class DataFetch extends Thread {
 	private final String icsPath = Config.INSTANCE.getICS_CALENDAR_ADDRESS();
 	private final Queue<Runnable> listeners = new ConcurrentLinkedQueue<>();
 
+	private final AtomicBoolean success = new AtomicBoolean(true);
 	private final AtomicBoolean networkUp = new AtomicBoolean(true);
 	private final AtomicBoolean loaded = new AtomicBoolean();
 
@@ -94,7 +95,7 @@ public class DataFetch extends Thread {
 	public void run() {
 		int iterations = 0;
 		while (!Thread.interrupted()) {
-			boolean fail = false;
+			success.set(true);
 			long startTime = System.currentTimeMillis();
 
 			boolean pullSlides = iterations++ * interval % icalInterval == 0,
@@ -103,23 +104,23 @@ public class DataFetch extends Thread {
 
 
 			// TEPID
-			fail = fail || fetchAndPutAll(fetchDestinations, destinations);
-			fail = fail || fetchAndPutAll(fetchQueueStatus, printerStatus);
+			fetchMandatorily(fetchAndPutAll(fetchDestinations, destinations));
+			fetchMandatorily(fetchAndPutAll(fetchQueueStatus, printerStatus));
 			jobsFetch.setQueueStatuses(printerStatus);
-			fail = fail || fetchAndPutAll(jobsFetch, jobData);
+			fetchMandatorily(fetchAndPutAll(jobsFetch, jobData));
 
 			// User
-			fail = fail || fetchAndAddSingle(userFetch, nameUser);
+			fetchMandatorily(fetchAndAddSingle(userFetch, nameUser));
 			profilePictureFetch.setUser(nameUser.peek());
 
 			// Optional
-			fetchAndAddAll(slideFetch, slides);
-			fetchAndAddAll(fetchMarquee, marqueeData);
-			if (pullPropic) fetchAndAddSingle(profilePictureFetch, profilePic);
-			if (pullEvents) fetchAndAddAll(eventsFetch, upcomingEvents);
+			fetchOptionally(fetchAndAddAll(slideFetch, slides));
+			fetchOptionally(fetchAndAddAll(fetchMarquee, marqueeData));
+			if (pullPropic) fetchOptionally(fetchAndAddSingle(profilePictureFetch, profilePic));
+			if (pullEvents) fetchOptionally(fetchAndAddAll(eventsFetch, upcomingEvents));
 
 			this.loaded.set(true);
-			networkUp.set(!fail);
+			networkUp.set(success.get());
 			for (Runnable listener : listeners) {
 				listener.run();
 			}
@@ -166,6 +167,13 @@ public class DataFetch extends Thread {
 			destination.clear();
 			destination.add(v);
 		});
+	}
+
+	private void fetchOptionally(boolean result){};
+
+	private void fetchMandatorily(boolean result) {
+		System.out.println(result);
+		success.set(success.get() || result);
 	}
 
 	public void addChangeListener(Runnable listener) {
