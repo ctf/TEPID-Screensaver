@@ -32,7 +32,7 @@ public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
     }
 
     private void setProfilePic(BufferedImage pic) {
-        profilePic = pic;
+        profilePic = Util.circleCrop(pic);
     }
 
     @Override

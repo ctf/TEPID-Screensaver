@@ -8,7 +8,6 @@ import ca.mcgill.science.tepid.models.data.PrintJob;
 import ca.mcgill.sus.screensaver.Config;
 import ca.mcgill.sus.screensaver.ConfigKt;
 import ca.mcgill.sus.screensaver.Main;
-import ca.mcgill.sus.screensaver.Util;
 import ca.mcgill.sus.screensaver.io.Slide;
 import org.glassfish.jersey.jackson.JacksonFeature;
 
@@ -58,7 +57,7 @@ public class DataFetch extends Thread {
 			gImageApi,
 			null
 	);
-	private SlideFetch slideFetch = new SlideFetch(icalInterval/interval);
+	private SlideFetch slideFetch = new SlideFetch(icalInterval / interval);
 	private EventsFetch eventsFetch = new EventsFetch(
 			icalInterval,
 			icalServer,
@@ -99,78 +98,25 @@ public class DataFetch extends Thread {
 			long startTime = System.currentTimeMillis();
 
 			boolean pullSlides = iterations++ * interval % icalInterval == 0,
-			pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
-			pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
+					pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
+					pullPropic = Main.OFFICE_COMPUTER && profilePic.isEmpty();
 
-			FetchResult<List<MarqueeData>> marqueeResult = fetchMarquee.fetchUnexceptionally();
-			if (marqueeResult.success){
-				marqueeData.clear();
-				marqueeData.addAll(marqueeResult.value);
-			}
 
-			try {
-				FetchResult<Map<String, Destination>> destinationResult = fetchDestinations.fetch();
-				if (destinationResult.success) {
-					destinations.clear();
-					destinations.putAll(destinationResult.value);
-				}
+			// TEPID
+			fail = fail || fetchAndPutAll(fetchDestinations, destinations);
+			fail = fail || fetchAndPutAll(fetchQueueStatus, printerStatus);
+			jobsFetch.setQueueStatuses(printerStatus);
+			fail = fail || fetchAndPutAll(jobsFetch, jobData);
 
-				FetchResult<Map<String, Boolean>> queueStatusResult = fetchQueueStatus.fetch();
-				if (queueStatusResult.success) {
-					jobsFetch.setQueueStatuses(queueStatusResult.value);
-					printerStatus.clear();
-					printerStatus.putAll(queueStatusResult.value);
-				}
+			// User
+			fail = fail || fetchAndAddSingle(userFetch, nameUser);
+			profilePictureFetch.setUser(nameUser.peek());
 
-				FetchResult<Map<String, List<PrintJob>>> jobsResult = jobsFetch.fetch();
-				if (jobsResult.success) {
-					jobData.clear();
-					jobData.putAll(jobsResult.value);
-				}
-
-			}catch(Exception e){
-				e.printStackTrace();
-				fail=true;
-			}
-
-			try {
-				FetchResult<NameUser> userResult = userFetch.fetch();
-				if (userResult.success) {
-					nameUser.clear();
-					nameUser.add(userResult.value);
-				}
-
-				profilePictureFetch.setUser(nameUser.peek());
-			}catch(Exception e){
-				e.printStackTrace();
-				fail=true;
-			}
-
-			try {
-				FetchResult<List<Slide>> slideResult = slideFetch.fetch();
-				if (slideResult.success) {
-					slides.clear();
-					slides.addAll(slideResult.value);
-				}
-
-				if (pullPropic) {
-					FetchResult<BufferedImage> profilePicResult = profilePictureFetch.fetch();
-					if (profilePicResult.success){
-						profilePic.clear();
-						profilePic.add(Util.circleCrop(profilePicResult.value));
-					}
-				}
-
-				if (pullEvents) {
-					FetchResult<Queue<String>> eventsResult = eventsFetch.fetch();
-					if (eventsResult.success){
-						upcomingEvents.clear();
-						upcomingEvents.addAll(eventsResult.value);
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			// Optional
+			fetchAndAddAll(slideFetch, slides);
+			fetchAndAddAll(fetchMarquee, marqueeData);
+			if (pullPropic) fetchAndAddSingle(profilePictureFetch, profilePic);
+			if (pullEvents) fetchAndAddAll(eventsFetch, upcomingEvents);
 
 			this.loaded.set(true);
 			networkUp.set(!fail);
@@ -186,6 +132,40 @@ public class DataFetch extends Thread {
 			}
 		}
 		System.out.println("Data fetch thread over and out");
+	}
+
+	private interface ReplacerFunc<V> {
+		void replace(V val);
+	}
+
+	private <T> boolean fetchAndReplace(DataFetchable<T> fetcher, ReplacerFunc<T> replacer) {
+		FetchResult<T> result = fetcher.fetchUnexceptionally();
+		if (!result.success) {
+			return false;
+		}
+		replacer.replace(result.value);
+		return true;
+	}
+
+	private <K, V, T extends Map<K, V>> boolean fetchAndPutAll(DataFetchable<T> fetcher, T destination) {
+		return fetchAndReplace(fetcher, v -> {
+			destination.clear();
+			destination.putAll(v);
+		});
+	}
+
+	private <E, T1 extends Collection<E>, T2 extends Collection<E>> boolean fetchAndAddAll(DataFetchable<T1> fetcher, T2 destination) {
+		return fetchAndReplace(fetcher, v -> {
+			destination.clear();
+			destination.addAll(v);
+		});
+	}
+
+	private <E, T extends Collection<E>> boolean fetchAndAddSingle(DataFetchable<E> fetcher, Collection<E> destination) {
+		return fetchAndReplace(fetcher, v -> {
+			destination.clear();
+			destination.add(v);
+		});
 	}
 
 	public void addChangeListener(Runnable listener) {
