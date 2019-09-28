@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DataFetch extends Thread {
 
-	private static final int interval = 15, icalInterval = 5 * 60;
+	private static final int interval = 15, longFetch = 5 * 60, longFetchEvery = longFetch/interval;
 
 	private DataFetch() {
 		this.setDaemon(true);
@@ -50,9 +50,9 @@ public class DataFetch extends Thread {
 			ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://www.googleapis.com/customsearch/v1?" + Config.INSTANCE.getGOOGLE_CUSTOM_SEARCH_KEY() + "&searchType=image"),
 			null
 	);
-	private SlideFetch slideFetch = new SlideFetch(icalInterval / interval);
+	private SlideFetch slideFetch = new SlideFetch();
 	private EventsFetch eventsFetch = new EventsFetch(
-			icalInterval,
+			interval,
 			ClientBuilder.newBuilder().register(JacksonFeature.class).build().target("https://calendar.google.com/calendar/ical"),
 			Config.INSTANCE.getICS_CALENDAR_ADDRESS()
 	);
@@ -78,10 +78,8 @@ public class DataFetch extends Thread {
 			success.set(true);
 			long startTime = System.currentTimeMillis();
 
-			boolean pullSlides = iterations++ * interval % icalInterval == 0,
-					pullEvents = (Main.OFFICE_COMPUTER && pullSlides) || !networkUp.get(),
-					pullPropic = Main.OFFICE_COMPUTER;
-
+			boolean refetchLongFetch = iterations++ % longFetchEvery == 0 || !success.get(),
+					isOfficeComputer = Main.OFFICE_COMPUTER;
 
 			// TEPID
 			fetchMandatorily(fetchAndPutAll(fetchDestinations, destinations));
@@ -94,10 +92,12 @@ public class DataFetch extends Thread {
 			profilePictureFetch.setUser(nameUser.peek());
 
 			// Optional
-			fetchOptionally(fetchAndAddAll(slideFetch, slides));
-			fetchOptionally(fetchAndAddAll(fetchMarquee, marqueeData));
-			if (pullPropic) fetchOptionally(fetchAndAddSingle(profilePictureFetch, profilePic));
-			if (pullEvents) fetchOptionally(fetchAndAddAll(eventsFetch, upcomingEvents));
+			if (refetchLongFetch) {
+				fetchOptionally(fetchAndAddAll(slideFetch, slides));
+				fetchOptionally(fetchAndAddAll(fetchMarquee, marqueeData));
+				if (isOfficeComputer) fetchOptionally(fetchAndAddAll(eventsFetch, upcomingEvents));
+			}
+			if (isOfficeComputer) fetchOptionally(fetchAndAddSingle(profilePictureFetch, profilePic));
 
 			this.loaded.set(true);
 			networkUp.set(success.get());
@@ -153,7 +153,6 @@ public class DataFetch extends Thread {
 	}
 
 	private void fetchMandatorily(boolean result) {
-		System.out.println(result);
 		success.set(success.get() || result);
 	}
 
