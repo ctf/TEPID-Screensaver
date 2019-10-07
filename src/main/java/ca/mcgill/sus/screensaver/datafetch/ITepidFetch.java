@@ -12,8 +12,6 @@ public class ITepidFetch<T> extends DataFetchable<T> {
         Call<T> buildCall();
     }
 
-    private T value;
-
     private final ApiCall<T> fetchFunction;
     private final long timeOutInterval;
 

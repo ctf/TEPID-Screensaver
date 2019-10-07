@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
 
-    private BufferedImage profilePic;
-
     private final long timeOutInterval;
     private final WebTarget gravatarApi;
     private final WebTarget gImageApi;
@@ -31,25 +29,21 @@ public class ProfilePictureFetch extends DataFetchable<BufferedImage> {
         user = _user;
     }
 
-    private void setProfilePic(BufferedImage pic) {
-        profilePic = Util.circleCrop(pic);
-    }
-
     @Override
     public FetchResult<BufferedImage> fetch() {
-        if (profilePic != null) {
-            return new FetchResult<>(profilePic);
+        if (value != null) {
+            return new FetchResult<>(value);
         }
 
         BufferedImage gravatar = pullGravatar(user);
         if (gravatar != null) {
-            setProfilePic(gravatar);
-            return new FetchResult<>(profilePic);
+            value = Util.circleCrop(gravatar);
+            return new FetchResult<>(value);
         }
         BufferedImage googleThumbnail = pullWebImage(user);
         if (googleThumbnail != null) {
-            setProfilePic(googleThumbnail);
-            return new FetchResult<>(profilePic);
+            value = Util.circleCrop(googleThumbnail);
+            return new FetchResult<>(value);
         }
         throw new RuntimeException("Could not fetch profile picture");
     }

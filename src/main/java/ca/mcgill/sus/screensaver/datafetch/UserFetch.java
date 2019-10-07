@@ -8,8 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class UserFetch extends DataFetchable<NameUser> {
 
-    private NameUser user;
-
     private boolean hasNick = true;
 
     private final long timeOutInterval;
@@ -36,8 +34,8 @@ public abstract class UserFetch extends DataFetchable<NameUser> {
         System.out.println(user);
         computeSalutation(user);
 
-        this.user = user;
-        return new FetchResult<>(this.user);
+        this.value = user;
+        return new FetchResult<>(this.value);
     }
 
     protected abstract FetchResult<NameUser> getCurrentUser();

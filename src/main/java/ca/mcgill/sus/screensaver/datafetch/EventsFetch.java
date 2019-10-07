@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 public class EventsFetch extends DataFetchable<Queue<String>> {
 
-    private Queue<String> events = new LinkedList<>();
-
     private final WebTarget icalServer;
     private final String icsPath;
     private final long timeOutInterval;
@@ -74,10 +72,10 @@ public class EventsFetch extends DataFetchable<Queue<String>> {
             boolean isSoon = timeOfEvent.before(oneWeek),
                     isToday = timeOfEvent.equals(today);
             String dateFormat = (isToday ? "" : (isSoon ? "E": "MMM d")) + (isOnTheHour ? " @ h a" : " @ h:mm a");
-            events.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
+            value.add((isToday ? "Today" : "") + new SimpleDateFormat(dateFormat).format(d) + " - " + e.getSummary().getValue());
         }
         System.out.println("Fetched events");
-        return new FetchResult<>(events);
+        return new FetchResult<>(value);
     }
 
     private static TimeZone getTimezone(TimezoneInfo tzInfo, VEvent e) {

@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
 
 public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
 
-    private Map<String, List<PrintJob>> printJobs;
-
-
     private final long timeOutInterval;
     private final ITepidScreensaver api;
     private Map<String, Boolean> queueStatuses;
@@ -51,7 +48,7 @@ public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
 
         boolean success = futureJobs.values().stream().map(v -> v.success).reduce(true, (accumulator, result) -> result && accumulator);
 
-        printJobs = futureJobs.entrySet().stream()
+        value = futureJobs.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         (entry) -> {
@@ -65,6 +62,6 @@ public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
                         }
                 ));
 
-        return new FetchResult<>(printJobs, success);
+        return new FetchResult<>(value, success);
     }
 }
