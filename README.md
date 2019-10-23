@@ -1,6 +1,6 @@
 # CTF Screensaver
 
-##Features
+## Features
 The CTF Screensaver is the most extra screensaver around. It has a number of cool features:
 
 ### Information Screens 
@@ -26,19 +26,6 @@ There's also some mildly nonfunctional members-on-duty display. This currently d
 
 Requires TEPID 2.2 minimum.
 
-## Build
-Gradle tasks: 
-- `jar` build jar
-- `windows` build jar and package it with a ctfscreen.scr launcher and libs in `ctfscreen-data` for copying to `System32`
-- `copyConfigs` copies your config files from somewhere else, so they get bundled into the JAR
-- `msi` build msi (make sure you are running on Windows and Wix is installed before running this)
-
-## Run
-The executable follows the Windows screensaver standard for command line flags. To run as a screensaver, execute `ctfscreen.jar /s`; to run in a window for debugging, execute `ctfscreen.jar /w`.
-
-## Known issues
-- Running in fullscreen mode (`/s`) scales badly on non-1080p displays
-
 ## Configuration Options
 Configurations are defined in the common config files. The configs use the TEPID standard configuration system. This allows them to be defined once, outside of the project's file tree, and used across all TEPID programs. The Gradle task copyConfigs will copy the configs from the project property "tepid_config_dir", which can be set in a number of ways:
     - As a standard project property
@@ -59,3 +46,17 @@ Both of these options have testing and production
 - REPORT_MALFUNCTIONING_COMPUTER_TEXT : completes the sentence to "Report this malfunctioning computer to", displayed when a computer cannot contact the network
 - BACKGROUND_PICTURE_LOCATION : location for the background picture
 - ANNOUNCEMENT_SLIDE_LOCATION : directory containing the announcement slides
+
+## Build
+Gradle tasks: 
+- `jar` build jar
+- `windows` build jar and package it with a ctfscreen.scr launcher and libs in `ctfscreen-data` for copying to `System32`
+- `copyConfigs` copies your config files from somewhere else, so they get bundled into the JAR
+- `msi` build msi (make sure you are running on Windows, Wix is installed, and WIX can be called before running this)
+
+## Run
+The executable follows the Windows screensaver standard for command line flags. To run as a screensaver, execute `ctfscreen.jar /s`; to run in a window for debugging, execute `ctfscreen.jar /w`.
+
+## Known issues
+- Running in fullscreen mode (`/s`) scales badly on non-1080p displays
+
