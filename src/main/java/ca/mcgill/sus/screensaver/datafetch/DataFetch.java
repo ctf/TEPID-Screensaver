@@ -82,22 +82,22 @@ public class DataFetch extends Thread {
 					isOfficeComputer = Main.OFFICE_COMPUTER;
 
 			// TEPID
-			fetchMandatorily(fetchAndPutAll(fetchDestinations, destinations));
-			fetchMandatorily(fetchAndPutAll(fetchQueueStatus, printerStatus));
+			fetchMandatorily(fetchAndPutAll(()->fetchDestinations.fetchUnexceptionally(), destinations));
+			fetchMandatorily(fetchAndPutAll(()->fetchQueueStatus.fetchUnexceptionally(), printerStatus));
 			jobsFetch.setQueueStatuses(printerStatus);
-			fetchMandatorily(fetchAndPutAll(jobsFetch, jobData));
+			fetchMandatorily(fetchAndPutAll(()->jobsFetch.fetchUnexceptionally(), jobData));
 
 			// User
-			fetchMandatorily(fetchAndAddSingle(userFetch, nameUser));
+			fetchMandatorily(fetchAndAddSingle(()->userFetch.cachedOrFetchUnexceptionally(), nameUser));
 			profilePictureFetch.setUser(nameUser.peek());
 
 			// Optional
 			if (refetchLongFetch) {
-				fetchOptionally(fetchAndAddAll(slideFetch, slides));
-				fetchOptionally(fetchAndAddAll(fetchMarquee, marqueeData));
-				if (isOfficeComputer) fetchOptionally(fetchAndAddAll(eventsFetch, upcomingEvents));
+				fetchOptionally(fetchAndAddAll(()->slideFetch.fetchUnexceptionally(), slides));
+				fetchOptionally(fetchAndAddAll(()->fetchMarquee.fetchUnexceptionally(), marqueeData));
+				if (isOfficeComputer) fetchOptionally(fetchAndAddAll(()->eventsFetch.fetchUnexceptionally(), upcomingEvents));
 			}
-			if (isOfficeComputer) fetchOptionally(fetchAndAddSingle(profilePictureFetch, profilePic));
+			if (isOfficeComputer) fetchOptionally(fetchAndAddSingle(()->profilePictureFetch.cachedOrFetchUnexceptionally(), profilePic));
 
 			this.loaded.set(true);
 			networkUp.set(success.get());
@@ -119,8 +119,12 @@ public class DataFetch extends Thread {
 		void replace(V val);
 	}
 
-	private <T> boolean fetchAndReplace(DataFetchable<T> fetcher, ReplacerFunc<T> replacer) {
-		FetchResult<T> result = fetcher.fetchUnexceptionally();
+	private interface FetcherFunc<V> {
+		FetchResult<V> fetch();
+	}
+
+	private <T> boolean fetchAndReplace(FetcherFunc<T> fetcher, ReplacerFunc<T> replacer) {
+		FetchResult<T> result = fetcher.fetch();
 		if (!result.success) {
 			return false;
 		}
@@ -128,21 +132,21 @@ public class DataFetch extends Thread {
 		return true;
 	}
 
-	private <K, V, T extends Map<K, V>> boolean fetchAndPutAll(DataFetchable<T> fetcher, T destination) {
+	private <K, V, T extends Map<K, V>> boolean fetchAndPutAll(FetcherFunc<T> fetcher, T destination) {
 		return fetchAndReplace(fetcher, v -> {
 			destination.clear();
 			destination.putAll(v);
 		});
 	}
 
-	private <E, T1 extends Collection<E>, T2 extends Collection<E>> boolean fetchAndAddAll(DataFetchable<T1> fetcher, T2 destination) {
+	private <E, T1 extends Collection<E>, T2 extends Collection<E>> boolean fetchAndAddAll(FetcherFunc<T1> fetcher, T2 destination) {
 		return fetchAndReplace(fetcher, v -> {
 			destination.clear();
 			destination.addAll(v);
 		});
 	}
 
-	private <E, T extends Collection<E>> boolean fetchAndAddSingle(DataFetchable<E> fetcher, Collection<E> destination) {
+	private <E, T extends Collection<E>> boolean fetchAndAddSingle(FetcherFunc<E> fetcher, Collection<E> destination) {
 		return fetchAndReplace(fetcher, v -> {
 			destination.clear();
 			destination.add(v);
