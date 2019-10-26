@@ -1,34 +1,15 @@
 package ca.mcgill.sus.screensaver;
 
-import java.awt.AWTException;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Robot;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.font.GlyphVector;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.imageio.ImageIO;
-
-import ca.mcgill.sus.screensaver.io.Slide;
+import java.util.Arrays;
 
 public class Util {
 
@@ -354,39 +335,7 @@ public class Util {
 		return background;
 	}
 
-	public static List<Slide> loadSlides() {
-		Map<String, BufferedImage> images = new HashMap<>();
-		try {
-			for (File f : new File(Config.INSTANCE.getAnnouncement_slide_directory()).listFiles()) {
-				try {
-					images.put(f.getName(), ImageIO.read(f));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Map<String, Slide> slides = new HashMap<>();
-		for (Entry<String, BufferedImage> e : images.entrySet()) {
-			if (e.getValue() == null) continue;
-			String name = (e.getKey().contains(".") ? e.getKey().substring(0, e.getKey().indexOf(".")): e.getKey()).toLowerCase();
-			boolean light = name.endsWith("_light");
-			if (light) name = name.substring(0, name.indexOf("_light"));
-			if (!slides.containsKey(name)) slides.put(name, new Slide(name));
-			if (light) slides.get(name).light = e.getValue();
-			else slides.get(name).dark = e.getValue();
-		}
-		List<Slide> out = new ArrayList<>(slides.values());
-		for (Slide s : out) {
-			if (s.light == null) s.light = s.dark;
-			if (s.dark == null) s.dark = s.light;
-		}
-		out.sort((s1, s2) -> s1.name.compareTo(s2.name));
-		return out;
-	}
-
-	/**A function which causes the thread to wait for a time 
+	/**A function which causes the thread to wait for a time
 	 * @param ms	The time for which the thread should do nothing
 	 */
 	public static void sleep(long ms) {
