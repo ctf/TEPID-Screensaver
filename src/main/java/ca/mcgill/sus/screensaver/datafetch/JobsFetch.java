@@ -6,6 +6,7 @@ import ca.mcgill.science.tepid.models.data.PrintJob;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
@@ -21,7 +22,7 @@ public class JobsFetch extends DataFetchable<Map<String, List<PrintJob>>> {
         if (this.queueStatuses == queueStatuses) {
             return;
         }
-        this.queueStatuses = queueStatuses;
+        this.queueStatuses = new ConcurrentHashMap<>(queueStatuses);
         queueJobFetchers = new ArrayList<>(queueStatuses.keySet()).stream()
                 .collect(Collectors.toMap(
                         queueName -> queueName,
