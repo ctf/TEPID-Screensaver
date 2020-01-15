@@ -14,9 +14,11 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import javax.ws.rs.client.ClientBuilder;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class DataFetch extends Thread {
 
@@ -82,22 +84,22 @@ public class DataFetch extends Thread {
 					isOfficeComputer = Main.OFFICE_COMPUTER;
 
 			// TEPID
-			fetchMandatorily(fetchAndPutAll(()->fetchDestinations.fetchUnexceptionally(), destinations));
-			fetchMandatorily(fetchAndPutAll(()->fetchQueueStatus.fetchUnexceptionally(), printerStatus));
+			fetchMandatorily(()->fetchAndPutAll(()->fetchDestinations.fetchUnexceptionally(), destinations));
+			fetchMandatorily(()->fetchAndPutAll(()->fetchQueueStatus.fetchUnexceptionally(), printerStatus));
 			jobsFetch.setQueueStatuses(printerStatus);
-			fetchMandatorily(fetchAndPutAll(()->jobsFetch.fetchUnexceptionally(), jobData));
+			fetchMandatorily(()->fetchAndPutAll(()->jobsFetch.fetchUnexceptionally(), jobData));
 
 			// User
-			fetchMandatorily(fetchAndAddSingle(()->userFetch.cachedOrFetchUnexceptionally(), nameUser));
+			fetchMandatorily(()->fetchAndAddSingle(()->userFetch.cachedOrFetchUnexceptionally(), nameUser));
 			profilePictureFetch.setUser(nameUser.peek());
 
 			// Optional
 			if (refetchLongFetch) {
-				fetchOptionally(fetchAndAddAll(()->slideFetch.fetchUnexceptionally(), slides));
-				fetchOptionally(fetchAndAddAll(()->fetchMarquee.fetchUnexceptionally(), marqueeData));
-				if (isOfficeComputer) fetchOptionally(fetchAndAddAll(()->eventsFetch.fetchUnexceptionally(), upcomingEvents));
+				fetchOptionally(()->fetchAndAddAll(()->slideFetch.fetchUnexceptionally(), slides));
+				fetchOptionally(()->fetchAndAddAll(()->fetchMarquee.fetchUnexceptionally(), marqueeData));
+				if (isOfficeComputer) fetchOptionally(()->fetchAndAddAll(()->eventsFetch.fetchUnexceptionally(), upcomingEvents));
 			}
-			if (isOfficeComputer) fetchOptionally(fetchAndAddSingle(()->profilePictureFetch.cachedOrFetchUnexceptionally(), profilePic));
+			if (isOfficeComputer) fetchOptionally(()->fetchAndAddSingle(()->profilePictureFetch.cachedOrFetchUnexceptionally(), profilePic));
 
 			this.loaded.set(true);
 			networkUp.set(success.get());
@@ -153,11 +155,12 @@ public class DataFetch extends Thread {
 		});
 	}
 
-	private void fetchOptionally(boolean result) {
+	private void fetchOptionally(Supplier<Boolean> S) {
+		CompletableFuture.runAsync(S::get);
 	}
 
-	private void fetchMandatorily(boolean result) {
-		success.set(success.get() || result);
+	private void fetchMandatorily(Supplier<Boolean> result) {
+		CompletableFuture.runAsync(()-> success.set(success.get() && result.get()));
 	}
 
 	public void addChangeListener(Runnable listener) {
